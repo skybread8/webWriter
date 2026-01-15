@@ -1,0 +1,53 @@
+<?php
+
+return [
+    'nav' => [
+        'books' => 'Llibres',
+        'about' => 'Sobre mi',
+        'offers' => 'Ofertes',
+        'blog' => 'Blog',
+        'contact' => 'Contacte',
+        'cart' => 'Cistella',
+        'faq' => 'Preguntes freqüents',
+        'photos_readers' => 'Fotos amb lectors',
+        'photos_books' => 'Fotos amb novel·les',
+    ],
+    'footer' => [
+        'navigation' => 'Navegació',
+        'information' => 'Informació',
+        'social_media' => 'Xarxes socials',
+        'contact' => 'Contacte',
+        'rights' => 'Tots els drets reservats',
+        'designed_by' => 'Dissenyat per',
+    ],
+    'books' => [
+        'title' => 'Llibres disponibles',
+        'description' => 'Selecció de títols actius. Tots es poden comprar de forma segura mitjançant Stripe Checkout.',
+        'add_to_cart' => 'Afegir',
+        'buy' => 'Comprar',
+        'price_includes' => 'Tot inclòs: llibre + dedicatòria (opcional) + marcador + enviament certificat (amb assegurança) + embalatge.',
+        'book' => 'Llibre',
+        'back_to_books' => 'Tornar a tots els llibres',
+    ],
+    'cart' => [
+        'title' => 'Cistella de compra',
+        'description' => 'Revisa els teus llibres abans de procedir al pagament',
+        'empty' => 'La teva cistella està buida',
+        'quantity' => 'Quantitat',
+        'subtotal' => 'Subtotal',
+        'total' => 'Total',
+        'checkout' => 'Procedir al pagament',
+        'clear' => 'Buidar cistella',
+        'continue_shopping' => 'Continuar comprant',
+        'remove' => 'Eliminar',
+    ],
+    'contact' => [
+        'title' => 'Contacte',
+        'name' => 'Nom',
+        'email' => 'Correu electrònic',
+        'message' => 'Missatge',
+        'send' => 'Enviar missatge',
+        'success' => 'Missatge enviat. Et respondrem tan aviat com sigui possible.',
+        'follow_social' => 'Segueix-me a les xarxes socials',
+    ],
+];

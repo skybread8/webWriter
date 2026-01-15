@@ -1,0 +1,53 @@
+<?php
+
+return [
+    'nav' => [
+        'books' => 'Books',
+        'about' => 'About me',
+        'offers' => 'Offers',
+        'blog' => 'Blog',
+        'contact' => 'Contact',
+        'cart' => 'Cart',
+        'faq' => 'FAQ',
+        'photos_readers' => 'Photos with readers',
+        'photos_books' => 'Photos with novels',
+    ],
+    'footer' => [
+        'navigation' => 'Navigation',
+        'information' => 'Information',
+        'social_media' => 'Social media',
+        'contact' => 'Contact',
+        'rights' => 'All rights reserved',
+        'designed_by' => 'Designed by',
+    ],
+    'books' => [
+        'title' => 'Available books',
+        'description' => 'Selection of active titles. All can be purchased securely via Stripe Checkout.',
+        'add_to_cart' => 'Add',
+        'buy' => 'Buy',
+        'price_includes' => 'Everything included: book + dedication (optional) + bookmark + certified shipping (with insurance) + packaging.',
+        'book' => 'Book',
+        'back_to_books' => 'Back to all books',
+    ],
+    'cart' => [
+        'title' => 'Shopping cart',
+        'description' => 'Review your books before proceeding to payment',
+        'empty' => 'Your cart is empty',
+        'quantity' => 'Quantity',
+        'subtotal' => 'Subtotal',
+        'total' => 'Total',
+        'checkout' => 'Proceed to payment',
+        'clear' => 'Clear cart',
+        'continue_shopping' => 'Continue shopping',
+        'remove' => 'Remove',
+    ],
+    'contact' => [
+        'title' => 'Contact',
+        'name' => 'Name',
+        'email' => 'Email',
+        'message' => 'Message',
+        'send' => 'Send message',
+        'success' => 'Message sent. We will reply as soon as possible.',
+        'follow_social' => 'Follow me on social media',
+    ],
+];

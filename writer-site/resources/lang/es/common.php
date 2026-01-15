@@ -1,0 +1,53 @@
+<?php
+
+return [
+    'nav' => [
+        'books' => 'Libros',
+        'about' => 'Sobre mí',
+        'offers' => 'Ofertas',
+        'blog' => 'Blog',
+        'contact' => 'Contacto',
+        'cart' => 'Carrito',
+        'faq' => 'Preguntas frecuentes',
+        'photos_readers' => 'Fotos con lectores',
+        'photos_books' => 'Fotos con novelas',
+    ],
+    'footer' => [
+        'navigation' => 'Navegación',
+        'information' => 'Información',
+        'social_media' => 'Redes sociales',
+        'contact' => 'Contacto',
+        'rights' => 'Todos los derechos reservados',
+        'designed_by' => 'Diseñado por',
+    ],
+    'books' => [
+        'title' => 'Libros disponibles',
+        'description' => 'Selección de títulos activos. Todos pueden comprarse de forma segura mediante Stripe Checkout.',
+        'add_to_cart' => 'Añadir',
+        'buy' => 'Comprar',
+        'price_includes' => 'Todo incluido: libro + dedicatoria (opcional) + marcapáginas + envío certificado (con seguro) + embalaje.',
+        'book' => 'Libro',
+        'back_to_books' => 'Volver a todos los libros',
+    ],
+    'cart' => [
+        'title' => 'Carrito de compra',
+        'description' => 'Revisa tus libros antes de proceder al pago',
+        'empty' => 'Tu carrito está vacío',
+        'quantity' => 'Cantidad',
+        'subtotal' => 'Subtotal',
+        'total' => 'Total',
+        'checkout' => 'Proceder al pago',
+        'clear' => 'Vaciar carrito',
+        'continue_shopping' => 'Continuar comprando',
+        'remove' => 'Eliminar',
+    ],
+    'contact' => [
+        'title' => 'Contacto',
+        'name' => 'Nombre',
+        'email' => 'Correo electrónico',
+        'message' => 'Mensaje',
+        'send' => 'Enviar mensaje',
+        'success' => 'Mensaje enviado. Te responderemos en cuanto sea posible.',
+        'follow_social' => 'Sígueme en redes sociales',
+    ],
+];
