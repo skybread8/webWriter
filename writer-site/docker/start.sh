@@ -17,34 +17,33 @@ chown -R www-data:www-data storage bootstrap/cache database 2>/dev/null || true
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 chmod -R 777 storage/logs 2>/dev/null || true
 
-# Crear base de datos SQLite si no existe (solo si DB_CONNECTION=sqlite)
+# Verificar configuración de base de datos
 if [ -f .env ]; then
-    if grep -q "DB_CONNECTION=sqlite" .env 2>/dev/null || [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
-        DB_PATH=$(grep "DB_DATABASE=" .env 2>/dev/null | cut -d '=' -f2 | tr -d '"' | tr -d "'" | xargs || echo "/var/www/html/database/database.sqlite")
+    DB_CONN=$(grep "^DB_CONNECTION=" .env 2>/dev/null | cut -d '=' -f2 | tr -d '"' | tr -d "'" | xargs || echo "")
+    
+    if [ "$DB_CONN" = "sqlite" ]; then
+        echo "SQLite detected. Creating database file..."
+        DB_PATH=$(grep "^DB_DATABASE=" .env 2>/dev/null | cut -d '=' -f2 | tr -d '"' | tr -d "'" | xargs || echo "/var/www/html/database/database.sqlite")
         DB_DIR=$(dirname "$DB_PATH")
         
-        echo "SQLite database path: $DB_PATH"
-        echo "SQLite database directory: $DB_DIR"
-        
-        # Crear directorio si no existe
         mkdir -p "$DB_DIR" 2>/dev/null || true
-        
-        # Crear archivo de base de datos si no existe
-        if [ ! -f "$DB_PATH" ]; then
-            echo "Creating SQLite database file at $DB_PATH..."
-            touch "$DB_PATH" 2>/dev/null || {
-                echo "Warning: Could not create database file at $DB_PATH, trying default location..."
-                touch /var/www/html/database/database.sqlite 2>/dev/null || true
-                DB_PATH="/var/www/html/database/database.sqlite"
-            }
-        fi
-        
-        # Establecer permisos en el archivo de base de datos
+        touch "$DB_PATH" 2>/dev/null || true
         chown www-data:www-data "$DB_PATH" 2>/dev/null || true
         chmod 664 "$DB_PATH" 2>/dev/null || true
         chown -R www-data:www-data "$DB_DIR" 2>/dev/null || true
         chmod -R 775 "$DB_DIR" 2>/dev/null || true
         echo "SQLite database ready at $DB_PATH"
+    elif [ "$DB_CONN" = "pgsql" ] || [ -n "$DB_HOST" ] || [ -n "$DB_URL" ]; then
+        echo "PostgreSQL configuration detected. Verifying connection settings..."
+        if [ -z "$DB_HOST" ] && [ -z "$DB_URL" ] && ! grep -q "^DB_HOST=" .env 2>/dev/null && ! grep -q "^DB_URL=" .env 2>/dev/null; then
+            echo "WARNING: PostgreSQL selected but DB_HOST or DB_URL not configured!"
+            echo "Please configure DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, and DB_PASSWORD in Render.com"
+        else
+            echo "PostgreSQL configuration looks good"
+        fi
+    else
+        echo "WARNING: No database connection configured!"
+        echo "Please set DB_CONNECTION=pgsql and PostgreSQL credentials in Render.com"
     fi
 fi
 
