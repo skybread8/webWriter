@@ -174,27 +174,18 @@ RUN if [ -f package.json ] && [ -s package.json ] && [ "$(cat package.json)" != 
     fi
 
 # Copiar el resto de archivos del proyecto al directorio final
-RUN set -e; \
-    if [ -f /tmp/build/composer.json ]; then \
+RUN if [ -f /tmp/build/composer.json ]; then \
         # Contexto en la raíz (writer-site/)
         echo "Copying files from project root..."; \
-        shopt -s dotglob nullglob; \
-        for file in /tmp/build/*; do \
-            [ -e "$file" ] && cp -r "$file" /var/www/html/ 2>/dev/null || true; \
-        done; \
-        for file in /tmp/build/.[!.]*; do \
-            [ -e "$file" ] && cp -r "$file" /var/www/html/ 2>/dev/null || true; \
-        done; \
+        cp -r /tmp/build/. /var/www/html/ 2>/dev/null || \
+        (cp -r /tmp/build/* /var/www/html/ 2>/dev/null && \
+         cp -r /tmp/build/.[!.]* /var/www/html/ 2>/dev/null || true); \
     elif [ -f /tmp/build/writer-site/composer.json ]; then \
         # Contexto en el directorio padre
         echo "Copying files from writer-site subdirectory..."; \
-        shopt -s dotglob nullglob; \
-        for file in /tmp/build/writer-site/*; do \
-            [ -e "$file" ] && cp -r "$file" /var/www/html/ 2>/dev/null || true; \
-        done; \
-        for file in /tmp/build/writer-site/.[!.]*; do \
-            [ -e "$file" ] && cp -r "$file" /var/www/html/ 2>/dev/null || true; \
-        done; \
+        cp -r /tmp/build/writer-site/. /var/www/html/ 2>/dev/null || \
+        (cp -r /tmp/build/writer-site/* /var/www/html/ 2>/dev/null && \
+         cp -r /tmp/build/writer-site/.[!.]* /var/www/html/ 2>/dev/null || true); \
     else \
         echo "ERROR: Could not determine build structure"; \
         echo "Contents of /tmp/build:"; \
@@ -202,9 +193,10 @@ RUN set -e; \
         echo "Looking for composer.json..."; \
         find /tmp/build -name "composer.json" -type f 2>/dev/null | head -5; \
         exit 1; \
-    fi; \
-    echo "Files copied. Checking for artisan..."; \
-    if [ ! -f /var/www/html/artisan ]; then \
+    fi
+
+# Verificar que artisan existe y establecer permisos
+RUN if [ ! -f /var/www/html/artisan ]; then \
         echo "ERROR: artisan file not found after copy"; \
         echo "Contents of /var/www/html:"; \
         ls -la /var/www/html/ | head -20; \
@@ -217,7 +209,7 @@ RUN set -e; \
             ls -la /tmp/build/writer-site/ | head -20; \
         fi; \
         exit 1; \
-    fi; \
+    fi && \
     chmod +x /var/www/html/artisan && \
     echo "artisan file found and made executable" && \
     rm -rf /tmp/build
