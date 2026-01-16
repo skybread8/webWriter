@@ -122,6 +122,11 @@ Route::middleware(['auth', 'admin', 'locale'])->prefix('admin')->name('admin.')-
     Route::resource('reader-photos', \App\Http\Controllers\Admin\ReaderPhotoController::class);
     Route::post('/reader-photos/update-order', [\App\Http\Controllers\Admin\ReaderPhotoController::class, 'updateOrder'])->name('reader-photos.update-order');
 
+    // Estadísticas
+    Route::get('/statistics', [\App\Http\Controllers\Admin\StatisticsController::class, 'index'])->name('statistics.index');
+    Route::post('/orders/{order}/mark-shipped', [\App\Http\Controllers\Admin\StatisticsController::class, 'markAsShipped'])->name('orders.mark-shipped');
+    Route::post('/orders/{order}/mark-not-shipped', [\App\Http\Controllers\Admin\StatisticsController::class, 'markAsNotShipped'])->name('orders.mark-not-shipped');
+
     // Blog
     Route::resource('blog', \App\Http\Controllers\Admin\BlogPostController::class);
     Route::post('/blog/update-order', [\App\Http\Controllers\Admin\BlogPostController::class, 'updateOrder'])->name('blog.update-order');

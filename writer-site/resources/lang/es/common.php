@@ -133,6 +133,7 @@ return [
     'admin' => [
         'panel' => 'Panel',
         'dashboard' => 'Panel de control',
+        'statistics' => 'Estadísticas',
         'books' => 'Libros',
         'testimonials' => 'Testimonios',
         'blog' => 'Blog',

@@ -64,6 +64,9 @@
                             <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.dashboard') ? 'bg-zinc-900' : '' }}" @click="mobileMenuOpen = false">
                                 <span>{{ __('common.admin.dashboard') }}</span>
                             </a>
+                            <a href="{{ route('admin.statistics.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.statistics.*') ? 'bg-zinc-900' : '' }}" @click="mobileMenuOpen = false">
+                                <span>{{ __('common.admin.statistics') }}</span>
+                            </a>
                             <a href="{{ route('admin.home.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.home.*') ? 'bg-zinc-900' : '' }}" @click="mobileMenuOpen = false">
                                 <span>{{ __('common.admin.home') }}</span>
                             </a>
@@ -126,6 +129,9 @@
                 <nav class="flex-1 px-4 py-4 text-sm space-y-1">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.dashboard') ? 'bg-zinc-900' : '' }}">
                         <span>{{ __('common.admin.dashboard') }}</span>
+                    </a>
+                    <a href="{{ route('admin.statistics.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.statistics.*') ? 'bg-zinc-900' : '' }}">
+                        <span>{{ __('common.admin.statistics') }}</span>
                     </a>
                     <a href="{{ route('admin.home.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.home.*') ? 'bg-zinc-900' : '' }}">
                         <span>{{ __('common.admin.home') }}</span>

@@ -23,10 +23,14 @@ class Order extends Model
         'customer_province',
         'customer_country',
         'notes',
+        'shipped',
+        'shipped_at',
     ];
 
     protected $casts = [
         'total' => 'decimal:2',
+        'shipped' => 'boolean',
+        'shipped_at' => 'datetime',
     ];
 
     /**

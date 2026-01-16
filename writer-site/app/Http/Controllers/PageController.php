@@ -56,14 +56,34 @@ class PageController extends Controller
             'message.max' => 'El mensaje no puede tener más de 2000 caracteres.',
         ]);
 
+        // Guardar mensaje en la base de datos
+        \App\Models\ContactMessage::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'message' => $data['message'],
+        ]);
+
         $toEmail = $settings?->contact_email;
 
         if ($toEmail) {
-            Mail::to($toEmail)->send(new ContactMessageMail(
-                $data['name'],
-                $data['email'],
-                $data['message']
-            ));
+            try {
+                Mail::to($toEmail)->send(new ContactMessageMail(
+                    $data['name'],
+                    $data['email'],
+                    $data['message']
+                ));
+                
+                // Registrar email enviado
+                if (function_exists('track_sent_email')) {
+                    track_sent_email('contact', $toEmail, 'Nuevo mensaje desde la web', "De: {$data['name']} ({$data['email']})\n\n{$data['message']}", true);
+                }
+            } catch (\Exception $e) {
+                // Registrar error
+                if (function_exists('track_sent_email')) {
+                    track_sent_email('contact', $toEmail, 'Nuevo mensaje desde la web', null, false, $e->getMessage());
+                }
+                throw $e;
+            }
         }
 
         return redirect()

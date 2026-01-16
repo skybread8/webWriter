@@ -16,6 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => EnsureAdmin::class,
             'locale' => \App\Http\Middleware\SetLocale::class,
+            'track.visit' => \App\Http\Middleware\TrackVisit::class,
+        ]);
+        
+        // Aplicar tracking de visitas a todas las rutas web
+        // El middleware TrackVisit ya filtra las rutas admin internamente
+        $middleware->web(append: [
+            \App\Http\Middleware\TrackVisit::class,
         ]);
         
         // NO aplicar middleware de idioma globalmente - solo en rutas específicas
