@@ -21,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Cargar helpers personalizados
         require_once app_path('Helpers/UrlHelper.php');
+        require_once app_path('Helpers/StorageHelper.php');
         
         // Forzar HTTPS en producción
         if (app()->environment('production')) {
