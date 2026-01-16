@@ -1,9 +1,19 @@
+# Excluir node_modules y vendor (se instalarán durante el build)
 node_modules
 vendor
+
+# Excluir archivos de Git
 .git
 .gitignore
+.gitattributes
+
+# Excluir archivos de entorno (se configurarán en Render.com)
 .env
 .env.backup
+.env.production
+.env.local
+
+# Excluir cachés y logs
 .phpunit.result.cache
 storage/*.key
 storage/logs/*
@@ -13,11 +23,29 @@ storage/framework/views/*
 bootstrap/cache/*
 npm-debug.log
 yarn-error.log
+*.log
+
+# Excluir archivos del sistema
 .DS_Store
 Thumbs.db
 .idea
 .vscode
-*.log
 *.swp
 *.swo
 *~
+
+# Excluir archivos de Docker
+docker/
+.dockerignore
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+
+# Excluir documentación
+README.md
+*.md
+!VARIABLES-ENTORNO.md
+
+# Excluir archivos de desarrollo
+tests/
+.phpunit.cache

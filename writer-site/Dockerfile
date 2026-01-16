@@ -38,6 +38,8 @@ set -e
 mkdir -p storage/framework/cache/data
 mkdir -p storage/framework/sessions
 mkdir -p storage/framework/views
+mkdir -p storage/logs
+mkdir -p storage/app/public
 mkdir -p bootstrap/cache
 
 # Establecer permisos
@@ -65,10 +67,26 @@ exec apache2-foreground
 EOF
 RUN chmod +x /usr/local/bin/start.sh
 
-# Copiar archivos del proyecto (usando .dockerignore para excluir archivos innecesarios)
+# Copiar primero solo composer.json (y composer.lock si existe)
+COPY composer.json* ./
+
+# Instalar dependencias de PHP (sin dev para producción)
+RUN if [ -f composer.json ]; then \
+        composer install --no-dev --optimize-autoloader --no-interaction --no-scripts; \
+    fi
+
+# Copiar archivos de Node (package.json y package-lock.json si existen)
+COPY package*.json ./
+
+# Instalar dependencias de Node
+RUN if [ -f package.json ]; then \
+        npm ci --only=production=false; \
+    fi
+
+# Copiar el resto de archivos del proyecto
 COPY . /var/www/html
 
-# Crear directorios necesarios si no existen y establecer permisos
+# Crear directorios necesarios y establecer permisos
 RUN mkdir -p /var/www/html/storage/framework/cache/data \
     && mkdir -p /var/www/html/storage/framework/sessions \
     && mkdir -p /var/www/html/storage/framework/views \
@@ -79,17 +97,22 @@ RUN mkdir -p /var/www/html/storage/framework/cache/data \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Instalar dependencias de PHP (sin dev para producción)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
-
-# Instalar dependencias de Node
-RUN npm ci --only=production=false
+# Ejecutar scripts de post-instalación de Composer (después de copiar todos los archivos)
+RUN if [ -f composer.json ]; then \
+        composer dump-autoload --optimize; \
+    fi
 
 # Compilar assets para producción
-RUN npm run build
+RUN if [ -f package.json ]; then \
+        npm run build; \
+    fi
 
-# Limpiar node_modules después de compilar (opcional, para reducir tamaño)
-RUN rm -rf node_modules
+# Limpiar node_modules y archivos innecesarios después de compilar para reducir tamaño
+RUN rm -rf node_modules \
+    && rm -rf /root/.composer/cache \
+    && rm -rf /root/.npm \
+    && apt-get purge -y git curl \
+    && apt-get autoremove -y
 
 # Configurar Apache para escuchar en el puerto 10000 (puerto estándar de Render.com)
 RUN echo "Listen 10000" >> /etc/apache2/ports.conf
