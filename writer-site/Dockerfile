@@ -57,9 +57,51 @@ mkdir -p storage/logs
 mkdir -p storage/app/public
 mkdir -p bootstrap/cache
 
+# Crear archivo .env si no existe (usando variables de entorno de Render.com)
+if [ ! -f .env ]; then
+    echo "Creating .env file from environment variables..."
+    cat > .env << ENVEOF
+APP_NAME="${APP_NAME:-Laravel}"
+APP_ENV="${APP_ENV:-production}"
+APP_KEY="${APP_KEY:-}"
+APP_DEBUG="${APP_DEBUG:-false}"
+APP_URL="${APP_URL:-http://localhost}"
+
+LOG_CHANNEL=stack
+LOG_LEVEL="${LOG_LEVEL:-error}"
+
+DB_CONNECTION="${DB_CONNECTION:-sqlite}"
+DB_DATABASE="${DB_DATABASE:-/var/www/html/database/database.sqlite}"
+ENVEOF
+    # Añadir más variables si existen
+    [ -n "$DB_HOST" ] && echo "DB_HOST=${DB_HOST}" >> .env
+    [ -n "$DB_PORT" ] && echo "DB_PORT=${DB_PORT}" >> .env
+    [ -n "$DB_DATABASE" ] && echo "DB_DATABASE=${DB_DATABASE}" >> .env
+    [ -n "$DB_USERNAME" ] && echo "DB_USERNAME=${DB_USERNAME}" >> .env
+    [ -n "$DB_PASSWORD" ] && echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
+    [ -n "$STRIPE_SECRET" ] && echo "STRIPE_SECRET=${STRIPE_SECRET}" >> .env
+    [ -n "$MAIL_MAILER" ] && echo "MAIL_MAILER=${MAIL_MAILER}" >> .env
+    [ -n "$MAIL_HOST" ] && echo "MAIL_HOST=${MAIL_HOST}" >> .env
+    [ -n "$MAIL_PORT" ] && echo "MAIL_PORT=${MAIL_PORT}" >> .env
+    [ -n "$MAIL_USERNAME" ] && echo "MAIL_USERNAME=${MAIL_USERNAME}" >> .env
+    [ -n "$MAIL_PASSWORD" ] && echo "MAIL_PASSWORD=${MAIL_PASSWORD}" >> .env
+    [ -n "$MAIL_ENCRYPTION" ] && echo "MAIL_ENCRYPTION=${MAIL_ENCRYPTION}" >> .env
+    [ -n "$MAIL_FROM_ADDRESS" ] && echo "MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}" >> .env
+    [ -n "$MAIL_FROM_NAME" ] && echo "MAIL_FROM_NAME=${MAIL_FROM_NAME}" >> .env
+    [ -n "$APP_LOCALE" ] && echo "APP_LOCALE=${APP_LOCALE}" >> .env
+    [ -n "$APP_FALLBACK_LOCALE" ] && echo "APP_FALLBACK_LOCALE=${APP_FALLBACK_LOCALE}" >> .env
+fi
+
 # Establecer permisos
-chown -R www-data:www-data storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache .env 2>/dev/null || true
 chmod -R 775 storage bootstrap/cache
+chmod 644 .env 2>/dev/null || true
+
+# Verificar que APP_KEY esté configurada
+if ! grep -q "APP_KEY=base64:" .env 2>/dev/null || [ -z "$APP_KEY" ]; then
+    echo "WARNING: APP_KEY not set. Generating one..."
+    php artisan key:generate --force || echo "Warning: Failed to generate APP_KEY"
+fi
 
 # Ejecutar scripts de Composer que requieren Laravel configurado
 php artisan package:discover --ansi || echo "Warning: Package discovery failed"
@@ -75,10 +117,10 @@ php artisan cache:clear || true
 php artisan view:clear || true
 php artisan route:clear || true
 
-# Optimizar para producción
+# Optimizar para producción (con manejo de errores mejorado)
 php artisan config:cache || echo "Warning: Config cache failed"
 php artisan route:cache || echo "Warning: Route cache failed"
-php artisan view:cache || echo "Warning: View cache failed"
+php artisan view:cache || echo "Warning: View cache failed - this is usually OK if views are not pre-compiled"
 
 # Iniciar Apache
 exec apache2-foreground
@@ -132,31 +174,53 @@ RUN if [ -f package.json ] && [ -s package.json ] && [ "$(cat package.json)" != 
     fi
 
 # Copiar el resto de archivos del proyecto al directorio final
-RUN if [ -f /tmp/build/composer.json ]; then \
+RUN set -e; \
+    if [ -f /tmp/build/composer.json ]; then \
         # Contexto en la raíz (writer-site/)
         echo "Copying files from project root..."; \
-        shopt -s dotglob; \
-        cp -r /tmp/build/* /var/www/html/ 2>/dev/null || true; \
-        cp -r /tmp/build/.[!.]* /var/www/html/ 2>/dev/null || true; \
+        shopt -s dotglob nullglob; \
+        for file in /tmp/build/*; do \
+            [ -e "$file" ] && cp -r "$file" /var/www/html/ 2>/dev/null || true; \
+        done; \
+        for file in /tmp/build/.[!.]*; do \
+            [ -e "$file" ] && cp -r "$file" /var/www/html/ 2>/dev/null || true; \
+        done; \
     elif [ -f /tmp/build/writer-site/composer.json ]; then \
         # Contexto en el directorio padre
         echo "Copying files from writer-site subdirectory..."; \
-        shopt -s dotglob; \
-        cp -r /tmp/build/writer-site/* /var/www/html/ 2>/dev/null || true; \
-        cp -r /tmp/build/writer-site/.[!.]* /var/www/html/ 2>/dev/null || true; \
-    fi && \
-    rm -rf /tmp/build
-
-# Verificar que artisan existe después de copiar
-RUN if [ ! -f /var/www/html/artisan ]; then \
+        shopt -s dotglob nullglob; \
+        for file in /tmp/build/writer-site/*; do \
+            [ -e "$file" ] && cp -r "$file" /var/www/html/ 2>/dev/null || true; \
+        done; \
+        for file in /tmp/build/writer-site/.[!.]*; do \
+            [ -e "$file" ] && cp -r "$file" /var/www/html/ 2>/dev/null || true; \
+        done; \
+    else \
+        echo "ERROR: Could not determine build structure"; \
+        echo "Contents of /tmp/build:"; \
+        ls -la /tmp/build/ | head -20; \
+        echo "Looking for composer.json..."; \
+        find /tmp/build -name "composer.json" -type f 2>/dev/null | head -5; \
+        exit 1; \
+    fi; \
+    echo "Files copied. Checking for artisan..."; \
+    if [ ! -f /var/www/html/artisan ]; then \
         echo "ERROR: artisan file not found after copy"; \
         echo "Contents of /var/www/html:"; \
         ls -la /var/www/html/ | head -20; \
+        echo "Looking for artisan in subdirectories..."; \
         find /var/www/html -name "artisan" -type f 2>/dev/null | head -5 || echo "No artisan found"; \
+        echo "Contents of /tmp/build (before cleanup):"; \
+        ls -la /tmp/build/ | head -20; \
+        if [ -d /tmp/build/writer-site ]; then \
+            echo "Contents of /tmp/build/writer-site:"; \
+            ls -la /tmp/build/writer-site/ | head -20; \
+        fi; \
         exit 1; \
-    fi && \
+    fi; \
     chmod +x /var/www/html/artisan && \
-    echo "artisan file found and made executable"
+    echo "artisan file found and made executable" && \
+    rm -rf /tmp/build
 
 # Crear directorios necesarios y establecer permisos
 RUN mkdir -p /var/www/html/storage/framework/cache/data \
@@ -190,18 +254,39 @@ RUN echo "Listen 10000" >> /etc/apache2/ports.conf
 
 # Configurar VirtualHost para el puerto 10000
 RUN cat > /etc/apache2/sites-available/000-default.conf << 'APACHE_EOF'
+ServerName localhost
+
 <VirtualHost *:10000>
     ServerAdmin webmaster@localhost
+    ServerName localhost
     DocumentRoot /var/www/html/public
     
     <Directory /var/www/html/public>
-        Options Indexes FollowSymLinks
+        Options -Indexes +FollowSymLinks
         AllowOverride All
         Require all granted
+        DirectoryIndex index.php index.html
     </Directory>
+    
+    # Denegar acceso al directorio raíz del proyecto
+    <Directory /var/www/html>
+        Options -Indexes
+        AllowOverride None
+        Require all denied
+    </Directory>
+    
+    # Permitir acceso solo a public/
+    <DirectoryMatch "^/var/www/html/(?!public)">
+        Require all denied
+    </DirectoryMatch>
     
     ErrorLog ${APACHE_LOG_DIR}/error.log
     CustomLog ${APACHE_LOG_DIR}/access.log combined
+    
+    # PHP configuration
+    <FilesMatch \.php$>
+        SetHandler application/x-httpd-php
+    </FilesMatch>
 </VirtualHost>
 APACHE_EOF
 
