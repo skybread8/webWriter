@@ -16,6 +16,9 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(Request $request): View
     {
+        // Establecer idioma a español para las páginas de autenticación
+        app()->setLocale('es');
+        
         // Guardar la URL previa si el usuario viene de otra página y no hay una URL intended ya guardada
         // Laravel automáticamente guarda url.intended cuando se intenta acceder a una ruta protegida,
         // pero si el usuario hace clic en "Iniciar sesión" desde el menú, necesitamos guardarla manualmente
@@ -47,6 +50,9 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        // Establecer idioma a español para los mensajes de error
+        app()->setLocale('es');
+        
         $request->authenticate();
 
         $request->session()->regenerate();

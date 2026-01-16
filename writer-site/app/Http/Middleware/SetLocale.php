@@ -16,8 +16,20 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Si estamos en una ruta del admin, no aplicar lógica de idiomas
+        // Si estamos en una ruta del admin, establecer español
         if ($request->is('admin*') || $request->routeIs('admin.*')) {
+            app()->setLocale('es');
+            return $next($request);
+        }
+        
+        // Si estamos en rutas de autenticación (login, register, password reset), establecer español
+        if ($request->is('login*') || 
+            $request->is('register*') || 
+            $request->is('forgot-password*') || 
+            $request->is('reset-password*') ||
+            $request->routeIs('login*') ||
+            $request->routeIs('register*') ||
+            $request->routeIs('password.*')) {
             app()->setLocale('es');
             return $next($request);
         }

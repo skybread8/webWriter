@@ -58,7 +58,7 @@
                             x-transition:enter-end="opacity-100 translate-x-0"
                         >
                             @if($item['cover_image'])
-                                <img src="{{ asset('storage/'.$item['cover_image']) }}" alt="{{ $item['title'] }}" class="w-20 h-28 sm:w-24 sm:h-32 rounded-xl object-cover border-2 border-zinc-800 shadow-lg flex-shrink-0">
+                                <img src="{{ get_image_url($item['cover_image']) }}" alt="{{ $item['title'] }}" class="w-20 h-28 sm:w-24 sm:h-32 rounded-xl object-cover border-2 border-zinc-800 shadow-lg flex-shrink-0">
                             @else
                                 <div class="w-20 h-28 sm:w-24 sm:h-32 rounded-xl border-2 border-dashed border-zinc-700 flex items-center justify-center bg-zinc-950 flex-shrink-0">
                                     <x-icons.book class="w-6 h-6 sm:w-8 sm:h-8 text-zinc-700" />

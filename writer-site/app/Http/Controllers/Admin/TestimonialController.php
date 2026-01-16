@@ -49,6 +49,7 @@ class TestimonialController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        app()->setLocale('es');
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'review' => ['required', 'string', 'max:2000'],
@@ -58,9 +59,15 @@ class TestimonialController extends Controller
             'order' => ['nullable', 'integer', 'min:0'],
         ], [
             'name.required' => 'Escribe el nombre de la persona que da el testimonio.',
+            'name.max' => 'El nombre no puede tener más de 255 caracteres.',
             'review.required' => 'Escribe el texto del testimonio.',
+            'review.max' => 'El texto del testimonio no puede tener más de 2000 caracteres.',
             'rating.required' => 'Selecciona una calificación de 1 a 5 estrellas.',
-            'photo.image' => 'La foto debe ser una imagen válida.',
+            'rating.integer' => 'La calificación debe ser un número.',
+            'rating.min' => 'La calificación debe ser al menos 1.',
+            'rating.max' => 'La calificación no puede ser mayor que 5.',
+            'photo.image' => 'La foto debe ser un archivo de imagen (JPG, PNG, etc.).',
+            'photo.max' => 'La foto no puede pesar más de 2MB.',
         ]);
 
         if ($request->hasFile('photo')) {
@@ -90,6 +97,7 @@ class TestimonialController extends Controller
      */
     public function update(Request $request, Testimonial $testimonial): RedirectResponse
     {
+        app()->setLocale('es');
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'review' => ['required', 'string', 'max:2000'],
@@ -99,9 +107,15 @@ class TestimonialController extends Controller
             'order' => ['nullable', 'integer', 'min:0'],
         ], [
             'name.required' => 'Escribe el nombre de la persona que da el testimonio.',
+            'name.max' => 'El nombre no puede tener más de 255 caracteres.',
             'review.required' => 'Escribe el texto del testimonio.',
+            'review.max' => 'El texto del testimonio no puede tener más de 2000 caracteres.',
             'rating.required' => 'Selecciona una calificación de 1 a 5 estrellas.',
-            'photo.image' => 'La foto debe ser una imagen válida.',
+            'rating.integer' => 'La calificación debe ser un número.',
+            'rating.min' => 'La calificación debe ser al menos 1.',
+            'rating.max' => 'La calificación no puede ser mayor que 5.',
+            'photo.image' => 'La foto debe ser un archivo de imagen (JPG, PNG, etc.).',
+            'photo.max' => 'La foto no puede pesar más de 2MB.',
         ]);
 
         if ($request->hasFile('photo')) {

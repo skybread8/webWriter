@@ -15,9 +15,17 @@ class ReviewController extends Controller
      */
     public function store(Request $request, string $locale, Book $book): RedirectResponse
     {
+        app()->setLocale('es');
+        
         $validated = $request->validate([
             'rating' => ['required', 'integer', 'min:1', 'max:10'],
             'comment' => ['nullable', 'string', 'max:2000'],
+        ], [
+            'rating.required' => 'Debes seleccionar una valoración de 1 a 10 estrellas.',
+            'rating.integer' => 'La valoración debe ser un número.',
+            'rating.min' => 'La valoración debe ser al menos 1 estrella.',
+            'rating.max' => 'La valoración no puede ser mayor que 10 estrellas.',
+            'comment.max' => 'El comentario no puede tener más de 2000 caracteres.',
         ]);
 
         // Buscar si ya existe una reseña del usuario para este libro

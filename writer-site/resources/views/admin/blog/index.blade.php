@@ -42,7 +42,7 @@
                                 >
                             </div>
                             @if($post->featured_image)
-                                <img src="{{ asset('storage/'.$post->featured_image) }}" alt="{{ $post->title }}" class="w-16 h-16 rounded-md object-cover border border-zinc-800 shrink-0">
+                                <img src="{{ get_image_url($post->featured_image) }}" alt="{{ $post->title }}" class="w-16 h-16 rounded-md object-cover border border-zinc-800 shrink-0">
                             @else
                                 <div class="w-16 h-16 rounded-md border border-dashed border-zinc-700 flex items-center justify-center text-[10px] text-zinc-600 shrink-0">
                                     Sin imagen

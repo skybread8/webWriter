@@ -40,6 +40,7 @@ class PageController extends Controller
 
     public function sendContact(Request $request)
     {
+        app()->setLocale('es');
         $settings = SiteSetting::first();
 
         $data = $request->validate([
@@ -48,9 +49,11 @@ class PageController extends Controller
             'message' => ['required', 'string', 'max:2000'],
         ], [
             'name.required' => 'Escribe tu nombre.',
+            'name.max' => 'El nombre no puede tener más de 255 caracteres.',
             'email.required' => 'Indica un correo para poder responderte.',
             'email.email' => 'El formato del correo no parece válido.',
             'message.required' => 'Escribe un mensaje antes de enviar.',
+            'message.max' => 'El mensaje no puede tener más de 2000 caracteres.',
         ]);
 
         $toEmail = $settings?->contact_email;
@@ -98,9 +101,14 @@ class PageController extends Controller
 
     public function photosReaders()
     {
-        $page = Page::where('slug', 'photos-readers')->first();
+        // Solo mostrar fotos generales (sin libro específico)
+        $photos = \App\Models\ReaderPhoto::where('active', true)
+            ->whereNull('book_id')
+            ->orderBy('order')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        return view('site.page', compact('page'));
+        return view('site.photos-readers', compact('photos'));
     }
 
     public function photosBooks()

@@ -49,7 +49,7 @@
                             <figure class="aspect-[3/4] bg-zinc-900 relative">
                                 @if($book->cover_image)
                                     <img 
-                                        src="{{ asset('storage/'.$book->cover_image) }}" 
+                                        src="{{ get_image_url($book->cover_image) }}" 
                                         alt="Portada del libro {{ $book->title }}" 
                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                         loading="lazy"

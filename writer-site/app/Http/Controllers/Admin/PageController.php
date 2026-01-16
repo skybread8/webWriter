@@ -20,6 +20,7 @@ class PageController extends Controller
 
     public function updateAbout(Request $request)
     {
+        app()->setLocale('es');
         $page = Page::where('slug', 'about')->firstOrFail();
 
         $data = $request->validate([
@@ -28,6 +29,9 @@ class PageController extends Controller
             'image' => ['nullable', 'image', 'max:4096'],
         ], [
             'title.required' => 'Este título se muestra en la página "Sobre el autor".',
+            'title.max' => 'El título no puede tener más de 255 caracteres.',
+            'image.image' => 'La foto del autor debe ser un archivo de imagen (JPG, PNG, etc.).',
+            'image.max' => 'La foto del autor no puede pesar más de 4MB.',
         ]);
 
         if ($request->hasFile('image')) {
@@ -53,6 +57,7 @@ class PageController extends Controller
 
     public function updateContact(Request $request)
     {
+        app()->setLocale('es');
         $page = Page::where('slug', 'contact')->firstOrFail();
 
         $data = $request->validate([

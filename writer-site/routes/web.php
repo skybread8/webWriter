@@ -118,6 +118,10 @@ Route::middleware(['auth', 'admin', 'locale'])->prefix('admin')->name('admin.')-
     Route::resource('testimonials', AdminTestimonialController::class);
     Route::post('/testimonials/update-order', [AdminTestimonialController::class, 'updateOrder'])->name('testimonials.update-order');
 
+    // Fotos con lectores
+    Route::resource('reader-photos', \App\Http\Controllers\Admin\ReaderPhotoController::class);
+    Route::post('/reader-photos/update-order', [\App\Http\Controllers\Admin\ReaderPhotoController::class, 'updateOrder'])->name('reader-photos.update-order');
+
     // Blog
     Route::resource('blog', \App\Http\Controllers\Admin\BlogPostController::class);
     Route::post('/blog/update-order', [\App\Http\Controllers\Admin\BlogPostController::class, 'updateOrder'])->name('blog.update-order');

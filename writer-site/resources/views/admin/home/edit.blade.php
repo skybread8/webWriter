@@ -49,7 +49,7 @@
                 @if($settings->hero_image)
                     <div class="mt-3">
                         <p class="text-xs text-zinc-500 mb-1">Imagen actual:</p>
-                        <img src="{{ asset('storage/'.$settings->hero_image) }}" alt="Imagen actual" class="max-h-40 rounded-lg border border-zinc-800 object-cover">
+                        <img src="{{ get_image_url($settings->hero_image) }}" alt="Imagen actual" class="max-h-40 rounded-lg border border-zinc-800 object-cover">
                     </div>
                 @endif
             </div>

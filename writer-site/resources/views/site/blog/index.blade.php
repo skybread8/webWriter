@@ -48,7 +48,7 @@
                                     @if($post->featured_image)
                                         <figure class="md:col-span-1">
                                             <img 
-                                                src="{{ asset('storage/'.$post->featured_image) }}" 
+                                                src="{{ get_image_url($post->featured_image) }}" 
                                                 alt="{{ $post->title }}" 
                                                 class="w-full h-48 md:h-full object-cover"
                                                 loading="lazy"

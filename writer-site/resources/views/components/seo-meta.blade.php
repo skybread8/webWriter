@@ -12,7 +12,7 @@
     $defaultDescription = 'Escritor independiente. Más de 5.000 libros vendidos en las calles. Novelas de misterio, terror, romance y drama.';
     $pageTitle = $title ? $title . ' – ' . $siteName : $siteName;
     $pageDescription = $description ?? $defaultDescription;
-    $pageImage = $image ?? ($settings?->hero_image ? asset('storage/'.$settings->hero_image) : asset('images/default-og.jpg'));
+    $pageImage = $image ?? ($settings?->hero_image ? get_image_url($settings->hero_image) : asset('images/default-og.jpg'));
     $pageUrl = $url ?? url()->current();
 @endphp
 

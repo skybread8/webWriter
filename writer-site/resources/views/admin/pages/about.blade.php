@@ -67,7 +67,7 @@
                 @if($page->image)
                     <div class="mt-3">
                         <p class="text-xs text-zinc-500 mb-1">Foto actual:</p>
-                        <img src="{{ asset('storage/'.$page->image) }}" alt="Foto del autor" class="max-h-48 rounded-lg border border-zinc-800 object-cover">
+                        <img src="{{ get_image_url($page->image) }}" alt="Foto del autor" class="max-h-48 rounded-lg border border-zinc-800 object-cover">
                     </div>
                 @endif
             </div>

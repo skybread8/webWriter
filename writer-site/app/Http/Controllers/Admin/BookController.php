@@ -46,6 +46,7 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
+        app()->setLocale('es');
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string', 'max:500'],
@@ -57,8 +58,14 @@ class BookController extends Controller
             'order' => ['nullable', 'integer', 'min:0'],
         ], [
             'title.required' => 'Escribe un título para el libro.',
+            'title.max' => 'El título no puede tener más de 255 caracteres.',
             'description.required' => 'Añade una descripción breve; aparecerá en la lista de libros.',
+            'description.max' => 'La descripción no puede tener más de 500 caracteres.',
             'price.required' => 'Indica un precio para poder vender el libro.',
+            'price.numeric' => 'El precio debe ser un número.',
+            'price.min' => 'El precio no puede ser negativo.',
+            'cover_image.image' => 'La imagen de portada debe ser un archivo de imagen (JPG, PNG, etc.).',
+            'cover_image.max' => 'La imagen de portada no puede pesar más de 4MB.',
         ]);
 
         if ($request->hasFile('cover_image')) {
@@ -90,8 +97,9 @@ class BookController extends Controller
     public function edit(string $id)
     {
         $book = Book::findOrFail($id);
+        $readerPhotos = $book->readerPhotos()->orderBy('order')->orderBy('created_at', 'desc')->get();
 
-        return view('admin.books.edit', compact('book'));
+        return view('admin.books.edit', compact('book', 'readerPhotos'));
     }
 
     /**
@@ -99,6 +107,7 @@ class BookController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        app()->setLocale('es');
         $book = Book::findOrFail($id);
 
         $data = $request->validate([

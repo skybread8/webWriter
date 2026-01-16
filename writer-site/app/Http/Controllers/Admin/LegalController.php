@@ -19,6 +19,7 @@ class LegalController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
+        app()->setLocale('es');
         $settings = SiteSetting::firstOrFail();
 
         $data = $request->validate([

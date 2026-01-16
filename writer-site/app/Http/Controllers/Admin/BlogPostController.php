@@ -25,6 +25,7 @@ class BlogPostController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        app()->setLocale('es');
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:blog_posts,slug'],
@@ -36,9 +37,13 @@ class BlogPostController extends Controller
             'order' => ['nullable', 'integer'],
         ], [
             'title.required' => 'El título del artículo es obligatorio.',
-            'slug.unique' => 'Este slug ya está en uso.',
-            'featured_image.image' => 'El archivo debe ser una imagen.',
-            'featured_image.max' => 'La imagen no puede pesar más de 2MB.',
+            'title.max' => 'El título no puede tener más de 255 caracteres.',
+            'slug.max' => 'El slug no puede tener más de 255 caracteres.',
+            'slug.unique' => 'Este slug ya está en uso. Elige otro.',
+            'excerpt.max' => 'El extracto no puede tener más de 500 caracteres.',
+            'featured_image.image' => 'La imagen destacada debe ser un archivo de imagen (JPG, PNG, etc.).',
+            'featured_image.max' => 'La imagen destacada no puede pesar más de 2MB.',
+            'published_at.date' => 'La fecha de publicación debe ser una fecha válida.',
         ]);
 
         if ($request->hasFile('featured_image')) {
@@ -63,6 +68,7 @@ class BlogPostController extends Controller
 
     public function update(Request $request, BlogPost $blogPost): RedirectResponse
     {
+        app()->setLocale('es');
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:blog_posts,slug,' . $blogPost->id],

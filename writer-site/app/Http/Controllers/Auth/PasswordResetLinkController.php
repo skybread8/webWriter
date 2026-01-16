@@ -15,6 +15,7 @@ class PasswordResetLinkController extends Controller
      */
     public function create(): View
     {
+        app()->setLocale('es');
         return view('auth.forgot-password');
     }
 
@@ -25,6 +26,7 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        app()->setLocale('es');
         $request->validate([
             'email' => ['required', 'email'],
         ]);

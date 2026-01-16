@@ -88,6 +88,9 @@
                             <a href="{{ route('admin.pages.about.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.pages.about.*') ? 'bg-zinc-900' : '' }}" @click="mobileMenuOpen = false">
                                 <span>{{ __('common.admin.about') }}</span>
                             </a>
+                            <a href="{{ route('admin.reader-photos.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.reader-photos.*') ? 'bg-zinc-900' : '' }}" @click="mobileMenuOpen = false">
+                                <span>Fotos con lectores</span>
+                            </a>
                             <a href="{{ route('admin.pages.contact.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.pages.contact.*') ? 'bg-zinc-900' : '' }}" @click="mobileMenuOpen = false">
                                 <span>{{ __('common.admin.contact') }}</span>
                             </a>
@@ -147,6 +150,9 @@
                     </a>
                     <a href="{{ route('admin.pages.about.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.pages.about.*') ? 'bg-zinc-900' : '' }}">
                         <span>{{ __('common.admin.about') }}</span>
+                    </a>
+                    <a href="{{ route('admin.reader-photos.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.reader-photos.*') ? 'bg-zinc-900' : '' }}">
+                        <span>Fotos con lectores</span>
                     </a>
                     <a href="{{ route('admin.pages.contact.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.pages.contact.*') ? 'bg-zinc-900' : '' }}">
                         <span>{{ __('common.admin.contact') }}</span>

@@ -98,7 +98,7 @@
             @if($book?->cover_image)
                 <div class="mt-3">
                     <p class="text-xs text-zinc-500 mb-1">Portada actual:</p>
-                    <img src="{{ asset('storage/'.$book->cover_image) }}" alt="Portada actual" class="max-h-40 rounded-lg border border-zinc-800 object-cover">
+                    <img src="{{ get_image_url($book->cover_image) }}" alt="Portada actual" class="max-h-40 rounded-lg border border-zinc-800 object-cover">
                 </div>
             @endif
         </div>

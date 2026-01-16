@@ -18,7 +18,7 @@
                 <figure class="aspect-[3/4] max-w-xs mx-auto md:max-w-none rounded-2xl sm:rounded-3xl border-2 border-zinc-800 overflow-hidden bg-zinc-900 shadow-2xl shadow-black/50">
                     @if($book->cover_image)
                         <img 
-                            src="{{ asset('storage/'.$book->cover_image) }}" 
+                            src="{{ get_image_url($book->cover_image) }}" 
                             alt="Portada del libro {{ $book->title }} de Kevin Pérez Alarcón" 
                             class="w-full h-full object-cover"
                             loading="lazy"
@@ -241,7 +241,9 @@
                                 @endif
                             </div>
                             @if($review->comment)
-                                <p class="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">{{ $review->comment }}</p>
+                                <div class="mt-3">
+                                    <p class="text-sm sm:text-base text-zinc-300 leading-relaxed whitespace-pre-wrap break-words">{{ $review->comment }}</p>
+                                </div>
                             @endif
                         </div>
                     @endforeach
@@ -255,6 +257,55 @@
                 </div>
             @endif
         </div>
+
+        <!-- Fotos de lectores que compraron este libro -->
+        @if(isset($readerPhotos) && $readerPhotos->isNotEmpty())
+            <div class="mt-12 sm:mt-16 space-y-6 sm:space-y-8">
+                <div>
+                    <div class="inline-flex items-center gap-2 mb-2 sm:mb-3">
+                        <x-icons.camera class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
+                        <p class="text-[10px] sm:text-[11px] tracking-[0.25em] sm:tracking-[0.3em] uppercase text-zinc-400">
+                            Fotos con lectores
+                        </p>
+                    </div>
+                    <h2 class="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-4xl tracking-tight">
+                        Lectores que compraron este libro
+                    </h2>
+                    <p class="text-xs sm:text-sm text-zinc-400 mt-2">
+                        Algunos lectores que han comprado "{{ $book->title }}" y se han hecho una foto conmigo.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+                    @foreach($readerPhotos as $photo)
+                        <figure class="group relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-black/50">
+                            <img 
+                                src="{{ $photo->photo_url }}" 
+                                alt="{{ $photo->reader_name ?? 'Foto con lector' }}" 
+                                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                loading="lazy"
+                            >
+                            @if($photo->reader_name || $photo->caption)
+                                <div class="absolute inset-0 bg-gradient-to-t from-zinc-950/95 via-zinc-950/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3 sm:p-4">
+                                    <div class="w-full">
+                                        @if($photo->reader_name)
+                                            <p class="text-xs sm:text-sm font-medium text-zinc-100 mb-1">
+                                                {{ $photo->reader_name }}
+                                            </p>
+                                        @endif
+                                        @if($photo->caption)
+                                            <p class="text-[10px] sm:text-xs text-zinc-300 line-clamp-2">
+                                                {{ $photo->caption }}
+                                            </p>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+                        </figure>
+                    @endforeach
+                </div>
+            </div>
+        @endif
     </section>
 @endsection
 

@@ -98,13 +98,39 @@ LOG_LEVEL=error
 
 ---
 
-### 4. **Variables Opcionales pero Recomendadas**
+### 4. **Almacenamiento de Imágenes (IMPORTANTE - Evita perder imágenes en cada deploy)**
+
+**⚠️ SIN S3, las imágenes se perderán en cada deploy.**
+
+Para que las imágenes persistan entre deploys, configura S3 (o DigitalOcean Spaces):
+
+#### Opción A: Amazon S3 (Recomendado)
+
+```
+AWS_ACCESS_KEY_ID=tu_access_key_id
+AWS_SECRET_ACCESS_KEY=tu_secret_access_key
+AWS_DEFAULT_REGION=eu-west-1
+AWS_BUCKET=tu-nombre-bucket
+AWS_URL=https://tu-nombre-bucket.s3.eu-west-1.amazonaws.com
+FILESYSTEM_DISK=s3
+```
+
+**Ver documentación completa en `CONFIGURACION-S3.md`**
+
+#### Opción B: Sin S3 (NO RECOMENDADO - Las imágenes se perderán)
+
+Si no configuras S3, las imágenes se guardarán localmente y se perderán en cada deploy:
+
+```
+FILESYSTEM_DISK=local
+```
+
+### 5. **Variables Opcionales pero Recomendadas**
 
 ```
 SESSION_DRIVER=database
 CACHE_DRIVER=file
 QUEUE_CONNECTION=sync
-FILESYSTEM_DISK=local
 ```
 
 ---

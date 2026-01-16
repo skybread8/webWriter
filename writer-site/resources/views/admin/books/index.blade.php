@@ -42,7 +42,7 @@
                                 >
                             </div>
                             @if($book->cover_image)
-                                <img src="{{ asset('storage/'.$book->cover_image) }}" alt="Portada de {{ $book->title }}" class="w-16 h-20 rounded-md object-cover border border-zinc-800">
+                                <img src="{{ get_image_url($book->cover_image) }}" alt="Portada de {{ $book->title }}" class="w-16 h-20 rounded-md object-cover border border-zinc-800">
                             @else
                                 <div class="w-16 h-20 rounded-md border border-dashed border-zinc-700 flex items-center justify-center text-[10px] text-zinc-600">
                                     Sin imagen

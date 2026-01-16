@@ -49,7 +49,10 @@ class BookStoreController extends Controller
             ->latest()
             ->get();
 
-        return view('store.books.show', compact('book', 'reviews', 'userReview'));
+        // Cargar fotos de lectores activas para este libro
+        $readerPhotos = $book->readerPhotos()->where('active', true)->orderBy('order')->orderBy('created_at', 'desc')->get();
+
+        return view('store.books.show', compact('book', 'reviews', 'userReview', 'readerPhotos'));
     }
 
     /**

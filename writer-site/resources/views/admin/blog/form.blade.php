@@ -82,7 +82,7 @@
         </p>
         @if($post?->featured_image)
             <div class="mb-3">
-                <img src="{{ asset('storage/'.$post->featured_image) }}" alt="Imagen actual" class="max-h-40 rounded-lg border border-zinc-800 object-cover">
+                <img src="{{ get_image_url($post->featured_image) }}" alt="Imagen actual" class="max-h-40 rounded-lg border border-zinc-800 object-cover">
                 <label for="remove_featured_image" class="flex items-center mt-2 text-sm text-zinc-400">
                     <input type="checkbox" name="remove_featured_image" id="remove_featured_image" value="1" class="rounded border-zinc-700 text-red-600 shadow-sm focus:ring-red-500">
                                     <span class="ml-2">{{ __('common.admin.remove_current_image') }}</span>

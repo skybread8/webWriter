@@ -34,7 +34,88 @@
                 <p class="text-zinc-400">{{ __('common.admin.reviews_empty') }}</p>
             </div>
         @else
-            <div class="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
+            <!-- Vista móvil: tarjetas -->
+            <div class="md:hidden space-y-4">
+                @foreach($reviews as $review)
+                    <div class="bg-zinc-900 rounded-lg border border-zinc-800 p-4 space-y-3">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-zinc-100 truncate">{{ $review->book->title }}</p>
+                                <p class="text-xs text-zinc-400 mt-1">{{ $review->user->name }}</p>
+                                <p class="text-xs text-zinc-500">{{ $review->user->email }}</p>
+                            </div>
+                            <div>
+                                @if($review->approved)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-900/40 text-emerald-300 border border-emerald-800/50">
+                                        {{ __('common.admin.reviews_status_approved') }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-900/40 text-amber-300 border border-amber-800/50">
+                                        {{ __('common.admin.reviews_status_pending') }}
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-1 flex-wrap">
+                            @for($i = 1; $i <= 10; $i++)
+                                @if($i <= $review->rating)
+                                    <svg class="w-3.5 h-3.5 text-amber-400 fill-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                @else
+                                    <svg class="w-3.5 h-3.5 text-zinc-700 fill-zinc-700" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                @endif
+                            @endfor
+                            <span class="text-xs text-zinc-400 ml-1">{{ $review->rating }}/10</span>
+                        </div>
+                        
+                        @if($review->comment)
+                            <div class="pt-2 border-t border-zinc-800">
+                                <p class="text-xs text-zinc-400 mb-1">{{ __('common.admin.reviews_table_comment') }}:</p>
+                                <p class="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap break-words">{{ $review->comment }}</p>
+                            </div>
+                        @else
+                            <p class="text-xs text-zinc-500">{{ __('common.admin.reviews_no_comment') }}</p>
+                        @endif
+                        
+                        <div class="pt-2 border-t border-zinc-800">
+                            <p class="text-xs text-zinc-400 mb-2">{{ __('common.admin.reviews_table_date') }}: {{ $review->created_at->format('d/m/Y H:i') }}</p>
+                            <div class="flex flex-wrap gap-2">
+                                @if(!$review->approved)
+                                    <form method="POST" action="{{ route('admin.reviews.approve', $review) }}" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="px-2.5 py-1.5 text-[10px] font-medium text-emerald-300 bg-emerald-900/20 border border-emerald-800/50 rounded-lg hover:bg-emerald-900/40 transition-colors">
+                                            {{ __('common.admin.reviews_approve') }}
+                                        </button>
+                                    </form>
+                                @else
+                                    <form method="POST" action="{{ route('admin.reviews.reject', $review) }}" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="px-2.5 py-1.5 text-[10px] font-medium text-amber-300 bg-amber-900/20 border border-amber-800/50 rounded-lg hover:bg-amber-900/40 transition-colors">
+                                            {{ __('common.admin.reviews_reject') }}
+                                        </button>
+                                    </form>
+                                @endif
+                                <form method="POST" action="{{ route('admin.reviews.destroy', $review) }}" onsubmit="return confirm('{{ __('common.admin.reviews_confirm_delete') }}');" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="px-2.5 py-1.5 text-[10px] font-medium text-red-300 bg-red-900/20 border border-red-800/50 rounded-lg hover:bg-red-900/40 transition-colors">
+                                        {{ __('common.admin.delete') }}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+            
+            <!-- Vista desktop: tabla -->
+            <div class="hidden md:block bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-zinc-800/50">
@@ -74,9 +155,9 @@
                                             <span class="ml-2 text-xs text-zinc-400">{{ $review->rating }}/10</span>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-4">
+                                    <td class="px-4 py-4 max-w-md">
                                         @if($review->comment)
-                                            <p class="text-sm text-zinc-300 line-clamp-2 max-w-xs">{{ Str::limit($review->comment, 100) }}</p>
+                                            <p class="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap break-words">{{ $review->comment }}</p>
                                         @else
                                             <span class="text-xs text-zinc-500">{{ __('common.admin.reviews_no_comment') }}</span>
                                         @endif

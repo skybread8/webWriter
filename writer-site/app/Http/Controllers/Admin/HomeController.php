@@ -17,6 +17,7 @@ class HomeController extends Controller
 
     public function update(Request $request)
     {
+        app()->setLocale('es');
         $settings = SiteSetting::firstOrFail();
 
         $data = $request->validate([
@@ -24,8 +25,9 @@ class HomeController extends Controller
             'hero_image' => ['nullable', 'image', 'max:4096'],
         ], [
             'hero_text.required' => 'Este texto se muestra en la parte principal de la página de inicio.',
-            'hero_text.max' => 'Por claridad visual, el texto principal no debe ser demasiado largo.',
-            'hero_image.image' => 'La imagen debe ser un archivo de tipo imagen (JPG, PNG, etc.).',
+            'hero_text.max' => 'Por claridad visual, el texto principal no debe ser demasiado largo (máximo 500 caracteres).',
+            'hero_image.image' => 'La imagen principal debe ser un archivo de imagen (JPG, PNG, etc.).',
+            'hero_image.max' => 'La imagen principal no puede pesar más de 4MB.',
         ]);
 
         if ($request->hasFile('hero_image')) {

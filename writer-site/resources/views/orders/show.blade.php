@@ -89,7 +89,7 @@
                             @foreach($order->items as $item)
                                 <div class="flex items-start gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-zinc-800 last:border-0">
                                     @if($item->book && $item->book->cover_image)
-                                        <img src="{{ asset('storage/'.$item->book->cover_image) }}" alt="{{ $item->book_title }}" class="w-12 h-16 sm:w-16 sm:h-20 rounded-lg object-cover border border-zinc-800 flex-shrink-0">
+                                        <img src="{{ get_image_url($item->book->cover_image) }}" alt="{{ $item->book_title }}" class="w-12 h-16 sm:w-16 sm:h-20 rounded-lg object-cover border border-zinc-800 flex-shrink-0">
                                     @else
                                         <div class="w-12 h-16 sm:w-16 sm:h-20 rounded-lg border border-dashed border-zinc-700 flex items-center justify-center bg-zinc-950 flex-shrink-0">
                                             <x-icons.book class="w-4 h-4 sm:w-6 sm:h-6 text-zinc-700" />

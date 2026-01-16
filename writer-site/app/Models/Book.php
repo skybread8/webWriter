@@ -15,6 +15,14 @@ class Book extends Model
     }
 
     /**
+     * Relación con las fotos de lectores
+     */
+    public function readerPhotos()
+    {
+        return $this->hasMany(ReaderPhoto::class);
+    }
+
+    /**
      * Obtener la valoración promedio (solo de reseñas aprobadas)
      */
     public function getAverageRatingAttribute()

@@ -29,7 +29,7 @@
             <x-seo-meta 
                 :title="$pageTitle"
                 :description="$pageDescription"
-                :image="$settings?->hero_image ? asset('storage/'.$settings->hero_image) : null"
+                :image="$settings?->hero_image ? get_image_url($settings->hero_image) : null"
             />
         @endif
 
@@ -161,6 +161,10 @@
                         <x-icons.user class="w-4 h-4" aria-hidden="true" />
                         <span>{{ __('common.nav.about') }}</span>
                     </a>
+                    <a href="{{ localized_route('photos.readers') }}" class="flex items-center gap-1.5 {{ request()->routeIs('photos.readers') ? 'text-zinc-100' : 'hover:text-zinc-200' }} transition-colors" aria-label="Fotos con lectores">
+                        <x-icons.camera class="w-4 h-4" aria-hidden="true" />
+                        <span>{{ __('common.nav.photos_readers') }}</span>
+                    </a>
                     <a href="{{ localized_route('offers') }}" class="flex items-center gap-1.5 {{ request()->routeIs('offers') ? 'text-zinc-100' : 'hover:text-zinc-200' }} transition-colors" aria-label="Ofertas y packs">
                         <x-icons.gift class="w-4 h-4" aria-hidden="true" />
                         <span>{{ __('common.nav.offers') }}</span>
@@ -290,6 +294,10 @@
                             <x-icons.user class="w-4 h-4" aria-hidden="true" />
                             <span class="text-sm">{{ __('common.nav.about') }}</span>
                         </a>
+                        <a href="{{ localized_route('photos.readers') }}" class="flex items-center gap-2 px-4 py-3 rounded-lg {{ request()->routeIs('photos.readers') ? 'bg-zinc-900 text-zinc-100' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200' }} transition-colors">
+                            <x-icons.camera class="w-4 h-4" aria-hidden="true" />
+                            <span class="text-sm">{{ __('common.nav.photos_readers') }}</span>
+                        </a>
                         <a href="{{ localized_route('offers') }}" class="flex items-center gap-2 px-4 py-3 rounded-lg {{ request()->routeIs('offers') ? 'bg-zinc-900 text-zinc-100' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200' }} transition-colors">
                             <x-icons.gift class="w-4 h-4" aria-hidden="true" />
                             <span class="text-sm">{{ __('common.nav.offers') }}</span>
@@ -323,6 +331,7 @@
                             <ul class="space-y-2" role="list">
                                 <li><a href="{{ localized_route('books.index.public') }}" class="hover:text-zinc-300 transition-colors">{{ __('common.nav.books') }}</a></li>
                                 <li><a href="{{ localized_route('about') }}" class="hover:text-zinc-300 transition-colors">{{ __('common.nav.about') }}</a></li>
+                                <li><a href="{{ localized_route('photos.readers') }}" class="hover:text-zinc-300 transition-colors">{{ __('common.nav.photos_readers') }}</a></li>
                                 <li><a href="{{ localized_route('offers') }}" class="hover:text-zinc-300 transition-colors">{{ __('common.nav.offers') }}</a></li>
                                 <li><a href="{{ localized_route('blog') }}" class="hover:text-zinc-300 transition-colors">{{ __('common.nav.blog') }}</a></li>
                             </ul>

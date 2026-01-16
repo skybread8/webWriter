@@ -30,7 +30,7 @@
             @if($post->featured_image)
                 <figure class="mb-10 rounded-3xl overflow-hidden">
                     <img 
-                        src="{{ asset('storage/'.$post->featured_image) }}" 
+                        src="{{ get_image_url($post->featured_image) }}" 
                         alt="{{ $post->title }}" 
                         class="w-full h-auto object-cover"
                         loading="lazy"

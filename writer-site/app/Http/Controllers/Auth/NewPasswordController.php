@@ -20,6 +20,7 @@ class NewPasswordController extends Controller
      */
     public function create(Request $request): View
     {
+        app()->setLocale('es');
         return view('auth.reset-password', ['request' => $request]);
     }
 
@@ -30,6 +31,7 @@ class NewPasswordController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        app()->setLocale('es');
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],
