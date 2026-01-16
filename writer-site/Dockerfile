@@ -332,20 +332,33 @@ RUN composer dump-autoload --optimize --no-scripts || true
 
 # Compilar assets para producción (después de copiar todos los archivos)
 RUN if [ -f package.json ] && [ -s package.json ] && [ "$(cat package.json)" != "{}" ]; then \
-        echo "Building assets for production..."; \
-        echo "Checking if resources directory exists..."; \
-        ls -la resources/ 2>/dev/null || echo "Warning: resources/ directory not found"; \
+        echo "=== Building assets for production ==="; \
+        echo "Checking required files..."; \
+        [ -f vite.config.js ] && echo "✓ vite.config.js found" || echo "✗ vite.config.js missing"; \
+        [ -f tailwind.config.js ] && echo "✓ tailwind.config.js found" || echo "✗ tailwind.config.js missing"; \
+        [ -f postcss.config.js ] && echo "✓ postcss.config.js found" || echo "✗ postcss.config.js missing"; \
+        [ -d resources ] && echo "✓ resources/ directory found" || echo "✗ resources/ directory missing"; \
+        [ -d resources/css ] && echo "✓ resources/css/ directory found" || echo "✗ resources/css/ directory missing"; \
+        [ -d resources/js ] && echo "✓ resources/js/ directory found" || echo "✗ resources/js/ directory missing"; \
+        echo "Removing old build directory if exists..."; \
+        rm -rf public/build public/hot 2>/dev/null || true; \
         echo "Running npm run build..."; \
-        npm run build || (echo "ERROR: Build failed!" && exit 1); \
-        echo "Assets built successfully"; \
+        NODE_ENV=production npm run build 2>&1 || (echo "ERROR: Build failed!" && exit 1); \
+        echo "=== Build completed ==="; \
         echo "Checking build output..."; \
-        ls -la public/ 2>/dev/null || echo "Warning: public/ directory not found"; \
-        ls -la public/build/ 2>/dev/null || echo "Warning: public/build/ directory not found after build"; \
-        if [ -f public/build/manifest.json ]; then \
-            echo "manifest.json found:"; \
-            cat public/build/manifest.json | head -20; \
+        if [ -d public/build ]; then \
+            echo "✓ public/build/ directory exists"; \
+            ls -la public/build/; \
+            if [ -f public/build/manifest.json ]; then \
+                echo "✓ manifest.json found"; \
+                echo "manifest.json content:"; \
+                cat public/build/manifest.json; \
+            else \
+                echo "✗ ERROR: manifest.json not found in public/build/"; \
+                exit 1; \
+            fi; \
         else \
-            echo "ERROR: manifest.json not found in public/build/"; \
+            echo "✗ ERROR: public/build/ directory not created"; \
             exit 1; \
         fi; \
     else \
@@ -365,12 +378,21 @@ RUN if [ -d public/build ]; then \
     fi
 
 # Limpiar archivos innecesarios para reducir tamaño de imagen (pero mantener public/build)
-RUN rm -rf node_modules \
+RUN echo "Cleaning up unnecessary files (keeping public/build)..."; \
+    rm -rf node_modules \
     && rm -rf /root/.composer/cache \
     && rm -rf /root/.npm \
     && apt-get purge -y git curl gnupg \
     && apt-get autoremove -y \
-    && apt-get clean
+    && apt-get clean; \
+    echo "Verifying public/build still exists after cleanup..."; \
+    if [ -d public/build ] && [ -f public/build/manifest.json ]; then \
+        echo "✓ public/build/ and manifest.json preserved"; \
+        ls -la public/build/ | head -5; \
+    else \
+        echo "✗ ERROR: public/build/ was removed during cleanup!"; \
+        exit 1; \
+    fi
 
 # Configurar Apache para escuchar en el puerto 10000 (puerto estándar de Render.com)
 RUN echo "Listen 10000" >> /etc/apache2/ports.conf

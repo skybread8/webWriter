@@ -102,16 +102,33 @@ echo "=== Checking Build Assets ==="
 if [ -d public/build ] && [ -f public/build/manifest.json ]; then
     echo "✓ Build assets found in public/build/"
     echo "✓ manifest.json exists"
-    ls -la public/build/ | head -5
+    echo "manifest.json content:"
+    cat public/build/manifest.json
+    echo ""
+    echo "Build directory contents:"
+    ls -la public/build/
+    echo ""
+    echo "Checking if assets are accessible..."
+    if [ -d public/build/assets ]; then
+        echo "✓ public/build/assets/ directory exists"
+        ls -la public/build/assets/ | head -5
+    else
+        echo "✗ WARNING: public/build/assets/ directory not found"
+    fi
 else
-    echo "⚠ WARNING: Build assets not found!"
-    echo "The application may not display correctly."
+    echo "✗ ERROR: Build assets not found!"
+    echo "The application will not display correctly."
     echo "Expected: public/build/manifest.json"
     if [ -d public/build ]; then
         echo "public/build/ exists but manifest.json is missing"
         ls -la public/build/ 2>/dev/null || echo "public/build/ is empty"
     else
         echo "public/build/ directory does not exist"
+        echo "Attempting to rebuild assets..."
+        if [ -f package.json ]; then
+            npm install --only=production=false 2>&1 | head -20
+            npm run build 2>&1 || echo "Build failed"
+        fi
     fi
 fi
 echo "=============================="
