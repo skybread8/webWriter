@@ -17,6 +17,43 @@ chown -R www-data:www-data storage bootstrap/cache database 2>/dev/null || true
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 chmod -R 777 storage/logs 2>/dev/null || true
 
+# Actualizar .env con variables de entorno actuales (importante: Render.com pasa variables en runtime)
+if [ -f .env ]; then
+    echo "Updating .env file with current environment variables..."
+    
+    # Prioridad: DATABASE_URL (Render.com) > DB_URL > variables individuales
+    if [ -n "$DATABASE_URL" ]; then
+        # Render.com proporciona DATABASE_URL, Laravel usa DB_URL
+        echo "DATABASE_URL detected, setting DB_URL for Laravel..."
+        (grep -q "^DB_URL=" .env && sed -i "s|^DB_URL=.*|DB_URL=${DATABASE_URL}|" .env || echo "DB_URL=${DATABASE_URL}" >> .env)
+        # Asegurar que DB_CONNECTION=pgsql cuando hay DATABASE_URL
+        (grep -q "^DB_CONNECTION=" .env && sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=pgsql|" .env || echo "DB_CONNECTION=pgsql" >> .env)
+    elif [ -n "$DB_URL" ]; then
+        # Si hay DB_URL directamente, usarla
+        (grep -q "^DB_URL=" .env && sed -i "s|^DB_URL=.*|DB_URL=${DB_URL}|" .env || echo "DB_URL=${DB_URL}" >> .env)
+        (grep -q "^DB_CONNECTION=" .env && sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=pgsql|" .env || echo "DB_CONNECTION=pgsql" >> .env)
+    else
+        # Usar variables individuales si no hay URL
+        [ -n "$DB_CONNECTION" ] && (grep -q "^DB_CONNECTION=" .env && sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=${DB_CONNECTION}|" .env || echo "DB_CONNECTION=${DB_CONNECTION}" >> .env)
+        [ -n "$DB_HOST" ] && (grep -q "^DB_HOST=" .env && sed -i "s|^DB_HOST=.*|DB_HOST=${DB_HOST}|" .env || echo "DB_HOST=${DB_HOST}" >> .env)
+        [ -n "$DB_PORT" ] && (grep -q "^DB_PORT=" .env && sed -i "s|^DB_PORT=.*|DB_PORT=${DB_PORT}|" .env || echo "DB_PORT=${DB_PORT}" >> .env)
+        [ -n "$DB_DATABASE" ] && (grep -q "^DB_DATABASE=" .env && sed -i "s|^DB_DATABASE=.*|DB_DATABASE=${DB_DATABASE}|" .env || echo "DB_DATABASE=${DB_DATABASE}" >> .env)
+        [ -n "$DB_USERNAME" ] && (grep -q "^DB_USERNAME=" .env && sed -i "s|^DB_USERNAME=.*|DB_USERNAME=${DB_USERNAME}|" .env || echo "DB_USERNAME=${DB_USERNAME}" >> .env)
+        [ -n "$DB_PASSWORD" ] && (grep -q "^DB_PASSWORD=" .env && sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=${DB_PASSWORD}|" .env || echo "DB_PASSWORD=${DB_PASSWORD}" >> .env)
+        [ -n "$DB_SSLMODE" ] && (grep -q "^DB_SSLMODE=" .env && sed -i "s|^DB_SSLMODE=.*|DB_SSLMODE=${DB_SSLMODE}|" .env || echo "DB_SSLMODE=${DB_SSLMODE}" >> .env)
+    fi
+    
+    # Actualizar otras variables importantes
+    [ -n "$APP_KEY" ] && (grep -q "^APP_KEY=" .env && sed -i "s|^APP_KEY=.*|APP_KEY=${APP_KEY}|" .env || echo "APP_KEY=${APP_KEY}" >> .env)
+    [ -n "$APP_URL" ] && (grep -q "^APP_URL=" .env && sed -i "s|^APP_URL=.*|APP_URL=${APP_URL}|" .env || echo "APP_URL=${APP_URL}" >> .env)
+    [ -n "$SESSION_DRIVER" ] && (grep -q "^SESSION_DRIVER=" .env && sed -i "s|^SESSION_DRIVER=.*|SESSION_DRIVER=${SESSION_DRIVER}|" .env || echo "SESSION_DRIVER=${SESSION_DRIVER}" >> .env)
+    [ -n "$CACHE_DRIVER" ] && (grep -q "^CACHE_DRIVER=" .env && sed -i "s|^CACHE_DRIVER=.*|CACHE_DRIVER=${CACHE_DRIVER}|" .env || echo "CACHE_DRIVER=${CACHE_DRIVER}" >> .env)
+    
+    echo ".env file updated"
+else
+    echo "WARNING: .env file not found!"
+fi
+
 # Verificar configuración de base de datos
 if [ -f .env ]; then
     DB_CONN=$(grep "^DB_CONNECTION=" .env 2>/dev/null | cut -d '=' -f2 | tr -d '"' | tr -d "'" | xargs || echo "")
@@ -33,13 +70,16 @@ if [ -f .env ]; then
         chown -R www-data:www-data "$DB_DIR" 2>/dev/null || true
         chmod -R 775 "$DB_DIR" 2>/dev/null || true
         echo "SQLite database ready at $DB_PATH"
-    elif [ "$DB_CONN" = "pgsql" ] || [ -n "$DB_HOST" ] || [ -n "$DB_URL" ]; then
+    elif [ "$DB_CONN" = "pgsql" ] || [ -n "$DB_HOST" ] || [ -n "$DB_URL" ] || [ -n "$DATABASE_URL" ]; then
         echo "PostgreSQL configuration detected. Verifying connection settings..."
-        if [ -z "$DB_HOST" ] && [ -z "$DB_URL" ] && ! grep -q "^DB_HOST=" .env 2>/dev/null && ! grep -q "^DB_URL=" .env 2>/dev/null; then
-            echo "WARNING: PostgreSQL selected but DB_HOST or DB_URL not configured!"
-            echo "Please configure DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, and DB_PASSWORD in Render.com"
+        if [ -z "$DB_HOST" ] && [ -z "$DB_URL" ] && [ -z "$DATABASE_URL" ] && ! grep -q "^DB_HOST=" .env 2>/dev/null && ! grep -q "^DB_URL=" .env 2>/dev/null; then
+            echo "WARNING: PostgreSQL selected but DB_HOST, DB_URL, or DATABASE_URL not configured!"
+            echo "Please configure DATABASE_URL (preferred) or DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, and DB_PASSWORD in Render.com"
         else
             echo "PostgreSQL configuration looks good"
+            if [ -n "$DATABASE_URL" ] || grep -q "^DB_URL=" .env 2>/dev/null; then
+                echo "Using database URL connection (DATABASE_URL/DB_URL)"
+            fi
         fi
     else
         echo "WARNING: No database connection configured!"
@@ -57,7 +97,12 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
     php artisan migrate --force || echo "Warning: Migrations failed"
 fi
 
-# Limpiar cachés
+# Mostrar configuración de base de datos para debugging (sin mostrar contraseña)
+echo "=== Database Configuration ==="
+grep "^DB_" .env | sed 's/DB_PASSWORD=.*/DB_PASSWORD=***HIDDEN***/' | sed 's/DB_URL=.*:\/\/[^:]*:[^@]*@/DB_URL=***HIDDEN***@/' || echo "No DB configuration found in .env"
+echo "=============================="
+
+# Limpiar cachés ANTES de optimizar (importante para que lea el .env actualizado)
 php artisan config:clear || true
 php artisan cache:clear || true
 php artisan view:clear || true

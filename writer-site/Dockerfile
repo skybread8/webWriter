@@ -64,10 +64,11 @@ chown -R www-data:www-data storage bootstrap/cache database 2>/dev/null || true
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 chmod -R 777 storage/logs 2>/dev/null || true
 
-# Crear archivo .env si no existe (usando variables de entorno de Render.com)
-if [ ! -f .env ]; then
-    echo "Creating .env file from environment variables..."
-    cat > .env << ENVEOF
+# Crear o actualizar archivo .env con variables de entorno de Render.com
+echo "Creating/updating .env file from environment variables..."
+
+# Crear archivo .env base
+cat > .env << ENVEOF
 APP_NAME="${APP_NAME:-Laravel}"
 APP_ENV="${APP_ENV:-production}"
 APP_KEY="${APP_KEY:-}"
@@ -79,27 +80,47 @@ LOG_LEVEL="${LOG_LEVEL:-error}"
 
 DB_CONNECTION="${DB_CONNECTION:-pgsql}"
 ENVEOF
-    # Añadir más variables si existen
-    [ -n "$DB_CONNECTION" ] && sed -i "s|DB_CONNECTION=.*|DB_CONNECTION=${DB_CONNECTION}|" .env 2>/dev/null || true
-    [ -n "$DB_HOST" ] && echo "DB_HOST=${DB_HOST}" >> .env
-    [ -n "$DB_PORT" ] && echo "DB_PORT=${DB_PORT}" >> .env
-    [ -n "$DB_DATABASE" ] && echo "DB_DATABASE=${DB_DATABASE}" >> .env
-    [ -n "$DB_USERNAME" ] && echo "DB_USERNAME=${DB_USERNAME}" >> .env
-    [ -n "$DB_PASSWORD" ] && echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
-    [ -n "$DB_SSLMODE" ] && echo "DB_SSLMODE=${DB_SSLMODE}" >> .env
-    [ -n "$DB_URL" ] && echo "DB_URL=${DB_URL}" >> .env
-    [ -n "$STRIPE_SECRET" ] && echo "STRIPE_SECRET=${STRIPE_SECRET}" >> .env
-    [ -n "$MAIL_MAILER" ] && echo "MAIL_MAILER=${MAIL_MAILER}" >> .env
-    [ -n "$MAIL_HOST" ] && echo "MAIL_HOST=${MAIL_HOST}" >> .env
-    [ -n "$MAIL_PORT" ] && echo "MAIL_PORT=${MAIL_PORT}" >> .env
-    [ -n "$MAIL_USERNAME" ] && echo "MAIL_USERNAME=${MAIL_USERNAME}" >> .env
-    [ -n "$MAIL_PASSWORD" ] && echo "MAIL_PASSWORD=${MAIL_PASSWORD}" >> .env
-    [ -n "$MAIL_ENCRYPTION" ] && echo "MAIL_ENCRYPTION=${MAIL_ENCRYPTION}" >> .env
-    [ -n "$MAIL_FROM_ADDRESS" ] && echo "MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}" >> .env
-    [ -n "$MAIL_FROM_NAME" ] && echo "MAIL_FROM_NAME=${MAIL_FROM_NAME}" >> .env
-    [ -n "$APP_LOCALE" ] && echo "APP_LOCALE=${APP_LOCALE}" >> .env
-    [ -n "$APP_FALLBACK_LOCALE" ] && echo "APP_FALLBACK_LOCALE=${APP_FALLBACK_LOCALE}" >> .env
+
+# Añadir variables de base de datos (siempre, para asegurar que estén actualizadas)
+# Prioridad: DATABASE_URL (Render.com) > DB_URL > variables individuales
+if [ -n "$DATABASE_URL" ]; then
+    # Render.com proporciona DATABASE_URL, Laravel usa DB_URL
+    echo "DATABASE_URL detected, setting DB_URL for Laravel..."
+    (grep -q "^DB_URL=" .env && sed -i "s|^DB_URL=.*|DB_URL=${DATABASE_URL}|" .env || echo "DB_URL=${DATABASE_URL}" >> .env)
+    # Asegurar que DB_CONNECTION=pgsql cuando hay DATABASE_URL
+    (grep -q "^DB_CONNECTION=" .env && sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=pgsql|" .env || echo "DB_CONNECTION=pgsql" >> .env)
+elif [ -n "$DB_URL" ]; then
+    # Si hay DB_URL directamente, usarla
+    (grep -q "^DB_URL=" .env && sed -i "s|^DB_URL=.*|DB_URL=${DB_URL}|" .env || echo "DB_URL=${DB_URL}" >> .env)
+    (grep -q "^DB_CONNECTION=" .env && sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=pgsql|" .env || echo "DB_CONNECTION=pgsql" >> .env)
+else
+    # Usar variables individuales si no hay URL
+    [ -n "$DB_CONNECTION" ] && (grep -q "^DB_CONNECTION=" .env && sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=${DB_CONNECTION}|" .env || echo "DB_CONNECTION=${DB_CONNECTION}" >> .env)
+    [ -n "$DB_HOST" ] && (grep -q "^DB_HOST=" .env && sed -i "s|^DB_HOST=.*|DB_HOST=${DB_HOST}|" .env || echo "DB_HOST=${DB_HOST}" >> .env)
+    [ -n "$DB_PORT" ] && (grep -q "^DB_PORT=" .env && sed -i "s|^DB_PORT=.*|DB_PORT=${DB_PORT}|" .env || echo "DB_PORT=${DB_PORT}" >> .env)
+    [ -n "$DB_DATABASE" ] && (grep -q "^DB_DATABASE=" .env && sed -i "s|^DB_DATABASE=.*|DB_DATABASE=${DB_DATABASE}|" .env || echo "DB_DATABASE=${DB_DATABASE}" >> .env)
+    [ -n "$DB_USERNAME" ] && (grep -q "^DB_USERNAME=" .env && sed -i "s|^DB_USERNAME=.*|DB_USERNAME=${DB_USERNAME}|" .env || echo "DB_USERNAME=${DB_USERNAME}" >> .env)
+    [ -n "$DB_PASSWORD" ] && (grep -q "^DB_PASSWORD=" .env && sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=${DB_PASSWORD}|" .env || echo "DB_PASSWORD=${DB_PASSWORD}" >> .env)
+    [ -n "$DB_SSLMODE" ] && (grep -q "^DB_SSLMODE=" .env && sed -i "s|^DB_SSLMODE=.*|DB_SSLMODE=${DB_SSLMODE}|" .env || echo "DB_SSLMODE=${DB_SSLMODE}" >> .env)
 fi
+
+# Añadir otras variables opcionales
+[ -n "$STRIPE_SECRET" ] && (grep -q "^STRIPE_SECRET=" .env && sed -i "s|^STRIPE_SECRET=.*|STRIPE_SECRET=${STRIPE_SECRET}|" .env || echo "STRIPE_SECRET=${STRIPE_SECRET}" >> .env)
+[ -n "$SESSION_DRIVER" ] && (grep -q "^SESSION_DRIVER=" .env && sed -i "s|^SESSION_DRIVER=.*|SESSION_DRIVER=${SESSION_DRIVER}|" .env || echo "SESSION_DRIVER=${SESSION_DRIVER}" >> .env)
+[ -n "$CACHE_DRIVER" ] && (grep -q "^CACHE_DRIVER=" .env && sed -i "s|^CACHE_DRIVER=.*|CACHE_DRIVER=${CACHE_DRIVER}|" .env || echo "CACHE_DRIVER=${CACHE_DRIVER}" >> .env)
+[ -n "$QUEUE_CONNECTION" ] && (grep -q "^QUEUE_CONNECTION=" .env && sed -i "s|^QUEUE_CONNECTION=.*|QUEUE_CONNECTION=${QUEUE_CONNECTION}|" .env || echo "QUEUE_CONNECTION=${QUEUE_CONNECTION}" >> .env)
+[ -n "$MAIL_MAILER" ] && (grep -q "^MAIL_MAILER=" .env && sed -i "s|^MAIL_MAILER=.*|MAIL_MAILER=${MAIL_MAILER}|" .env || echo "MAIL_MAILER=${MAIL_MAILER}" >> .env)
+[ -n "$MAIL_HOST" ] && (grep -q "^MAIL_HOST=" .env && sed -i "s|^MAIL_HOST=.*|MAIL_HOST=${MAIL_HOST}|" .env || echo "MAIL_HOST=${MAIL_HOST}" >> .env)
+[ -n "$MAIL_PORT" ] && (grep -q "^MAIL_PORT=" .env && sed -i "s|^MAIL_PORT=.*|MAIL_PORT=${MAIL_PORT}|" .env || echo "MAIL_PORT=${MAIL_PORT}" >> .env)
+[ -n "$MAIL_USERNAME" ] && (grep -q "^MAIL_USERNAME=" .env && sed -i "s|^MAIL_USERNAME=.*|MAIL_USERNAME=${MAIL_USERNAME}|" .env || echo "MAIL_USERNAME=${MAIL_USERNAME}" >> .env)
+[ -n "$MAIL_PASSWORD" ] && (grep -q "^MAIL_PASSWORD=" .env && sed -i "s|^MAIL_PASSWORD=.*|MAIL_PASSWORD=${MAIL_PASSWORD}|" .env || echo "MAIL_PASSWORD=${MAIL_PASSWORD}" >> .env)
+[ -n "$MAIL_ENCRYPTION" ] && (grep -q "^MAIL_ENCRYPTION=" .env && sed -i "s|^MAIL_ENCRYPTION=.*|MAIL_ENCRYPTION=${MAIL_ENCRYPTION}|" .env || echo "MAIL_ENCRYPTION=${MAIL_ENCRYPTION}" >> .env)
+[ -n "$MAIL_FROM_ADDRESS" ] && (grep -q "^MAIL_FROM_ADDRESS=" .env && sed -i "s|^MAIL_FROM_ADDRESS=.*|MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}|" .env || echo "MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS}" >> .env)
+[ -n "$MAIL_FROM_NAME" ] && (grep -q "^MAIL_FROM_NAME=" .env && sed -i "s|^MAIL_FROM_NAME=.*|MAIL_FROM_NAME=${MAIL_FROM_NAME}|" .env || echo "MAIL_FROM_NAME=${MAIL_FROM_NAME}" >> .env)
+[ -n "$APP_LOCALE" ] && (grep -q "^APP_LOCALE=" .env && sed -i "s|^APP_LOCALE=.*|APP_LOCALE=${APP_LOCALE}|" .env || echo "APP_LOCALE=${APP_LOCALE}" >> .env)
+[ -n "$APP_FALLBACK_LOCALE" ] && (grep -q "^APP_FALLBACK_LOCALE=" .env && sed -i "s|^APP_FALLBACK_LOCALE=.*|APP_FALLBACK_LOCALE=${APP_FALLBACK_LOCALE}|" .env || echo "APP_FALLBACK_LOCALE=${APP_FALLBACK_LOCALE}" >> .env)
+
+echo ".env file created/updated successfully"
 
 # Establecer permisos en .env
 chown www-data:www-data .env 2>/dev/null || true
@@ -171,11 +192,16 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
     php artisan migrate --force || echo "Warning: Migrations failed, continuing..."
 fi
 
-# Limpiar cachés
+# Limpiar cachés ANTES de optimizar (importante para que lea el .env actualizado)
 php artisan config:clear || true
 php artisan cache:clear || true
 php artisan view:clear || true
 php artisan route:clear || true
+
+# Mostrar configuración de base de datos para debugging (sin mostrar contraseña)
+echo "=== Database Configuration ==="
+grep "^DB_" .env | sed 's/DB_PASSWORD=.*/DB_PASSWORD=***HIDDEN***/' | sed 's/DB_URL=.*:\/\/[^:]*:[^@]*@/DB_URL=***HIDDEN***@/' || echo "No DB configuration found in .env"
+echo "=============================="
 
 # Optimizar para producción (con manejo de errores mejorado)
 php artisan config:cache || echo "Warning: Config cache failed"
