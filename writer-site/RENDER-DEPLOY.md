@@ -30,12 +30,23 @@ Configura todas las variables de entorno necesarias. Consulta `VARIABLES-ENTORNO
 
 ### Error: "Could not open input file: artisan"
 
-Este error ocurre cuando Render.com intenta ejecutar comandos de Laravel antes de que el contenedor esté completamente iniciado.
+Este error ocurre cuando Render.com intenta ejecutar comandos de Laravel antes de que el contenedor esté completamente iniciado o desde un directorio incorrecto.
 
-**Solución**: 
-1. Asegúrate de que **Build Command** y **Start Command** estén **VACÍOS** en Render.com
-2. El Dockerfile ya maneja todo el proceso de inicio
-3. Si Render.com tiene una opción "Auto-Deploy", desactívala o configúrala para usar solo Docker
+**Solución PASO A PASO**:
+
+1. **Ve a la configuración de tu servicio en Render.com**
+2. **En la sección "Settings" o "Environment"**:
+   - **Build Command**: Debe estar **COMPLETAMENTE VACÍO** (no pongas nada, ni siquiera espacios)
+   - **Start Command**: Debe estar **COMPLETAMENTE VACÍO**
+3. **Verifica que estés usando Docker**:
+   - En "Docker" o "Dockerfile Path", debe estar configurado como `Dockerfile` o `./Dockerfile`
+4. **Si el error persiste**:
+   - Ve a "Environment" → "Advanced"
+   - Busca cualquier variable que contenga comandos de build o start
+   - Elimínalas o déjalas vacías
+5. **Reinicia el servicio** después de hacer estos cambios
+
+**IMPORTANTE**: Render.com a veces intenta ejecutar comandos automáticamente. El Dockerfile ya maneja todo, así que NO necesitas Build Command ni Start Command.
 
 ### Error: "Database connection failed"
 

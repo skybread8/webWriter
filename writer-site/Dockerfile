@@ -39,8 +39,15 @@ RUN cat > /usr/local/bin/start.sh << 'EOF'
 #!/bin/bash
 set -e
 
-# Cambiar al directorio de trabajo
-cd /var/www/html
+# Cambiar al directorio de trabajo explícitamente
+cd /var/www/html || exit 1
+
+# Verificar que artisan existe
+if [ ! -f artisan ]; then
+    echo "ERROR: artisan file not found in /var/www/html"
+    ls -la /var/www/html
+    exit 1
+fi
 
 # Crear directorios necesarios si no existen
 mkdir -p storage/framework/cache/data
@@ -56,24 +63,35 @@ chmod -R 775 storage bootstrap/cache
 
 # Ejecutar migraciones solo si la variable de entorno está configurada
 if [ "$RUN_MIGRATIONS" = "true" ]; then
-    cd /var/www/html && php artisan migrate --force
+    cd /var/www/html
+    php artisan migrate --force || echo "Warning: Migrations failed, continuing..."
 fi
 
-# Limpiar cachés
-cd /var/www/html && php artisan config:clear
-cd /var/www/html && php artisan cache:clear
-cd /var/www/html && php artisan view:clear
-cd /var/www/html && php artisan route:clear
+# Limpiar cachés (con manejo de errores)
+cd /var/www/html
+php artisan config:clear || true
+php artisan cache:clear || true
+php artisan view:clear || true
+php artisan route:clear || true
 
 # Optimizar para producción
-cd /var/www/html && php artisan config:cache
-cd /var/www/html && php artisan route:cache
-cd /var/www/html && php artisan view:cache
+cd /var/www/html
+php artisan config:cache || echo "Warning: Config cache failed"
+php artisan route:cache || echo "Warning: Route cache failed"
+php artisan view:cache || echo "Warning: View cache failed"
 
 # Iniciar Apache
 exec apache2-foreground
 EOF
 RUN chmod +x /usr/local/bin/start.sh
+
+# Crear un script wrapper para comandos de artisan (por si Render.com intenta ejecutarlos)
+RUN cat > /usr/local/bin/artisan << 'EOF'
+#!/bin/bash
+cd /var/www/html
+exec php artisan "$@"
+EOF
+RUN chmod +x /usr/local/bin/artisan
 
 # Copiar primero solo composer.json (y composer.lock si existe)
 COPY composer.json* ./
@@ -93,6 +111,16 @@ RUN if [ -f package.json ]; then \
 
 # Copiar el resto de archivos del proyecto
 COPY . /var/www/html
+
+# Asegurar que artisan existe y tiene permisos correctos
+RUN if [ -f /var/www/html/artisan ]; then \
+        chmod +x /var/www/html/artisan; \
+        echo "artisan file found and made executable"; \
+    else \
+        echo "ERROR: artisan file not found after COPY"; \
+        ls -la /var/www/html/ | head -20; \
+        exit 1; \
+    fi
 
 # Crear directorios necesarios y establecer permisos
 RUN mkdir -p /var/www/html/storage/framework/cache/data \
