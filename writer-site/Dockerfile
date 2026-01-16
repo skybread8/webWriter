@@ -110,7 +110,18 @@ RUN if [ -f package.json ]; then \
     fi
 
 # Copiar el resto de archivos del proyecto
-COPY . /var/www/html
+COPY . /var/www/html/
+
+# Verificar estructura de directorios y mover contenido si es necesario
+# Si el contexto de Docker está en el directorio padre, los archivos estarán en writer-site/
+RUN if [ -d /var/www/html/writer-site ] && [ ! -f /var/www/html/artisan ]; then \
+        echo "Content is in writer-site subdirectory, moving..."; \
+        shopt -s dotglob nullglob; \
+        mv /var/www/html/writer-site/* /var/www/html/ 2>/dev/null || true; \
+        mv /var/www/html/writer-site/.[!.]* /var/www/html/ 2>/dev/null || true; \
+        rmdir /var/www/html/writer-site 2>/dev/null || true; \
+        echo "Content moved successfully"; \
+    fi
 
 # Asegurar que artisan existe y tiene permisos correctos
 RUN if [ -f /var/www/html/artisan ]; then \
@@ -118,7 +129,10 @@ RUN if [ -f /var/www/html/artisan ]; then \
         echo "artisan file found and made executable"; \
     else \
         echo "ERROR: artisan file not found after COPY"; \
+        echo "Contents of /var/www/html:"; \
         ls -la /var/www/html/ | head -20; \
+        echo "Looking for artisan in subdirectories..."; \
+        find /var/www/html -name "artisan" -type f 2>/dev/null | head -5; \
         exit 1; \
     fi
 

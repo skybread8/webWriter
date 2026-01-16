@@ -8,8 +8,21 @@
 - **Start Command**: (dejar vacío - Docker maneja todo)
 
 ### 2. Configuración de Docker
-- **Dockerfile Path**: `Dockerfile` (o `./Dockerfile` si estás en la raíz)
-- **Docker Context**: `.` (directorio raíz del repositorio)
+- **Dockerfile Path**: `writer-site/Dockerfile` (ruta completa desde la raíz del repositorio)
+- **Docker Context**: `writer-site` (directorio donde está el Dockerfile)
+  
+  **IMPORTANTE**: Si tu repositorio tiene la estructura:
+  ```
+  /tu-repo
+    /writer-site
+      Dockerfile
+      composer.json
+      ...
+  ```
+  
+  Entonces:
+  - **Dockerfile Path**: `writer-site/Dockerfile`
+  - **Docker Context**: `writer-site` (o `.` si estás configurando desde dentro de writer-site)
 
 ### 3. Variables de Entorno
 Configura todas las variables de entorno necesarias. Consulta `VARIABLES-ENTORNO.md` para la lista completa.
