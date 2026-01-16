@@ -28,6 +28,42 @@ RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/Allo
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Crear script de inicio directamente en el contenedor
+RUN cat > /usr/local/bin/start.sh << 'EOF'
+#!/bin/bash
+set -e
+
+# Crear directorios necesarios si no existen
+mkdir -p storage/framework/cache/data
+mkdir -p storage/framework/sessions
+mkdir -p storage/framework/views
+mkdir -p bootstrap/cache
+
+# Establecer permisos
+chown -R www-data:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+
+# Ejecutar migraciones solo si la variable de entorno está configurada
+if [ "$RUN_MIGRATIONS" = "true" ]; then
+    php artisan migrate --force
+fi
+
+# Limpiar cachés
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+php artisan route:clear
+
+# Optimizar para producción
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Iniciar Apache
+exec apache2-foreground
+EOF
+RUN chmod +x /usr/local/bin/start.sh
+
 # Copiar archivos del proyecto (usando .dockerignore para excluir archivos innecesarios)
 COPY . /var/www/html
 
@@ -63,10 +99,6 @@ RUN echo '<VirtualHost *:10000>\n\
     ErrorLog ${APACHE_LOG_DIR}/error.log\n\
     CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
-
-# Script de inicio
-COPY docker/start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
 
 # Exponer puerto 10000
 EXPOSE 10000
