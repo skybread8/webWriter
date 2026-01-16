@@ -93,39 +93,63 @@ exec php artisan "$@"
 EOF
 RUN chmod +x /usr/local/bin/artisan
 
-# Copiar primero solo composer.json y composer.lock
-COPY composer.json composer.lock* ./
+# Copiar todo el contenido a un directorio temporal
+COPY . /tmp/build/
+
+# Detectar estructura y copiar archivos necesarios para composer/npm
+RUN if [ -f /tmp/build/composer.json ]; then \
+        # Contexto en la raíz del proyecto (writer-site/)
+        echo "Build context: project root (writer-site/)"; \
+        cp /tmp/build/composer.json /tmp/build/composer.lock* ./ 2>/dev/null || true; \
+        cp /tmp/build/package.json /tmp/build/package-lock.json* ./ 2>/dev/null || true; \
+    elif [ -f /tmp/build/writer-site/composer.json ]; then \
+        # Contexto en el directorio padre
+        echo "Build context: parent directory"; \
+        cp /tmp/build/writer-site/composer.json /tmp/build/writer-site/composer.lock* ./ 2>/dev/null || true; \
+        cp /tmp/build/writer-site/package.json /tmp/build/writer-site/package-lock.json* ./ 2>/dev/null || true; \
+    else \
+        echo "ERROR: composer.json not found in /tmp/build/"; \
+        echo "Contents of /tmp/build/:"; \
+        ls -la /tmp/build/ | head -20; \
+        exit 1; \
+    fi
 
 # Instalar dependencias de PHP (sin scripts para evitar errores)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts || \
-    (echo "Warning: composer install failed, trying with scripts..." && \
-     composer install --no-dev --optimize-autoloader --no-interaction || exit 1)
-
-# Copiar archivos de Node
-COPY package.json package-lock.json* ./
+RUN if [ -f composer.json ]; then \
+        composer install --no-dev --optimize-autoloader --no-interaction --no-scripts || \
+        (echo "Warning: composer install failed, trying with scripts..." && \
+         composer install --no-dev --optimize-autoloader --no-interaction || exit 1); \
+    else \
+        echo "ERROR: composer.json not found after copy"; \
+        exit 1; \
+    fi
 
 # Instalar dependencias de Node
-RUN if [ -f package.json ]; then \
+RUN if [ -f package.json ] && [ -s package.json ] && [ "$(cat package.json)" != "{}" ]; then \
         npm ci --only=production=false || npm install; \
+    else \
+        echo "Skipping Node installation (no valid package.json found)"; \
     fi
 
-# Copiar el resto de archivos del proyecto
-COPY . /var/www/html/
+# Copiar el resto de archivos del proyecto al directorio final
+RUN if [ -f /tmp/build/composer.json ]; then \
+        # Contexto en la raíz (writer-site/)
+        echo "Copying files from project root..."; \
+        shopt -s dotglob; \
+        cp -r /tmp/build/* /var/www/html/ 2>/dev/null || true; \
+        cp -r /tmp/build/.[!.]* /var/www/html/ 2>/dev/null || true; \
+    elif [ -f /tmp/build/writer-site/composer.json ]; then \
+        # Contexto en el directorio padre
+        echo "Copying files from writer-site subdirectory..."; \
+        shopt -s dotglob; \
+        cp -r /tmp/build/writer-site/* /var/www/html/ 2>/dev/null || true; \
+        cp -r /tmp/build/writer-site/.[!.]* /var/www/html/ 2>/dev/null || true; \
+    fi && \
+    rm -rf /tmp/build
 
-# Verificar y mover contenido si está en subdirectorio (contexto Docker desde directorio padre)
-RUN if [ -d /var/www/html/writer-site ] && [ ! -f /var/www/html/artisan ]; then \
-        echo "Moving content from writer-site subdirectory..."; \
-        cd /var/www/html/writer-site; \
-        find . -mindepth 1 -maxdepth 1 ! -name '.' -exec mv -t /var/www/html/ {} + 2>/dev/null || \
-        (shopt -s dotglob && mv * /var/www/html/ 2>/dev/null || true); \
-        cd /var/www/html; \
-        rmdir writer-site 2>/dev/null || true; \
-        echo "Content moved successfully"; \
-    fi
-
-# Verificar que artisan existe después del movimiento
+# Verificar que artisan existe después de copiar
 RUN if [ ! -f /var/www/html/artisan ]; then \
-        echo "ERROR: artisan file not found"; \
+        echo "ERROR: artisan file not found after copy"; \
         echo "Contents of /var/www/html:"; \
         ls -la /var/www/html/ | head -20; \
         find /var/www/html -name "artisan" -type f 2>/dev/null | head -5 || echo "No artisan found"; \
@@ -149,7 +173,7 @@ RUN mkdir -p /var/www/html/storage/framework/cache/data \
 RUN composer dump-autoload --optimize --no-scripts || true
 
 # Compilar assets para producción
-RUN if [ -f package.json ]; then \
+RUN if [ -f package.json ] && [ -s package.json ] && [ "$(cat package.json)" != "{}" ]; then \
         npm run build || echo "Warning: Build failed"; \
     fi
 
