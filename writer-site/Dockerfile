@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libzip-dev \
     libsqlite3-dev \
+    libpq-dev \
     zip \
     unzip \
     ca-certificates \
@@ -22,7 +23,7 @@ RUN apt-get update && apt-get install -y \
     && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" > /etc/apt/sources.list.d/nodesource.list \
     && apt-get update \
     && apt-get install -y nodejs \
-    && docker-php-ext-install pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zip \
+    && docker-php-ext-install pdo_mysql pdo_sqlite pdo_pgsql mbstring exif pcntl bcmath gd zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Habilitar mod_rewrite de Apache
@@ -49,17 +50,18 @@ if [ ! -f artisan ]; then
     exit 1
 fi
 
-# Crear directorios necesarios si no existen
+# Crear directorios necesarios si no existen (CRÍTICO: antes de cualquier operación de Laravel)
 mkdir -p storage/framework/cache/data
 mkdir -p storage/framework/sessions
 mkdir -p storage/framework/views
 mkdir -p storage/logs
 mkdir -p storage/app/public
 mkdir -p bootstrap/cache
+mkdir -p database
 
-# Establecer permisos ANTES de crear .env (importante para que Laravel pueda escribir)
-chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
-chmod -R 775 storage bootstrap/cache
+# Establecer permisos CRÍTICOS primero (antes de que Laravel intente escribir)
+chown -R www-data:www-data storage bootstrap/cache database 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 chmod -R 777 storage/logs 2>/dev/null || true
 
 # Crear archivo .env si no existe (usando variables de entorno de Render.com)
@@ -124,6 +126,42 @@ chmod -R 775 storage bootstrap/cache
 chmod -R 777 storage/logs 2>/dev/null || true
 chmod 644 .env 2>/dev/null || true
 
+# Crear base de datos SQLite si no existe (solo si DB_CONNECTION=sqlite)
+if [ -f .env ]; then
+    if grep -q "DB_CONNECTION=sqlite" .env 2>/dev/null || [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
+        DB_PATH=$(grep "DB_DATABASE=" .env 2>/dev/null | cut -d '=' -f2 | tr -d '"' | tr -d "'" | xargs || echo "/var/www/html/database/database.sqlite")
+        DB_DIR=$(dirname "$DB_PATH")
+        
+        echo "SQLite database path: $DB_PATH"
+        echo "SQLite database directory: $DB_DIR"
+        
+        # Crear directorio si no existe
+        mkdir -p "$DB_DIR" 2>/dev/null || true
+        
+        # Crear archivo de base de datos si no existe
+        if [ ! -f "$DB_PATH" ]; then
+            echo "Creating SQLite database file at $DB_PATH..."
+            touch "$DB_PATH" 2>/dev/null || {
+                echo "Warning: Could not create database file at $DB_PATH, trying default location..."
+                touch /var/www/html/database/database.sqlite 2>/dev/null || true
+                DB_PATH="/var/www/html/database/database.sqlite"
+            }
+        fi
+        
+        # Establecer permisos en el archivo de base de datos
+        chown www-data:www-data "$DB_PATH" 2>/dev/null || true
+        chmod 664 "$DB_PATH" 2>/dev/null || true
+        chown -R www-data:www-data "$DB_DIR" 2>/dev/null || true
+        chmod -R 775 "$DB_DIR" 2>/dev/null || true
+        echo "SQLite database ready at $DB_PATH"
+    fi
+fi
+
+# Asegurar que el archivo de log existe y tiene permisos correctos
+touch storage/logs/laravel.log 2>/dev/null || true
+chown www-data:www-data storage/logs/laravel.log 2>/dev/null || true
+chmod 666 storage/logs/laravel.log 2>/dev/null || true
+
 # Ejecutar scripts de Composer que requieren Laravel configurado
 php artisan package:discover --ansi || echo "Warning: Package discovery failed"
 
@@ -143,6 +181,12 @@ php artisan config:cache || echo "Warning: Config cache failed"
 php artisan route:cache || echo "Warning: Route cache failed"
 php artisan view:cache || echo "Warning: View cache failed - this is usually OK if views are not pre-compiled"
 
+# Verificar permisos finales
+chown -R www-data:www-data storage bootstrap/cache database 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache 2>/dev/null || true
+chmod -R 777 storage/logs 2>/dev/null || true
+
+echo "Starting Apache..."
 # Iniciar Apache
 exec apache2-foreground
 EOF
