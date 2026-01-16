@@ -97,6 +97,25 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
     php artisan migrate --force || echo "Warning: Migrations failed"
 fi
 
+# Verificar que los assets compilados existan
+echo "=== Checking Build Assets ==="
+if [ -d public/build ] && [ -f public/build/manifest.json ]; then
+    echo "✓ Build assets found in public/build/"
+    echo "✓ manifest.json exists"
+    ls -la public/build/ | head -5
+else
+    echo "⚠ WARNING: Build assets not found!"
+    echo "The application may not display correctly."
+    echo "Expected: public/build/manifest.json"
+    if [ -d public/build ]; then
+        echo "public/build/ exists but manifest.json is missing"
+        ls -la public/build/ 2>/dev/null || echo "public/build/ is empty"
+    else
+        echo "public/build/ directory does not exist"
+    fi
+fi
+echo "=============================="
+
 # Mostrar configuración de base de datos para debugging (sin mostrar contraseña)
 echo "=== Database Configuration ==="
 grep "^DB_" .env | sed 's/DB_PASSWORD=.*/DB_PASSWORD=***HIDDEN***/' | sed 's/DB_URL=.*:\/\/[^:]*:[^@]*@/DB_URL=***HIDDEN***@/' || echo "No DB configuration found in .env"
@@ -113,10 +132,11 @@ php artisan config:cache || echo "Warning: Config cache failed"
 php artisan route:cache || echo "Warning: Route cache failed"
 php artisan view:cache || echo "Warning: View cache failed"
 
-# Verificar permisos finales
-chown -R www-data:www-data storage bootstrap/cache database 2>/dev/null || true
+# Verificar permisos finales (incluyendo public/build para assets)
+chown -R www-data:www-data storage bootstrap/cache database public/build 2>/dev/null || true
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 chmod -R 777 storage/logs 2>/dev/null || true
+chmod -R 755 public/build 2>/dev/null || true
 
 echo "Starting Apache..."
 # Iniciar Apache

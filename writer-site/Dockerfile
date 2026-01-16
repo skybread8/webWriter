@@ -198,6 +198,16 @@ php artisan cache:clear || true
 php artisan view:clear || true
 php artisan route:clear || true
 
+# Verificar que los assets compilados existan
+echo "=== Checking Build Assets ==="
+if [ -d public/build ] && [ -f public/build/manifest.json ]; then
+    echo "✓ Build assets found in public/build/"
+    ls -la public/build/ | head -5
+else
+    echo "⚠ WARNING: Build assets not found!"
+fi
+echo "=============================="
+
 # Mostrar configuración de base de datos para debugging (sin mostrar contraseña)
 echo "=== Database Configuration ==="
 grep "^DB_" .env | sed 's/DB_PASSWORD=.*/DB_PASSWORD=***HIDDEN***/' | sed 's/DB_URL=.*:\/\/[^:]*:[^@]*@/DB_URL=***HIDDEN***@/' || echo "No DB configuration found in .env"
@@ -320,12 +330,41 @@ RUN mkdir -p /var/www/html/storage/framework/cache/data \
 # Regenerar autoloader optimizado (sin scripts - se ejecutarán en start.sh)
 RUN composer dump-autoload --optimize --no-scripts || true
 
-# Compilar assets para producción
+# Compilar assets para producción (después de copiar todos los archivos)
 RUN if [ -f package.json ] && [ -s package.json ] && [ "$(cat package.json)" != "{}" ]; then \
-        npm run build || echo "Warning: Build failed"; \
+        echo "Building assets for production..."; \
+        echo "Checking if resources directory exists..."; \
+        ls -la resources/ 2>/dev/null || echo "Warning: resources/ directory not found"; \
+        echo "Running npm run build..."; \
+        npm run build || (echo "ERROR: Build failed!" && exit 1); \
+        echo "Assets built successfully"; \
+        echo "Checking build output..."; \
+        ls -la public/ 2>/dev/null || echo "Warning: public/ directory not found"; \
+        ls -la public/build/ 2>/dev/null || echo "Warning: public/build/ directory not found after build"; \
+        if [ -f public/build/manifest.json ]; then \
+            echo "manifest.json found:"; \
+            cat public/build/manifest.json | head -20; \
+        else \
+            echo "ERROR: manifest.json not found in public/build/"; \
+            exit 1; \
+        fi; \
+    else \
+        echo "Skipping asset build (no valid package.json)"; \
     fi
 
-# Limpiar archivos innecesarios para reducir tamaño de imagen
+# Asegurar permisos en los assets compilados y directorio public
+RUN if [ -d public/build ]; then \
+        chown -R www-data:www-data public/build public; \
+        chmod -R 755 public/build public; \
+        echo "Build assets permissions set"; \
+        echo "Build directory contents:"; \
+        ls -la public/build/ | head -10; \
+    else \
+        echo "ERROR: public/build/ directory does not exist!"; \
+        exit 1; \
+    fi
+
+# Limpiar archivos innecesarios para reducir tamaño de imagen (pero mantener public/build)
 RUN rm -rf node_modules \
     && rm -rf /root/.composer/cache \
     && rm -rf /root/.npm \
