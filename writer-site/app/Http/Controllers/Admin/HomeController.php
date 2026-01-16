@@ -31,6 +31,11 @@ class HomeController extends Controller
         if ($request->hasFile('hero_image')) {
             $path = $request->file('hero_image')->store('hero', 'public');
             $data['hero_image'] = $path;
+            // Asegurar permisos del archivo subido
+            $fullPath = storage_path('app/public/' . $path);
+            if (file_exists($fullPath)) {
+                @chmod($fullPath, 0644);
+            }
         }
 
         $settings->update($data);

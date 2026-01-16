@@ -63,6 +63,11 @@ class BookController extends Controller
 
         if ($request->hasFile('cover_image')) {
             $data['cover_image'] = $request->file('cover_image')->store('covers', 'public');
+            // Asegurar permisos del archivo subido
+            $fullPath = storage_path('app/public/' . $data['cover_image']);
+            if (file_exists($fullPath)) {
+                @chmod($fullPath, 0644);
+            }
         }
 
         $data['active'] = $request->boolean('active', true);
@@ -113,6 +118,11 @@ class BookController extends Controller
 
         if ($request->hasFile('cover_image')) {
             $data['cover_image'] = $request->file('cover_image')->store('covers', 'public');
+            // Asegurar permisos del archivo subido
+            $fullPath = storage_path('app/public/' . $data['cover_image']);
+            if (file_exists($fullPath)) {
+                @chmod($fullPath, 0644);
+            }
         }
 
         $data['active'] = $request->boolean('active', false);

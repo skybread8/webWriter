@@ -65,6 +65,11 @@ class TestimonialController extends Controller
 
         if ($request->hasFile('photo')) {
             $data['photo'] = $request->file('photo')->store('testimonials', 'public');
+            // Asegurar permisos del archivo subido
+            $fullPath = storage_path('app/public/' . $data['photo']);
+            if (file_exists($fullPath)) {
+                @chmod($fullPath, 0644);
+            }
         }
 
         $data['active'] = $request->has('active');

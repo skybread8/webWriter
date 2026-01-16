@@ -9,6 +9,7 @@ mkdir -p storage/framework/cache/data
 mkdir -p storage/framework/sessions
 mkdir -p storage/framework/views
 mkdir -p storage/logs
+mkdir -p storage/app/public
 mkdir -p bootstrap/cache
 mkdir -p database
 
@@ -16,6 +17,41 @@ mkdir -p database
 chown -R www-data:www-data storage bootstrap/cache database 2>/dev/null || true
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 chmod -R 777 storage/logs 2>/dev/null || true
+chmod -R 775 storage/app/public 2>/dev/null || true
+
+# Crear enlace simbólico de storage (importante para que las imágenes se sirvan)
+echo "=== Creating storage symlink ==="
+# Eliminar enlace roto o directorio existente si es necesario
+if [ -L public/storage ] && [ ! -e public/storage ]; then
+    echo "Removing broken symlink..."
+    rm -f public/storage
+elif [ -d public/storage ] && [ ! -L public/storage ]; then
+    echo "Removing existing directory (should be symlink)..."
+    rm -rf public/storage
+fi
+
+# Crear el enlace simbólico
+if [ ! -L public/storage ] && [ ! -d public/storage ]; then
+    echo "Creating storage symlink..."
+    php artisan storage:link 2>&1 || {
+        echo "artisan storage:link failed, trying manual link..."
+        ln -sfn ../storage/app/public public/storage 2>/dev/null || {
+            echo "Manual link also failed, trying absolute path..."
+            ln -sfn /var/www/html/storage/app/public /var/www/html/public/storage 2>/dev/null || true
+        }
+    }
+fi
+
+# Verificar y establecer permisos
+if [ -L public/storage ] || [ -d public/storage ]; then
+    echo "✓ Storage symlink exists"
+    chown -h www-data:www-data public/storage 2>/dev/null || true
+    ls -la public/storage | head -3
+else
+    echo "✗ WARNING: Storage symlink could not be created!"
+    echo "Images may not be accessible"
+fi
+echo "=============================="
 
 # Actualizar .env con variables de entorno actuales (importante: Render.com pasa variables en runtime)
 if [ -f .env ]; then
@@ -165,11 +201,33 @@ php artisan route:cache || echo "Warning: Route cache failed"
 echo "Optimization complete"
 echo "=============================="
 
-# Verificar permisos finales (incluyendo public/build para assets)
+# Verificar permisos finales (incluyendo public/build para assets y storage/app/public para imágenes)
 chown -R www-data:www-data storage bootstrap/cache database public/build 2>/dev/null || true
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 chmod -R 777 storage/logs 2>/dev/null || true
+chmod -R 775 storage/app/public 2>/dev/null || true
 chmod -R 755 public/build 2>/dev/null || true
+
+# Verificar que el enlace simbólico de storage existe (CRÍTICO para imágenes)
+echo "=== Verifying storage symlink ==="
+if [ -L public/storage ] || [ -d public/storage ]; then
+    echo "✓ Storage symlink exists"
+    ls -la public/storage | head -3
+else
+    echo "⚠️  WARNING: Storage symlink not found, creating..."
+    php artisan storage:link || {
+        echo "artisan storage:link failed, trying manual link..."
+        rm -rf public/storage 2>/dev/null || true
+        ln -sfn ../storage/app/public public/storage 2>/dev/null || true
+        chown -h www-data:www-data public/storage 2>/dev/null || true
+    }
+    if [ -L public/storage ] || [ -d public/storage ]; then
+        echo "✓ Storage symlink created successfully"
+    else
+        echo "✗ ERROR: Failed to create storage symlink!"
+    fi
+fi
+echo "=============================="
 
 echo "Starting Apache..."
 # Iniciar Apache

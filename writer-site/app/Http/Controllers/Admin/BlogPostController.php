@@ -43,6 +43,11 @@ class BlogPostController extends Controller
 
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $request->file('featured_image')->store('blog_images', 'public');
+            // Asegurar permisos del archivo subido
+            $fullPath = storage_path('app/public/' . $data['featured_image']);
+            if (file_exists($fullPath)) {
+                @chmod($fullPath, 0644);
+            }
         }
 
         if ($request->boolean('published') && empty($data['published_at'])) {

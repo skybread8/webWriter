@@ -15,7 +15,8 @@ class MigrateFromSqlite extends Command
      */
     protected $signature = 'db:migrate-from-sqlite 
                             {--sqlite-path= : Path to SQLite database file}
-                            {--force : Force migration even if tables exist}';
+                            {--force : Force migration even if tables exist}
+                            {--truncate : Truncate tables before migrating (WARNING: deletes all existing data)}';
 
     /**
      * The console command description.
@@ -132,82 +133,123 @@ class MigrateFromSqlite extends Command
         $pgsqlConnection = config('database.default') === 'pgsql' ? 'pgsql' : config('database.default');
         $existingCount = DB::connection($pgsqlConnection)->table($table)->count();
         
-        if ($existingCount > 0 && !$this->option('force')) {
-            if (!$this->confirm("Table {$table} already has {$existingCount} records. Continue? (This will add new records)", true)) {
-                $this->warn("Skipping {$table}...");
-                return;
+        // Truncar tabla si se solicita
+        if ($this->option('truncate') && $existingCount > 0) {
+            if ($this->confirm("⚠️  WARNING: This will DELETE all {$existingCount} existing records in {$table}. Continue?", false)) {
+                DB::connection($pgsqlConnection)->table($table)->truncate();
+                $this->info("✓ Table {$table} truncated");
+                $existingCount = 0;
+            } else {
+                $this->warn("Skipping truncate for {$table}...");
             }
+        }
+        
+        if ($existingCount > 0 && !$this->option('force')) {
+            $this->warn("Table {$table} already has {$existingCount} records.");
+            $this->info("Using updateOrInsert to update existing records and add new ones...");
         }
 
         // Insertar datos en PostgreSQL
         $bar = $this->output->createProgressBar($data->count());
         $bar->start();
 
-        $chunkSize = 100;
-        $data->chunk($chunkSize)->each(function ($chunk) use ($table, $bar, $pgsqlConnection) {
-            try {
-                // Convertir a array y manejar campos especiales
-                $records = $chunk->map(function ($record) use ($table) {
-                    $array = (array) $record;
-                    
-                    // Eliminar campos que no existen en PostgreSQL
-                    unset($array['rowid']); // SQLite tiene rowid, PostgreSQL no
-                    
-                    // Convertir booleanos de SQLite (0/1) a booleanos de PostgreSQL
-                    foreach ($array as $key => $value) {
-                        if ($value === null) {
-                            continue;
-                        }
-                        
-                        // Detectar campos booleanos por nombre
-                        if (in_array($key, ['active', 'approved']) && (is_int($value) || is_string($value))) {
-                            $array[$key] = (bool) (int) $value;
-                        }
-                    }
-                    
-                    return $array;
-                })->toArray();
+        $successCount = 0;
+        $errorCount = 0;
 
-                // Usar insertOrIgnore para evitar duplicados si hay IDs
-                if ($existingCount > 0) {
-                    foreach ($records as $record) {
-                        try {
-                            DB::connection($pgsqlConnection)->table($table)->insertOrIgnore($record);
-                        } catch (\Exception $e) {
-                            // Si insertOrIgnore no funciona, intentar updateOrInsert
-                            if (isset($record['id'])) {
-                                DB::connection($pgsqlConnection)->table($table)
-                                    ->updateOrInsert(['id' => $record['id']], $record);
-                            } else {
-                                DB::connection($pgsqlConnection)->table($table)->insert($record);
-                            }
-                        }
+        // Procesar registro por registro para mejor control de errores
+        $pgsqlConnection = config('database.default') === 'pgsql' ? 'pgsql' : config('database.default');
+        
+        foreach ($data as $record) {
+            try {
+                $array = (array) $record;
+                
+                // Eliminar campos que no existen en PostgreSQL
+                unset($array['rowid']); // SQLite tiene rowid, PostgreSQL no
+                
+                // Convertir booleanos de SQLite (0/1) a booleanos de PostgreSQL
+                foreach ($array as $key => $value) {
+                    if ($value === null) {
+                        continue;
                     }
-                } else {
-                    DB::connection($pgsqlConnection)->table($table)->insert($records);
+                    
+                    // Detectar campos booleanos por nombre
+                    if (in_array($key, ['active', 'approved']) && (is_int($value) || is_string($value))) {
+                        $array[$key] = (bool) (int) $value;
+                    }
                 }
                 
-                $bar->advance(count($records));
-            } catch (\Exception $e) {
-                $bar->advance(count($chunk));
-                $this->newLine();
-                $this->warn("Error inserting chunk: " . $e->getMessage());
-                // Intentar insertar uno por uno para identificar el problema
-                foreach ($chunk as $record) {
+                // Determinar la clave única para updateOrInsert
+                $uniqueKey = $this->getUniqueKey($table, $array);
+                
+                if ($uniqueKey) {
+                    // Usar updateOrInsert para actualizar si existe o insertar si no
+                    DB::connection($pgsqlConnection)->table($table)
+                        ->updateOrInsert($uniqueKey, $array);
+                } else {
+                    // Si no hay clave única, intentar insertar directamente
                     try {
-                        $array = (array) $record;
-                        unset($array['rowid']);
                         DB::connection($pgsqlConnection)->table($table)->insert($array);
-                    } catch (\Exception $e2) {
-                        $this->error("Failed to insert record ID " . ($array['id'] ?? 'unknown') . ": " . $e2->getMessage());
+                    } catch (\Exception $e) {
+                        // Si falla por duplicado, intentar updateOrInsert con ID
+                        if (isset($array['id'])) {
+                            DB::connection($pgsqlConnection)->table($table)
+                                ->updateOrInsert(['id' => $array['id']], $array);
+                        } else {
+                            throw $e;
+                        }
                     }
                 }
+                
+                $successCount++;
+                $bar->advance();
+            } catch (\Exception $e) {
+                $errorCount++;
+                $bar->advance();
+                $recordId = $array['id'] ?? ($array['email'] ?? 'unknown');
+                $this->newLine();
+                $this->warn("⚠️  Failed to migrate record ID {$recordId} in {$table}: " . $e->getMessage());
             }
-        });
+        }
 
         $bar->finish();
         $this->newLine();
-        $this->info("✓ {$table} migrated successfully");
+        
+        if ($errorCount > 0) {
+            $this->warn("⚠️  {$table}: {$successCount} migrated, {$errorCount} errors");
+        } else {
+            $this->info("✓ {$table}: {$successCount} records migrated successfully");
+        }
+    }
+
+    /**
+     * Get unique key for updateOrInsert based on table structure
+     */
+    protected function getUniqueKey(string $table, array $data): ?array
+    {
+        // Usar 'id' como clave única si existe
+        if (isset($data['id'])) {
+            return ['id' => $data['id']];
+        }
+        
+        // Para tablas específicas, usar otras claves únicas
+        $uniqueKeys = [
+            'users' => ['email'],
+            'site_settings' => ['id'], // Solo debería haber uno
+            'pages' => ['slug'],
+        ];
+        
+        if (isset($uniqueKeys[$table])) {
+            $key = $uniqueKeys[$table];
+            $keyData = [];
+            foreach ($key as $field) {
+                if (isset($data[$field])) {
+                    $keyData[$field] = $data[$field];
+                }
+            }
+            return !empty($keyData) ? $keyData : null;
+        }
+        
+        return null;
     }
 
     /**
