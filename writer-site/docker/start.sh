@@ -19,6 +19,18 @@ chmod -R 775 storage bootstrap/cache 2>/dev/null || true
 chmod -R 777 storage/logs 2>/dev/null || true
 chmod -R 775 storage/app/public 2>/dev/null || true
 
+# Crear directorios necesarios para imágenes
+echo "=== Creating image directories ==="
+mkdir -p storage/app/public/covers 2>/dev/null || true
+mkdir -p storage/app/public/blog_images 2>/dev/null || true
+mkdir -p storage/app/public/testimonials 2>/dev/null || true
+chown -R www-data:www-data storage/app/public 2>/dev/null || true
+chmod -R 775 storage/app/public 2>/dev/null || true
+echo "✓ Image directories created"
+echo "Contents of storage/app/public:"
+ls -la storage/app/public/ 2>/dev/null | head -10 || echo "Cannot list directory"
+echo "=============================="
+
 # Crear enlace simbólico de storage (importante para que las imágenes se sirvan)
 echo "=== Creating storage symlink ==="
 # Eliminar enlace roto o directorio existente si es necesario
@@ -35,21 +47,43 @@ if [ ! -L public/storage ] && [ ! -d public/storage ]; then
     echo "Creating storage symlink..."
     php artisan storage:link 2>&1 || {
         echo "artisan storage:link failed, trying manual link..."
-        ln -sfn ../storage/app/public public/storage 2>/dev/null || {
-            echo "Manual link also failed, trying absolute path..."
-            ln -sfn /var/www/html/storage/app/public /var/www/html/public/storage 2>/dev/null || true
+        cd public && ln -sfn ../storage/app/public storage && cd .. 2>/dev/null || {
+            echo "Relative link failed, trying absolute path..."
+            ln -sfn /var/www/html/storage/app/public /var/www/html/public/storage 2>/dev/null || {
+                echo "All symlink methods failed!"
+            }
         }
     }
 fi
 
 # Verificar y establecer permisos
-if [ -L public/storage ] || [ -d public/storage ]; then
-    echo "✓ Storage symlink exists"
+echo "Verifying symlink..."
+if [ -L public/storage ]; then
+    echo "✓ Storage symlink exists (symbolic link)"
+    TARGET=$(readlink -f public/storage 2>/dev/null || readlink public/storage 2>/dev/null || echo "unknown")
+    echo "  Target: $TARGET"
+    if [ -e public/storage ]; then
+        echo "  ✓ Target is accessible"
+        echo "  Contents of public/storage:"
+        ls -la public/storage/ 2>/dev/null | head -5 || echo "  Cannot list contents"
+    else
+        echo "  ✗ Target is NOT accessible!"
+    fi
     chown -h www-data:www-data public/storage 2>/dev/null || true
-    ls -la public/storage | head -3
+elif [ -d public/storage ]; then
+    echo "⚠ public/storage is a directory, not a symlink"
+    echo "  This may cause issues. Contents:"
+    ls -la public/storage/ 2>/dev/null | head -5 || echo "  Cannot list contents"
 else
     echo "✗ WARNING: Storage symlink could not be created!"
-    echo "Images may not be accessible"
+    echo "Images will NOT be accessible via web"
+    echo "Attempting diagnostic..."
+    echo "  storage/app/public exists: $([ -d storage/app/public ] && echo 'yes' || echo 'no')"
+    echo "  public/ exists: $([ -d public ] && echo 'yes' || echo 'no')"
+    echo "  Current directory: $(pwd)"
+    echo "  Full paths:"
+    echo "    storage/app/public: $(realpath storage/app/public 2>/dev/null || echo 'not found')"
+    echo "    public/: $(realpath public 2>/dev/null || echo 'not found')"
 fi
 echo "=============================="
 

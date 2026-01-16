@@ -422,10 +422,17 @@ ServerName localhost
     DocumentRoot /var/www/html/public
     
     <Directory /var/www/html/public>
-        Options -Indexes +FollowSymLinks
+        Options -Indexes +FollowSymLinks +SymLinksIfOwnerMatch
         AllowOverride All
         Require all granted
         DirectoryIndex index.php index.html
+    </Directory>
+    
+    # Permitir acceso a storage a través del enlace simbólico
+    <Directory /var/www/html/public/storage>
+        Options -Indexes +FollowSymLinks +SymLinksIfOwnerMatch
+        AllowOverride All
+        Require all granted
     </Directory>
     
     # Denegar acceso al directorio raíz del proyecto
