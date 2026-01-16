@@ -95,7 +95,7 @@
                                     @click="open = false"
                                 >
                                     <x-icons.home class="w-4 h-4" aria-hidden="true" />
-                                    <span>{{ __('common.account.dashboard') }}</span>
+                                    <span class="text-[11px] uppercase tracking-[0.25em]">{{ __('common.account.dashboard') }}</span>
                                 </a>
                                 <a
                                     href="{{ localized_route('account.profile') }}"
@@ -104,7 +104,7 @@
                                     @click="open = false"
                                 >
                                     <x-icons.user class="w-4 h-4" aria-hidden="true" />
-                                    <span>{{ __('common.account.my_profile') }}</span>
+                                    <span class="text-[11px] uppercase tracking-[0.25em]">{{ __('common.account.my_profile') }}</span>
                                 </a>
                                 <a
                                     href="{{ localized_route('orders.index') }}"
@@ -113,7 +113,7 @@
                                     @click="open = false"
                                 >
                                     <x-icons.shopping-bag class="w-4 h-4" aria-hidden="true" />
-                                    <span>{{ __('common.account.my_orders') }}</span>
+                                    <span class="text-[11px] uppercase tracking-[0.25em]">{{ __('common.account.my_orders') }}</span>
                                 </a>
                                 <div class="border-t border-zinc-800"></div>
                                 <form method="POST" action="{{ route('logout') }}" class="inline">
@@ -125,7 +125,7 @@
                                         @click="open = false"
                                     >
                                         <x-icons.logout class="w-4 h-4" aria-hidden="true" />
-                                        <span>{{ __('common.nav.logout') }}</span>
+                                        <span class="text-[11px] uppercase tracking-[0.25em]">{{ __('common.nav.logout') }}</span>
                                     </button>
                                 </form>
                             </div>
@@ -195,7 +195,7 @@
                                 :aria-expanded="open"
                             >
                                 <x-icons.user class="w-4 h-4" aria-hidden="true" />
-                                <span class="hidden sm:inline">{{ __('common.nav.account') }}</span>
+                                <span class="hidden sm:inline text-[11px] uppercase tracking-[0.25em]">{{ __('common.nav.account') }}</span>
                                 <svg class="w-3 h-3 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -222,7 +222,7 @@
                                     @click="open = false"
                                 >
                                     <x-icons.home class="w-4 h-4" aria-hidden="true" />
-                                    <span>{{ __('common.account.dashboard') }}</span>
+                                    <span class="text-[11px] uppercase tracking-[0.25em]">{{ __('common.account.dashboard') }}</span>
                                 </a>
                                 <a
                                     href="{{ localized_route('account.profile') }}"
@@ -231,7 +231,7 @@
                                     @click="open = false"
                                 >
                                     <x-icons.user class="w-4 h-4" aria-hidden="true" />
-                                    <span>{{ __('common.account.my_profile') }}</span>
+                                    <span class="text-[11px] uppercase tracking-[0.25em]">{{ __('common.account.my_profile') }}</span>
                                 </a>
                                 <a
                                     href="{{ localized_route('orders.index') }}"
@@ -240,7 +240,7 @@
                                     @click="open = false"
                                 >
                                     <x-icons.shopping-bag class="w-4 h-4" aria-hidden="true" />
-                                    <span>{{ __('common.account.my_orders') }}</span>
+                                    <span class="text-[11px] uppercase tracking-[0.25em]">{{ __('common.account.my_orders') }}</span>
                                 </a>
                                 <div class="border-t border-zinc-800"></div>
                                 <form method="POST" action="{{ route('logout') }}" class="inline">
@@ -252,7 +252,7 @@
                                         @click="open = false"
                                     >
                                         <x-icons.logout class="w-4 h-4" aria-hidden="true" />
-                                        <span>{{ __('common.nav.logout') }}</span>
+                                        <span class="text-[11px] uppercase tracking-[0.25em]">{{ __('common.nav.logout') }}</span>
                                     </button>
                                 </form>
                             </div>
@@ -260,7 +260,7 @@
                     @else
                         <a href="{{ route('login') }}" class="flex items-center gap-1.5 hover:text-zinc-200 transition-colors" aria-label="Iniciar sesión">
                             <x-icons.user class="w-4 h-4" aria-hidden="true" />
-                            <span class="hidden sm:inline">{{ __('common.nav.login') }}</span>
+                            <span class="hidden sm:inline text-[11px] uppercase tracking-[0.25em]">{{ __('common.nav.login') }}</span>
                         </a>
                     @endauth
                     <x-language-switcher />

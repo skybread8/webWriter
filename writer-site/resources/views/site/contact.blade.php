@@ -30,7 +30,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('contact.send') }}" class="space-y-5 max-w-xl">
+        <form method="POST" action="{{ localized_route('contact.send') }}" class="space-y-5 max-w-xl">
             @csrf
 
             <div class="space-y-2">

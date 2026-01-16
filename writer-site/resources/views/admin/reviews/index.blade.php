@@ -1,13 +1,9 @@
-@extends('layouts.admin')
-
-@section('title', 'Reseñas')
-
-@section('content')
+<x-admin.layout title="{{ __('common.admin.reviews') }}">
     <div class="space-y-6">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-zinc-100">Reseñas de libros</h1>
-                <p class="text-zinc-400 mt-1">Gestiona las reseñas que los clientes han dejado en los libros</p>
+                <h1 class="text-3xl font-bold text-zinc-100">{{ __('common.admin.reviews_title') }}</h1>
+                <p class="text-zinc-400 mt-1">{{ __('common.admin.reviews_description') }}</p>
             </div>
         </div>
 
@@ -20,22 +16,22 @@
         <!-- Estadísticas -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
-                <p class="text-sm text-zinc-400 mb-1">Total de reseñas</p>
+                <p class="text-sm text-zinc-400 mb-1">{{ __('common.admin.reviews_total') }}</p>
                 <p class="text-2xl font-bold text-zinc-100">{{ $reviews->count() }}</p>
             </div>
             <div class="bg-amber-900/20 border border-amber-800/50 rounded-lg p-4">
-                <p class="text-sm text-zinc-400 mb-1">Pendientes de aprobación</p>
+                <p class="text-sm text-zinc-400 mb-1">{{ __('common.admin.reviews_pending') }}</p>
                 <p class="text-2xl font-bold text-amber-400">{{ $pendingCount }}</p>
             </div>
             <div class="bg-emerald-900/20 border border-emerald-800/50 rounded-lg p-4">
-                <p class="text-sm text-zinc-400 mb-1">Aprobadas</p>
+                <p class="text-sm text-zinc-400 mb-1">{{ __('common.admin.reviews_approved') }}</p>
                 <p class="text-2xl font-bold text-emerald-400">{{ $approvedCount }}</p>
             </div>
         </div>
 
         @if($reviews->isEmpty())
             <div class="bg-zinc-900 rounded-lg p-8 text-center border border-zinc-800">
-                <p class="text-zinc-400">Aún no hay reseñas.</p>
+                <p class="text-zinc-400">{{ __('common.admin.reviews_empty') }}</p>
             </div>
         @else
             <div class="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
@@ -43,13 +39,13 @@
                     <table class="w-full">
                         <thead class="bg-zinc-800/50">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">Libro</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">Usuario</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">Valoración</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">Comentario</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">Estado</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">Fecha</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold text-zinc-400 uppercase tracking-wider">Acciones</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">{{ __('common.admin.reviews_table_book') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">{{ __('common.admin.reviews_table_user') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">{{ __('common.admin.reviews_table_rating') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">{{ __('common.admin.reviews_table_comment') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">{{ __('common.admin.reviews_table_status') }}</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">{{ __('common.admin.reviews_table_date') }}</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold text-zinc-400 uppercase tracking-wider">{{ __('common.admin.reviews_table_actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-800">
@@ -82,17 +78,17 @@
                                         @if($review->comment)
                                             <p class="text-sm text-zinc-300 line-clamp-2 max-w-xs">{{ Str::limit($review->comment, 100) }}</p>
                                         @else
-                                            <span class="text-xs text-zinc-500">Sin comentario</span>
+                                            <span class="text-xs text-zinc-500">{{ __('common.admin.reviews_no_comment') }}</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-4">
                                         @if($review->approved)
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-900/40 text-emerald-300 border border-emerald-800/50">
-                                                Aprobada
+                                                {{ __('common.admin.reviews_status_approved') }}
                                             </span>
                                         @else
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-900/40 text-amber-300 border border-amber-800/50">
-                                                Pendiente
+                                                {{ __('common.admin.reviews_status_pending') }}
                                             </span>
                                         @endif
                                     </td>
@@ -106,7 +102,7 @@
                                                     @csrf
                                                     @method('PATCH')
                                                     <button type="submit" class="px-3 py-1.5 text-xs font-medium text-emerald-300 bg-emerald-900/20 border border-emerald-800/50 rounded-lg hover:bg-emerald-900/40 transition-colors">
-                                                        Aprobar
+                                                        {{ __('common.admin.reviews_approve') }}
                                                     </button>
                                                 </form>
                                             @else
@@ -114,15 +110,15 @@
                                                     @csrf
                                                     @method('PATCH')
                                                     <button type="submit" class="px-3 py-1.5 text-xs font-medium text-amber-300 bg-amber-900/20 border border-amber-800/50 rounded-lg hover:bg-amber-900/40 transition-colors">
-                                                        Rechazar
+                                                        {{ __('common.admin.reviews_reject') }}
                                                     </button>
                                                 </form>
                                             @endif
-                                            <form method="POST" action="{{ route('admin.reviews.destroy', $review) }}" onsubmit="return confirm('¿Seguro que quieres eliminar esta reseña?');" class="inline">
+                                            <form method="POST" action="{{ route('admin.reviews.destroy', $review) }}" onsubmit="return confirm('{{ __('common.admin.reviews_confirm_delete') }}');" class="inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="px-3 py-1.5 text-xs font-medium text-red-300 bg-red-900/20 border border-red-800/50 rounded-lg hover:bg-red-900/40 transition-colors">
-                                                    Eliminar
+                                                    {{ __('common.admin.delete') }}
                                                 </button>
                                             </form>
                                         </div>
@@ -135,4 +131,4 @@
             </div>
         @endif
     </div>
-@endsection
+</x-admin.layout>

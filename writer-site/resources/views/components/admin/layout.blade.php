@@ -45,7 +45,7 @@
                         <span>{{ __('common.admin.testimonials') }}</span>
                     </a>
                     <a href="{{ route('admin.reviews.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.reviews.*') ? 'bg-zinc-900' : '' }}">
-                        <span>Reseñas</span>
+                        <span>{{ __('common.admin.reviews') }}</span>
                         @php
                             $pendingReviews = \App\Models\Review::where('approved', false)->count();
                         @endphp

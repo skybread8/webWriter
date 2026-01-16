@@ -35,7 +35,7 @@ class ReviewController extends Controller
 
         return redirect()
             ->route('admin.reviews.index')
-            ->with('status', 'La reseña se ha aprobado correctamente.');
+            ->with('status', __('common.admin.reviews_approved_success'));
     }
 
     /**
@@ -47,7 +47,7 @@ class ReviewController extends Controller
 
         return redirect()
             ->route('admin.reviews.index')
-            ->with('status', 'La reseña se ha rechazado y ya no se mostrará públicamente.');
+            ->with('status', __('common.admin.reviews_rejected_success'));
     }
 
     /**
@@ -59,6 +59,6 @@ class ReviewController extends Controller
 
         return redirect()
             ->route('admin.reviews.index')
-            ->with('status', 'La reseña se ha eliminado correctamente.');
+            ->with('status', __('common.admin.reviews_deleted_success'));
     }
 }
