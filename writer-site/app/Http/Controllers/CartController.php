@@ -39,8 +39,13 @@ class CartController extends Controller
     /**
      * Añadir libro al carrito
      */
-    public function add(Request $request, Book $book): RedirectResponse
+    public function add(Request $request, string $locale, $book): RedirectResponse
     {
+        // Si $book es un string (ID), buscar el modelo
+        if (is_string($book) || is_numeric($book)) {
+            $book = Book::findOrFail($book);
+        }
+        
         abort_unless($book->active, 404);
 
         $cart = session()->get('cart', []);
@@ -55,15 +60,20 @@ class CartController extends Controller
         session()->put('cart', $cart);
 
         return redirect()
-            ->route('cart.index')
+            ->to(localized_route('cart.index'))
             ->with('status', 'Libro añadido al carrito.');
     }
 
     /**
      * Actualizar cantidad de un libro en el carrito
      */
-    public function update(Request $request, Book $book): RedirectResponse
+    public function update(Request $request, string $locale, $book): RedirectResponse
     {
+        // Si $book es un string (ID), buscar el modelo
+        if (is_string($book) || is_numeric($book)) {
+            $book = Book::findOrFail($book);
+        }
+        
         $cart = session()->get('cart', []);
         $quantity = (int) $request->input('quantity', 1);
 
@@ -75,19 +85,24 @@ class CartController extends Controller
 
         session()->put('cart', $cart);
 
-        return redirect()->route('cart.index');
+        return redirect()->to(localized_route('cart.index'));
     }
 
     /**
      * Eliminar libro del carrito
      */
-    public function remove(Book $book): RedirectResponse
+    public function remove(string $locale, $book): RedirectResponse
     {
+        // Si $book es un string (ID), buscar el modelo
+        if (is_string($book) || is_numeric($book)) {
+            $book = Book::findOrFail($book);
+        }
+        
         $cart = session()->get('cart', []);
         unset($cart[$book->id]);
         session()->put('cart', $cart);
 
-        return redirect()->route('cart.index');
+        return redirect()->to(localized_route('cart.index'));
     }
 
     /**
@@ -97,6 +112,6 @@ class CartController extends Controller
     {
         session()->forget('cart');
 
-        return redirect()->route('cart.index');
+        return redirect()->to(localized_route('cart.index'));
     }
 }

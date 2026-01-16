@@ -15,5 +15,18 @@ class SiteSetting extends Model
         'instagram_url',
         'facebook_url',
         'tiktok_url',
+        'twitter_url',
+        'youtube_url',
+        'linkedin_url',
+        'pinterest_url',
+        'privacy_policy',
+        'terms_of_service',
+        'legal_notice',
+        'cookie_policy',
+        'cookies_enabled',
+    ];
+
+    protected $casts = [
+        'cookies_enabled' => 'boolean',
     ];
 }

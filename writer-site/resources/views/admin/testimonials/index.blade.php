@@ -22,13 +22,28 @@
                 Aún no hay testimonios. Pulsa "Añadir testimonio" para crear el primero.
             </p>
         @else
-            <div class="space-y-3">
+            <div class="mb-4 p-3 bg-zinc-900/40 border border-zinc-800 rounded-lg">
+                <p class="text-xs text-zinc-400">
+                    💡 <strong>Ordenar testimonios:</strong> Cambia el número de orden para controlar el orden de aparición. Los números más bajos aparecen primero.
+                </p>
+            </div>
+            <div class="space-y-3" id="testimonials-list">
                 @foreach ($testimonials as $testimonial)
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-zinc-800 rounded-2xl px-4 py-3 bg-zinc-900/40">
-                        <div class="flex items-start gap-3">
-                            <img src="{{ $testimonial->photo_url }}" alt="{{ $testimonial->name }}" class="w-12 h-12 rounded-full object-cover border border-zinc-800">
-                            <div>
-                                <div class="flex items-center gap-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-zinc-800 rounded-2xl px-4 py-3 bg-zinc-900/40" data-id="{{ $testimonial->id }}">
+                        <div class="flex items-start gap-3 flex-1">
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="text-xs text-zinc-500 w-8">#{{ $testimonial->order }}</span>
+                                <input 
+                                    type="number" 
+                                    value="{{ $testimonial->order }}" 
+                                    min="0"
+                                    class="w-16 px-2 py-1 text-xs bg-zinc-950 border border-zinc-800 rounded text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+                                    onchange="updateTestimonialOrder({{ $testimonial->id }}, this.value)"
+                                >
+                            </div>
+                            <img src="{{ $testimonial->photo_url }}" alt="{{ $testimonial->name }}" class="w-12 h-12 rounded-full object-cover border border-zinc-800 shrink-0">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
                                     <h2 class="text-sm font-medium text-zinc-50">{{ $testimonial->name }}</h2>
                                     <div class="flex items-center gap-0.5">
                                         @for($i = 1; $i <= 5; $i++)
@@ -50,7 +65,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 justify-end">
+                        <div class="flex items-center gap-2 justify-end shrink-0">
                             <a href="{{ route('admin.testimonials.edit', $testimonial) }}" class="text-xs text-zinc-200 underline underline-offset-4">
                                 Editar
                             </a>
@@ -65,6 +80,22 @@
                     </div>
                 @endforeach
             </div>
+            <script>
+                function updateTestimonialOrder(testimonialId, order) {
+                    fetch('{{ route("admin.testimonials.update-order") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            testimonials: [{ id: testimonialId, order: parseInt(order) }]
+                        })
+                    }).then(() => {
+                        location.reload();
+                    });
+                }
+            </script>
         @endif
     </div>
 </x-admin.layout>

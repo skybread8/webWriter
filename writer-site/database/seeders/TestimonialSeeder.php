@@ -19,6 +19,7 @@ class TestimonialSeeder extends Seeder
                 'rating' => 5,
                 'photo' => 'https://i.pravatar.cc/150?img=47',
                 'active' => true,
+                'order' => 1,
             ]
         );
 
@@ -29,6 +30,7 @@ class TestimonialSeeder extends Seeder
                 'rating' => 5,
                 'photo' => 'https://i.pravatar.cc/150?img=33',
                 'active' => true,
+                'order' => 2,
             ]
         );
     }

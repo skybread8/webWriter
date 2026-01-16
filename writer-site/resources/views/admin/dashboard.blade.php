@@ -10,11 +10,20 @@
             </p>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-3">
+        <div class="grid gap-4 md:grid-cols-4">
             <div class="border border-zinc-800 rounded-2xl p-4 bg-zinc-900/40">
                 <div class="text-xs text-zinc-500 mb-2">Libros activos</div>
                 <div class="text-3xl font-semibold">{{ $activeBooksCount }}</div>
                 <div class="text-xs text-zinc-500 mt-1">{{ $booksCount }} en total</div>
+            </div>
+            <div class="border border-zinc-800 rounded-2xl p-4 bg-zinc-900/40">
+                <div class="text-xs text-zinc-500 mb-2">Reseñas pendientes</div>
+                <div class="text-3xl font-semibold text-amber-400">{{ $pendingReviewsCount }}</div>
+                <div class="text-xs text-zinc-500 mt-1">
+                    <a href="{{ route('admin.reviews.index') }}" class="text-amber-400 hover:text-amber-300 underline">
+                        Gestionar reseñas
+                    </a>
+                </div>
             </div>
             <div class="border border-zinc-800 rounded-2xl p-4 bg-zinc-900/40">
                 <div class="text-xs text-zinc-500 mb-2">Sobre el autor</div>

@@ -10,7 +10,7 @@
                     Contacto
                 </p>
                 <h1 class="font-['DM_Serif_Display'] text-3xl sm:text-4xl tracking-tight">
-                    {{ $page?->title ?? 'Contacto' }}
+                    {{ __('common.contact.title') }}
                 </h1>
             </div>
             <div class="prose prose-invert prose-zinc max-w-none text-sm leading-relaxed">
@@ -35,7 +35,7 @@
 
             <div class="space-y-2">
                 <label class="block text-xs font-medium text-zinc-300">
-                    Nombre
+                    {{ __('common.contact.name') }}
                 </label>
                 <input
                     type="text"
@@ -50,7 +50,7 @@
 
             <div class="space-y-2">
                 <label class="block text-xs font-medium text-zinc-300">
-                    Correo electrónico
+                    {{ __('common.contact.email') }}
                 </label>
                 <input
                     type="email"
@@ -65,7 +65,7 @@
 
             <div class="space-y-2">
                 <label class="block text-xs font-medium text-zinc-300">
-                    Mensaje
+                    {{ __('common.contact.message') }}
                 </label>
                 <textarea
                     name="message"
@@ -79,7 +79,7 @@
 
             <div class="pt-2">
                 <x-button>
-                    Enviar mensaje
+                    {{ __('common.contact.send') }}
                 </x-button>
             </div>
 
@@ -90,26 +90,50 @@
             @endif
         </form>
 
-        @if($settings && ($settings->instagram_url || $settings->facebook_url || $settings->tiktok_url))
+        @if($settings && ($settings->instagram_url || $settings->facebook_url || $settings->tiktok_url || $settings->twitter_url || $settings->youtube_url || $settings->linkedin_url || $settings->pinterest_url))
             <div class="mt-12 pt-8 border-t border-zinc-800">
-                <h2 class="text-sm font-semibold text-zinc-300 mb-4">Sígueme en redes sociales</h2>
-                <div class="flex items-center gap-4">
-                    @if($settings->instagram_url)
-                        <a href="{{ $settings->instagram_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-zinc-400 hover:text-zinc-100 transition-colors">
-                            <x-icons.instagram class="w-5 h-5" />
+                <h2 class="text-sm font-semibold text-zinc-300 mb-4">{{ __('common.contact.follow_social') }}</h2>
+                <div class="flex flex-wrap items-center gap-4">
+                    @if($settings?->instagram_url)
+                        <a href="{{ $settings->instagram_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/40 transition-all" aria-label="{{ __('common.social.instagram') }}">
+                            <x-icons.instagram class="w-5 h-5" aria-hidden="true" />
                             <span class="text-sm">Instagram</span>
                         </a>
                     @endif
-                    @if($settings->facebook_url)
-                        <a href="{{ $settings->facebook_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-zinc-400 hover:text-zinc-100 transition-colors">
-                            <x-icons.facebook class="w-5 h-5" />
+                    @if($settings?->facebook_url)
+                        <a href="{{ $settings->facebook_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/40 transition-all" aria-label="{{ __('common.social.facebook') }}">
+                            <x-icons.facebook class="w-5 h-5" aria-hidden="true" />
                             <span class="text-sm">Facebook</span>
                         </a>
                     @endif
-                    @if($settings->tiktok_url)
-                        <a href="{{ $settings->tiktok_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-zinc-400 hover:text-zinc-100 transition-colors">
-                            <x-icons.tiktok class="w-5 h-5" />
+                    @if($settings?->tiktok_url)
+                        <a href="{{ $settings->tiktok_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/40 transition-all" aria-label="{{ __('common.social.tiktok') }}">
+                            <x-icons.tiktok class="w-5 h-5" aria-hidden="true" />
                             <span class="text-sm">TikTok</span>
+                        </a>
+                    @endif
+                    @if($settings?->twitter_url)
+                        <a href="{{ $settings->twitter_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/40 transition-all" aria-label="{{ __('common.social.twitter') }}">
+                            <x-icons.twitter class="w-5 h-5" aria-hidden="true" />
+                            <span class="text-sm">Twitter/X</span>
+                        </a>
+                    @endif
+                    @if($settings?->youtube_url)
+                        <a href="{{ $settings->youtube_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/40 transition-all" aria-label="{{ __('common.social.youtube') }}">
+                            <x-icons.youtube class="w-5 h-5" aria-hidden="true" />
+                            <span class="text-sm">YouTube</span>
+                        </a>
+                    @endif
+                    @if($settings?->linkedin_url)
+                        <a href="{{ $settings->linkedin_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/40 transition-all" aria-label="{{ __('common.social.linkedin') }}">
+                            <x-icons.linkedin class="w-5 h-5" aria-hidden="true" />
+                            <span class="text-sm">LinkedIn</span>
+                        </a>
+                    @endif
+                    @if($settings?->pinterest_url)
+                        <a href="{{ $settings->pinterest_url }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900/40 transition-all" aria-label="{{ __('common.social.pinterest') }}">
+                            <x-icons.pinterest class="w-5 h-5" aria-hidden="true" />
+                            <span class="text-sm">Pinterest</span>
                         </a>
                     @endif
                 </div>

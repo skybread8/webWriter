@@ -118,6 +118,70 @@
                             <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-medium text-zinc-300">
+                            URL de Twitter/X
+                        </label>
+                        <input
+                            type="url"
+                            name="twitter_url"
+                            value="{{ old('twitter_url', $settings->twitter_url) }}"
+                            placeholder="https://twitter.com/tu-usuario"
+                            class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+                        >
+                        @error('twitter_url')
+                            <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-medium text-zinc-300">
+                            URL de YouTube
+                        </label>
+                        <input
+                            type="url"
+                            name="youtube_url"
+                            value="{{ old('youtube_url', $settings->youtube_url) }}"
+                            placeholder="https://youtube.com/@tu-canal"
+                            class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+                        >
+                        @error('youtube_url')
+                            <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-medium text-zinc-300">
+                            URL de LinkedIn
+                        </label>
+                        <input
+                            type="url"
+                            name="linkedin_url"
+                            value="{{ old('linkedin_url', $settings->linkedin_url) }}"
+                            placeholder="https://linkedin.com/in/tu-perfil"
+                            class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+                        >
+                        @error('linkedin_url')
+                            <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-medium text-zinc-300">
+                            URL de Pinterest
+                        </label>
+                        <input
+                            type="url"
+                            name="pinterest_url"
+                            value="{{ old('pinterest_url', $settings->pinterest_url) }}"
+                            placeholder="https://pinterest.com/tu-usuario"
+                            class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+                        >
+                        @error('pinterest_url')
+                            <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
             </div>
 

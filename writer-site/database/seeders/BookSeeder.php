@@ -21,6 +21,7 @@ class BookSeeder extends Seeder
                 'cover_image' => null,
                 'stripe_price_id' => null,
                 'active' => true,
+                'order' => 1,
             ]
         );
 
@@ -33,6 +34,7 @@ class BookSeeder extends Seeder
                 'cover_image' => null,
                 'stripe_price_id' => null,
                 'active' => true,
+                'order' => 2,
             ]
         );
 
@@ -45,6 +47,7 @@ class BookSeeder extends Seeder
                 'cover_image' => null,
                 'stripe_price_id' => null,
                 'active' => true,
+                'order' => 3,
             ]
         );
 
@@ -57,6 +60,7 @@ class BookSeeder extends Seeder
                 'cover_image' => null,
                 'stripe_price_id' => null,
                 'active' => true,
+                'order' => 4,
             ]
         );
     }

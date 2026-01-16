@@ -28,37 +28,52 @@
                         {{ optional(\App\Models\SiteSetting::first())->site_name ?? 'Autor' }}
                     </div>
                     <p class="text-xs text-zinc-500 mt-1">
-                        Espacio privado para actualizar textos, libros e imágenes.
+                        {{ __('common.admin.private_space') }}
                     </p>
                 </div>
                 <nav class="flex-1 px-4 py-4 text-sm space-y-1">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.dashboard') ? 'bg-zinc-900' : '' }}">
-                        <span>Resumen general</span>
+                        <span>{{ __('common.admin.dashboard') }}</span>
                     </a>
                     <a href="{{ route('admin.home.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.home.*') ? 'bg-zinc-900' : '' }}">
-                        <span>Página de inicio</span>
+                        <span>{{ __('common.admin.home') }}</span>
                     </a>
                     <a href="{{ route('admin.books.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.books.*') ? 'bg-zinc-900' : '' }}">
-                        <span>Libros</span>
+                        <span>{{ __('common.admin.books') }}</span>
                     </a>
                     <a href="{{ route('admin.testimonials.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.testimonials.*') ? 'bg-zinc-900' : '' }}">
-                        <span>Testimonios</span>
+                        <span>{{ __('common.admin.testimonials') }}</span>
+                    </a>
+                    <a href="{{ route('admin.reviews.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.reviews.*') ? 'bg-zinc-900' : '' }}">
+                        <span>Reseñas</span>
+                        @php
+                            $pendingReviews = \App\Models\Review::where('approved', false)->count();
+                        @endphp
+                        @if($pendingReviews > 0)
+                            <span class="px-2 py-0.5 text-xs font-semibold text-zinc-950 bg-amber-400 rounded-full">{{ $pendingReviews }}</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('admin.blog.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.blog.*') ? 'bg-zinc-900' : '' }}">
+                        <span>{{ __('common.admin.blog') }}</span>
                     </a>
                     <a href="{{ route('admin.pages.about.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.pages.about.*') ? 'bg-zinc-900' : '' }}">
-                        <span>Sobre el autor</span>
+                        <span>{{ __('common.admin.about') }}</span>
                     </a>
                     <a href="{{ route('admin.pages.contact.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.pages.contact.*') ? 'bg-zinc-900' : '' }}">
-                        <span>Contacto</span>
+                        <span>{{ __('common.admin.contact') }}</span>
                     </a>
                     <a href="{{ route('admin.settings.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.settings.*') ? 'bg-zinc-900' : '' }}">
-                        <span>Datos generales</span>
+                        <span>{{ __('common.admin.settings') }}</span>
+                    </a>
+                    <a href="{{ route('admin.legal.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.legal.*') ? 'bg-zinc-900' : '' }}">
+                        <span>{{ __('common.admin.legal') }}</span>
                     </a>
                 </nav>
                 <div class="px-4 py-4 border-t border-zinc-800 text-xs text-zinc-500 space-y-2">
-                    <div>Conectado como <span class="text-zinc-200">{{ auth()->user()->name }}</span></div>
+                    <div>{{ __('common.admin.logged_in_as') }} <span class="text-zinc-200">{{ auth()->user()->name }}</span></div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button class="underline hover:text-zinc-200">Cerrar sesión</button>
+                        <button class="underline hover:text-zinc-200">{{ __('common.admin.logout') }}</button>
                     </form>
                 </div>
             </aside>

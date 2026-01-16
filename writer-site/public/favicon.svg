@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <style>
+      .book-cover { fill: #fbbf24; }
+      .book-pages { fill: #fef3c7; }
+      .book-spine { fill: #d97706; }
+    </style>
+  </defs>
+  <!-- Portada del libro -->
+  <rect x="20" y="15" width="50" height="70" rx="2" class="book-cover"/>
+  <!-- Páginas del libro -->
+  <rect x="25" y="18" width="45" height="64" rx="1" class="book-pages"/>
+  <!-- Lomo del libro -->
+  <rect x="20" y="15" width="5" height="70" rx="1" class="book-spine"/>
+  <!-- Líneas de texto (simulando páginas) -->
+  <line x1="30" y1="30" x2="65" y2="30" stroke="#d97706" stroke-width="1" opacity="0.3"/>
+  <line x1="30" y1="40" x2="65" y2="40" stroke="#d97706" stroke-width="1" opacity="0.3"/>
+  <line x1="30" y1="50" x2="60" y2="50" stroke="#d97706" stroke-width="1" opacity="0.3"/>
+  <line x1="30" y1="60" x2="65" y2="60" stroke="#d97706" stroke-width="1" opacity="0.3"/>
+  <line x1="30" y1="70" x2="55" y2="70" stroke="#d97706" stroke-width="1" opacity="0.3"/>
+</svg>

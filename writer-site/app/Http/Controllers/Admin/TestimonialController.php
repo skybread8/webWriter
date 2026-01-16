@@ -16,9 +16,24 @@ class TestimonialController extends Controller
      */
     public function index(): View
     {
-        $testimonials = Testimonial::orderBy('created_at', 'desc')->get();
+        $testimonials = Testimonial::orderBy('order')->orderBy('created_at', 'desc')->get();
 
         return view('admin.testimonials.index', compact('testimonials'));
+    }
+    
+    public function updateOrder(Request $request)
+    {
+        $request->validate([
+            'testimonials' => 'required|array',
+            'testimonials.*.id' => 'required|exists:testimonials,id',
+            'testimonials.*.order' => 'required|integer',
+        ]);
+
+        foreach ($request->testimonials as $testimonialData) {
+            Testimonial::where('id', $testimonialData['id'])->update(['order' => $testimonialData['order']]);
+        }
+
+        return response()->json(['success' => true]);
     }
 
     /**
@@ -40,6 +55,7 @@ class TestimonialController extends Controller
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'photo' => ['nullable', 'image', 'max:2048'],
             'active' => ['boolean'],
+            'order' => ['nullable', 'integer', 'min:0'],
         ], [
             'name.required' => 'Escribe el nombre de la persona que da el testimonio.',
             'review.required' => 'Escribe el texto del testimonio.',
@@ -52,6 +68,7 @@ class TestimonialController extends Controller
         }
 
         $data['active'] = $request->has('active');
+        $data['order'] = $request->input('order', 0);
 
         Testimonial::create($data);
 
@@ -79,6 +96,7 @@ class TestimonialController extends Controller
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'photo' => ['nullable', 'image', 'max:2048'],
             'active' => ['boolean'],
+            'order' => ['nullable', 'integer', 'min:0'],
         ], [
             'name.required' => 'Escribe el nombre de la persona que da el testimonio.',
             'review.required' => 'Escribe el texto del testimonio.',

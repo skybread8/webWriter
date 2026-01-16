@@ -18,10 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'locale' => \App\Http\Middleware\SetLocale::class,
         ]);
         
-        // Aplicar middleware de idioma a todas las rutas web excepto admin
-        $middleware->web(append: [
-            \App\Http\Middleware\SetLocale::class,
-        ]);
+        // NO aplicar middleware de idioma globalmente - solo en rutas específicas
+        // El middleware se aplica manualmente en las rutas que lo necesitan
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

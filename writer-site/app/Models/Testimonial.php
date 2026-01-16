@@ -12,6 +12,7 @@ class Testimonial extends Model
         'review',
         'rating',
         'active',
+        'order',
     ];
 
     protected $casts = [

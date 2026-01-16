@@ -12,19 +12,31 @@ use Illuminate\View\View;
 class ProfileController extends Controller
 {
     /**
+     * Display the user's account dashboard.
+     */
+    public function index(string $locale): View
+    {
+        $user = auth()->user();
+        $ordersCount = $user->orders()->count();
+        $recentOrders = $user->orders()->latest()->take(3)->get();
+
+        return view('account.dashboard', compact('user', 'ordersCount', 'recentOrders'));
+    }
+
+    /**
      * Display the user's profile form.
      */
-    public function edit(Request $request): View
+    public function edit(string $locale): View
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
+        return view('account.profile', [
+            'user' => auth()->user(),
         ]);
     }
 
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request, string $locale): RedirectResponse
     {
         $request->user()->fill($request->validated());
 
@@ -34,13 +46,14 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return redirect()->to(localized_route('account.profile'))
+            ->with('status', 'Tu perfil se ha actualizado correctamente.');
     }
 
     /**
      * Delete the user's account.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request, string $locale): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [
             'password' => ['required', 'current_password'],
@@ -55,6 +68,7 @@ class ProfileController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('/');
+        return redirect()->to(localized_route('home'))
+            ->with('status', 'Tu cuenta ha sido eliminada correctamente.');
     }
 }

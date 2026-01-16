@@ -19,13 +19,28 @@
 
         @if ($books->isEmpty())
             <p class="text-sm text-zinc-500">
-                Aún no hay libros. Pulsa “Añadir libro” para crear el primero.
+                Aún no hay libros. Pulsa "Añadir libro" para crear el primero.
             </p>
         @else
-            <div class="space-y-3">
+            <div class="mb-4 p-3 bg-zinc-900/40 border border-zinc-800 rounded-lg">
+                <p class="text-xs text-zinc-400">
+                    💡 <strong>Ordenar libros:</strong> Cambia el número de orden para controlar el orden de aparición. Los números más bajos aparecen primero.
+                </p>
+            </div>
+            <div class="space-y-3" id="books-list">
                 @foreach ($books as $book)
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-zinc-800 rounded-2xl px-4 py-3 bg-zinc-900/40">
-                        <div class="flex items-start gap-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-zinc-800 rounded-2xl px-4 py-3 bg-zinc-900/40" data-id="{{ $book->id }}">
+                        <div class="flex items-start gap-3 flex-1">
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="text-xs text-zinc-500 w-8">#{{ $book->order }}</span>
+                                <input 
+                                    type="number" 
+                                    value="{{ $book->order }}" 
+                                    min="0"
+                                    class="w-16 px-2 py-1 text-xs bg-zinc-950 border border-zinc-800 rounded text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+                                    onchange="updateBookOrder({{ $book->id }}, this.value)"
+                                >
+                            </div>
                             @if($book->cover_image)
                                 <img src="{{ asset('storage/'.$book->cover_image) }}" alt="Portada de {{ $book->title }}" class="w-16 h-20 rounded-md object-cover border border-zinc-800">
                             @else
@@ -33,7 +48,7 @@
                                     Sin imagen
                                 </div>
                             @endif
-                            <div>
+                            <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <h2 class="text-sm font-medium text-zinc-50">{{ $book->title }}</h2>
                                     @if($book->active)
@@ -54,7 +69,7 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 justify-end">
+                        <div class="flex items-center gap-2 justify-end shrink-0">
                             <a href="{{ route('admin.books.edit', $book) }}" class="text-xs text-zinc-200 underline underline-offset-4">
                                 Editar
                             </a>
@@ -69,6 +84,22 @@
                     </div>
                 @endforeach
             </div>
+            <script>
+                function updateBookOrder(bookId, order) {
+                    fetch('{{ route("admin.books.update-order") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            books: [{ id: bookId, order: parseInt(order) }]
+                        })
+                    }).then(() => {
+                        location.reload();
+                    });
+                }
+            </script>
         @endif
     </div>
 </x-admin.layout>

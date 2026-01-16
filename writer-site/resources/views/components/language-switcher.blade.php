@@ -37,26 +37,49 @@
         aria-label="Selector de idioma"
     >
         @foreach($locales as $locale => $info)
-            @php
-                $path = $currentPath;
-                // Remover prefijo de idioma actual si existe
-                $path = preg_replace('#^/(es|ca|en)/#', '/', $path);
-                $path = ltrim($path, '/');
-                // Añadir nuevo prefijo
-                $url = $locale === 'es' ? url($path ?: '/') : url($locale . '/' . $path);
-            @endphp
-            <a 
-                href="{{ $url }}"
-                class="flex items-center gap-2 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors {{ $currentLocale === $locale ? 'bg-zinc-800' : '' }}"
-                role="menuitem"
-                hreflang="{{ $locale }}"
-            >
-                <span>{{ $info['flag'] }}</span>
-                <span>{{ $info['name'] }}</span>
-                @if($currentLocale === $locale)
-                    <span class="ml-auto text-amber-400">✓</span>
-                @endif
-            </a>
+            @if(!request()->routeIs('admin.*') && strpos($currentPath, 'admin') !== 0)
+                @php
+                    // Obtener la ruta actual y sus parámetros
+                    $currentRoute = request()->route();
+                    $routeName = $currentRoute ? $currentRoute->getName() : null;
+                    $routeParams = $currentRoute ? $currentRoute->parameters() : [];
+                    
+                    // Remover 'locale' de los parámetros
+                    unset($routeParams['locale']);
+                    
+                    // Si tenemos un nombre de ruta, usar localized_route con el nuevo locale
+                    if ($routeName && function_exists('localized_route')) {
+                        $originalLocale = app()->getLocale();
+                        app()->setLocale($locale);
+                        
+                        try {
+                            $url = localized_route($routeName, $routeParams, true);
+                        } catch (\Exception $e) {
+                            // Fallback: reemplazar el locale en la URL actual
+                            $path = str_replace(['/es/', '/ca/', '/en/'], '/' . $locale . '/', '/' . $currentPath);
+                            $url = url($path);
+                        }
+                        
+                        app()->setLocale($originalLocale);
+                    } else {
+                        // Fallback: reemplazar el locale en la URL actual
+                        $path = str_replace(['/es/', '/ca/', '/en/'], '/' . $locale . '/', '/' . $currentPath);
+                        $url = url($path);
+                    }
+                @endphp
+                <a 
+                    href="{{ $url }}"
+                    class="flex items-center gap-2 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors {{ $currentLocale === $locale ? 'bg-zinc-800' : '' }}"
+                    role="menuitem"
+                    hreflang="{{ $locale }}"
+                >
+                    <span>{{ $info['flag'] }}</span>
+                    <span>{{ $info['name'] }}</span>
+                    @if($currentLocale === $locale)
+                        <span class="ml-auto text-amber-400">✓</span>
+                    @endif
+                </a>
+            @endif
         @endforeach
     </div>
 </div>

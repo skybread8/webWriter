@@ -9,12 +9,16 @@ use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
+if (!function_exists('localized_route')) {
+    require_once app_path('Helpers/UrlHelper.php');
+}
+
 class PageController extends Controller
 {
     public function home()
     {
         $settings = SiteSetting::first();
-        $books = Book::where('active', true)->orderBy('created_at', 'desc')->get();
+        $books = Book::where('active', true)->orderBy('order')->orderBy('created_at', 'desc')->get();
 
         return view('site.home', compact('settings', 'books'));
     }
@@ -60,7 +64,7 @@ class PageController extends Controller
         }
 
         return redirect()
-            ->route('contact')
+            ->to(localized_route('contact'))
             ->with('status', 'Mensaje enviado. Te responderemos en cuanto sea posible.');
     }
 
@@ -73,9 +77,23 @@ class PageController extends Controller
 
     public function blog()
     {
-        $page = Page::where('slug', 'blog')->first();
+        $posts = \App\Models\BlogPost::where('published', true)
+            ->where('published_at', '<=', now())
+            ->orderBy('order')
+            ->orderBy('published_at', 'desc')
+            ->paginate(10);
 
-        return view('site.page', compact('page'));
+        return view('site.blog.index', compact('posts'));
+    }
+    
+    public function blogPost($slug)
+    {
+        $post = \App\Models\BlogPost::where('slug', $slug)
+            ->where('published', true)
+            ->where('published_at', '<=', now())
+            ->firstOrFail();
+
+        return view('site.blog.show', compact('post'));
     }
 
     public function photosReaders()

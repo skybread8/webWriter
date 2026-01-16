@@ -13,9 +13,24 @@ class BookController extends Controller
      */
     public function index()
     {
-        $books = Book::orderBy('created_at', 'desc')->get();
+        $books = Book::orderBy('order')->orderBy('created_at', 'desc')->get();
 
         return view('admin.books.index', compact('books'));
+    }
+    
+    public function updateOrder(Request $request)
+    {
+        $request->validate([
+            'books' => 'required|array',
+            'books.*.id' => 'required|exists:books,id',
+            'books.*.order' => 'required|integer',
+        ]);
+
+        foreach ($request->books as $bookData) {
+            Book::where('id', $bookData['id'])->update(['order' => $bookData['order']]);
+        }
+
+        return response()->json(['success' => true]);
     }
 
     /**
@@ -39,6 +54,7 @@ class BookController extends Controller
             'cover_image' => ['nullable', 'image', 'max:4096'],
             'stripe_price_id' => ['nullable', 'string', 'max:255'],
             'active' => ['nullable', 'boolean'],
+            'order' => ['nullable', 'integer', 'min:0'],
         ], [
             'title.required' => 'Escribe un título para el libro.',
             'description.required' => 'Añade una descripción breve; aparecerá en la lista de libros.',
@@ -50,6 +66,7 @@ class BookController extends Controller
         }
 
         $data['active'] = $request->boolean('active', true);
+        $data['order'] = $request->input('order', 0);
 
         Book::create($data);
 
@@ -91,6 +108,7 @@ class BookController extends Controller
             'cover_image' => ['nullable', 'image', 'max:4096'],
             'stripe_price_id' => ['nullable', 'string', 'max:255'],
             'active' => ['nullable', 'boolean'],
+            'order' => ['nullable', 'integer', 'min:0'],
         ]);
 
         if ($request->hasFile('cover_image')) {

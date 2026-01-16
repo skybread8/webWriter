@@ -89,17 +89,38 @@
         @endif
     </div>
 
-    <div class="flex items-center gap-2">
-        <input
-            type="checkbox"
-            name="active"
-            id="active"
-            value="1"
-            {{ old('active', $testimonial?->active ?? true) ? 'checked' : '' }}
-            class="rounded border-zinc-700 bg-zinc-900 text-zinc-500 focus:ring-zinc-500"
-        >
-        <label for="active" class="text-xs text-zinc-300">
-            Visible en el sitio web
-        </label>
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="flex items-center gap-2">
+            <input
+                type="checkbox"
+                name="active"
+                id="active"
+                value="1"
+                {{ old('active', $testimonial?->active ?? true) ? 'checked' : '' }}
+                class="rounded border-zinc-700 bg-zinc-900 text-zinc-500 focus:ring-zinc-500"
+            >
+            <label for="active" class="text-xs text-zinc-300">
+                Visible en el sitio web
+            </label>
+        </div>
+
+        <div class="space-y-2">
+            <label class="block text-xs font-medium text-zinc-300">
+                Orden de aparición
+            </label>
+            <p class="text-xs text-zinc-500 mb-1">
+                Número que determina el orden. Los números más bajos aparecen primero. Por defecto: 0.
+            </p>
+            <input
+                type="number"
+                name="order"
+                value="{{ old('order', $testimonial?->order ?? 0) }}"
+                min="0"
+                class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+            >
+            @error('order')
+                <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+            @enderror
+        </div>
     </div>
 </div>

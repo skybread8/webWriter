@@ -21,7 +21,29 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'address',
+        'city',
+        'postal_code',
+        'province',
+        'country',
     ];
+
+    /**
+     * Relación con los pedidos
+     */
+    public function orders()
+    {
+        return $this->hasMany(\App\Models\Order::class);
+    }
+
+    /**
+     * Relación con las reseñas
+     */
+    public function reviews()
+    {
+        return $this->hasMany(\App\Models\Review::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

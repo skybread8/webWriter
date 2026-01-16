@@ -19,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Cargar helpers personalizados
+        require_once app_path('Helpers/UrlHelper.php');
     }
 }
