@@ -34,18 +34,18 @@ RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/Allo
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Crear script de inicio directamente en el contenedor
+# Crear script de inicio
 RUN cat > /usr/local/bin/start.sh << 'EOF'
 #!/bin/bash
 set -e
 
-# Cambiar al directorio de trabajo explícitamente
+# Cambiar al directorio de trabajo
 cd /var/www/html || exit 1
 
 # Verificar que artisan existe
 if [ ! -f artisan ]; then
     echo "ERROR: artisan file not found in /var/www/html"
-    ls -la /var/www/html
+    ls -la /var/www/html | head -20
     exit 1
 fi
 
@@ -61,21 +61,21 @@ mkdir -p bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 
+# Ejecutar scripts de Composer que requieren Laravel configurado
+php artisan package:discover --ansi || echo "Warning: Package discovery failed"
+
 # Ejecutar migraciones solo si la variable de entorno está configurada
 if [ "$RUN_MIGRATIONS" = "true" ]; then
-    cd /var/www/html
     php artisan migrate --force || echo "Warning: Migrations failed, continuing..."
 fi
 
-# Limpiar cachés (con manejo de errores)
-cd /var/www/html
+# Limpiar cachés
 php artisan config:clear || true
 php artisan cache:clear || true
 php artisan view:clear || true
 php artisan route:clear || true
 
 # Optimizar para producción
-cd /var/www/html
 php artisan config:cache || echo "Warning: Config cache failed"
 php artisan route:cache || echo "Warning: Route cache failed"
 php artisan view:cache || echo "Warning: View cache failed"
@@ -85,7 +85,7 @@ exec apache2-foreground
 EOF
 RUN chmod +x /usr/local/bin/start.sh
 
-# Crear un script wrapper para comandos de artisan (por si Render.com intenta ejecutarlos)
+# Crear wrapper para artisan (por si Render.com intenta ejecutarlo)
 RUN cat > /usr/local/bin/artisan << 'EOF'
 #!/bin/bash
 cd /var/www/html
@@ -93,48 +93,46 @@ exec php artisan "$@"
 EOF
 RUN chmod +x /usr/local/bin/artisan
 
-# Copiar primero solo composer.json (y composer.lock si existe)
-COPY composer.json* ./
+# Copiar primero solo composer.json y composer.lock
+COPY composer.json composer.lock* ./
 
-# Instalar dependencias de PHP (sin dev para producción)
-RUN if [ -f composer.json ]; then \
-        composer install --no-dev --optimize-autoloader --no-interaction --no-scripts; \
-    fi
+# Instalar dependencias de PHP (sin scripts para evitar errores)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts || \
+    (echo "Warning: composer install failed, trying with scripts..." && \
+     composer install --no-dev --optimize-autoloader --no-interaction || exit 1)
 
-# Copiar archivos de Node (package.json y package-lock.json si existen)
-COPY package*.json ./
+# Copiar archivos de Node
+COPY package.json package-lock.json* ./
 
 # Instalar dependencias de Node
 RUN if [ -f package.json ]; then \
-        npm ci --only=production=false; \
+        npm ci --only=production=false || npm install; \
     fi
 
 # Copiar el resto de archivos del proyecto
 COPY . /var/www/html/
 
-# Verificar estructura de directorios y mover contenido si es necesario
-# Si el contexto de Docker está en el directorio padre, los archivos estarán en writer-site/
+# Verificar y mover contenido si está en subdirectorio (contexto Docker desde directorio padre)
 RUN if [ -d /var/www/html/writer-site ] && [ ! -f /var/www/html/artisan ]; then \
-        echo "Content is in writer-site subdirectory, moving..."; \
-        shopt -s dotglob nullglob; \
-        mv /var/www/html/writer-site/* /var/www/html/ 2>/dev/null || true; \
-        mv /var/www/html/writer-site/.[!.]* /var/www/html/ 2>/dev/null || true; \
-        rmdir /var/www/html/writer-site 2>/dev/null || true; \
+        echo "Moving content from writer-site subdirectory..."; \
+        cd /var/www/html/writer-site; \
+        find . -mindepth 1 -maxdepth 1 ! -name '.' -exec mv -t /var/www/html/ {} + 2>/dev/null || \
+        (shopt -s dotglob && mv * /var/www/html/ 2>/dev/null || true); \
+        cd /var/www/html; \
+        rmdir writer-site 2>/dev/null || true; \
         echo "Content moved successfully"; \
     fi
 
-# Asegurar que artisan existe y tiene permisos correctos
-RUN if [ -f /var/www/html/artisan ]; then \
-        chmod +x /var/www/html/artisan; \
-        echo "artisan file found and made executable"; \
-    else \
-        echo "ERROR: artisan file not found after COPY"; \
+# Verificar que artisan existe después del movimiento
+RUN if [ ! -f /var/www/html/artisan ]; then \
+        echo "ERROR: artisan file not found"; \
         echo "Contents of /var/www/html:"; \
         ls -la /var/www/html/ | head -20; \
-        echo "Looking for artisan in subdirectories..."; \
-        find /var/www/html -name "artisan" -type f 2>/dev/null | head -5; \
+        find /var/www/html -name "artisan" -type f 2>/dev/null | head -5 || echo "No artisan found"; \
         exit 1; \
-    fi
+    fi && \
+    chmod +x /var/www/html/artisan && \
+    echo "artisan file found and made executable"
 
 # Crear directorios necesarios y establecer permisos
 RUN mkdir -p /var/www/html/storage/framework/cache/data \
@@ -147,22 +145,21 @@ RUN mkdir -p /var/www/html/storage/framework/cache/data \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# Ejecutar scripts de post-instalación de Composer (después de copiar todos los archivos)
-RUN if [ -f composer.json ]; then \
-        composer dump-autoload --optimize; \
-    fi
+# Regenerar autoloader optimizado (sin scripts - se ejecutarán en start.sh)
+RUN composer dump-autoload --optimize --no-scripts || true
 
 # Compilar assets para producción
 RUN if [ -f package.json ]; then \
-        npm run build; \
+        npm run build || echo "Warning: Build failed"; \
     fi
 
-# Limpiar node_modules y archivos innecesarios después de compilar para reducir tamaño
+# Limpiar archivos innecesarios para reducir tamaño de imagen
 RUN rm -rf node_modules \
     && rm -rf /root/.composer/cache \
     && rm -rf /root/.npm \
-    && apt-get purge -y git curl \
-    && apt-get autoremove -y
+    && apt-get purge -y git curl gnupg \
+    && apt-get autoremove -y \
+    && apt-get clean
 
 # Configurar Apache para escuchar en el puerto 10000 (puerto estándar de Render.com)
 RUN echo "Listen 10000" >> /etc/apache2/ports.conf
