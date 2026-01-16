@@ -45,7 +45,11 @@ if [ -f .env ]; then
     
     # Actualizar otras variables importantes
     [ -n "$APP_KEY" ] && (grep -q "^APP_KEY=" .env && sed -i "s|^APP_KEY=.*|APP_KEY=${APP_KEY}|" .env || echo "APP_KEY=${APP_KEY}" >> .env)
-    [ -n "$APP_URL" ] && (grep -q "^APP_URL=" .env && sed -i "s|^APP_URL=.*|APP_URL=${APP_URL}|" .env || echo "APP_URL=${APP_URL}" >> .env)
+    if [ -n "$APP_URL" ]; then
+        # Asegurar que APP_URL use HTTPS si no lo especifica
+        APP_URL_CLEAN=$(echo "$APP_URL" | sed 's|^http://|https://|')
+        (grep -q "^APP_URL=" .env && sed -i "s|^APP_URL=.*|APP_URL=${APP_URL_CLEAN}|" .env || echo "APP_URL=${APP_URL_CLEAN}" >> .env)
+    fi
     [ -n "$SESSION_DRIVER" ] && (grep -q "^SESSION_DRIVER=" .env && sed -i "s|^SESSION_DRIVER=.*|SESSION_DRIVER=${SESSION_DRIVER}|" .env || echo "SESSION_DRIVER=${SESSION_DRIVER}" >> .env)
     [ -n "$CACHE_DRIVER" ] && (grep -q "^CACHE_DRIVER=" .env && sed -i "s|^CACHE_DRIVER=.*|CACHE_DRIVER=${CACHE_DRIVER}|" .env || echo "CACHE_DRIVER=${CACHE_DRIVER}" >> .env)
     
@@ -126,7 +130,7 @@ else
         echo "public/build/ directory does not exist"
         echo "Attempting to rebuild assets..."
         if [ -f package.json ]; then
-            npm install --only=production=false 2>&1 | head -20
+            npm install 2>&1 | head -20
             npm run build 2>&1 || echo "Build failed"
         fi
     fi
@@ -138,16 +142,28 @@ echo "=== Database Configuration ==="
 grep "^DB_" .env | sed 's/DB_PASSWORD=.*/DB_PASSWORD=***HIDDEN***/' | sed 's/DB_URL=.*:\/\/[^:]*:[^@]*@/DB_URL=***HIDDEN***@/' || echo "No DB configuration found in .env"
 echo "=============================="
 
-# Limpiar cachés ANTES de optimizar (importante para que lea el .env actualizado)
+# Limpiar TODOS los cachés de forma agresiva (importante para que detecte assets nuevos)
+echo "=== Clearing all Laravel caches ==="
+php artisan optimize:clear || true
 php artisan config:clear || true
 php artisan cache:clear || true
 php artisan view:clear || true
 php artisan route:clear || true
+php artisan event:clear || true
+# Limpiar también cachés de archivos compilados
+rm -rf bootstrap/cache/*.php 2>/dev/null || true
+rm -rf storage/framework/views/*.php 2>/dev/null || true
+echo "All caches cleared"
+echo "=============================="
 
-# Optimizar para producción
+# Optimizar para producción (después de limpiar)
+echo "=== Optimizing for production ==="
 php artisan config:cache || echo "Warning: Config cache failed"
 php artisan route:cache || echo "Warning: Route cache failed"
-php artisan view:cache || echo "Warning: View cache failed"
+# NO cachear vistas en producción - pueden tener referencias a assets que cambian
+# php artisan view:cache || echo "Warning: View cache failed"
+echo "Optimization complete"
+echo "=============================="
 
 # Verificar permisos finales (incluyendo public/build para assets)
 chown -R www-data:www-data storage bootstrap/cache database public/build 2>/dev/null || true

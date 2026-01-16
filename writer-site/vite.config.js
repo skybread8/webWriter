@@ -8,4 +8,11 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    server: {
+        https: process.env.APP_ENV === 'production',
+    },
+    build: {
+        // Asegurar que los assets se generen con URLs absolutas si es necesario
+        assetsDir: 'assets',
+    },
 });

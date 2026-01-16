@@ -73,7 +73,7 @@ APP_NAME="${APP_NAME:-Laravel}"
 APP_ENV="${APP_ENV:-production}"
 APP_KEY="${APP_KEY:-}"
 APP_DEBUG="${APP_DEBUG:-false}"
-APP_URL="${APP_URL:-http://localhost}"
+APP_URL="${APP_URL:-https://localhost}"
 
 LOG_CHANNEL=stack
 LOG_LEVEL="${LOG_LEVEL:-error}"
@@ -192,11 +192,19 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
     php artisan migrate --force || echo "Warning: Migrations failed, continuing..."
 fi
 
-# Limpiar cachés ANTES de optimizar (importante para que lea el .env actualizado)
+# Limpiar TODOS los cachés ANTES de optimizar (importante para que lea el .env actualizado)
+echo "=== Clearing all Laravel caches ==="
+php artisan optimize:clear || true
 php artisan config:clear || true
 php artisan cache:clear || true
 php artisan view:clear || true
 php artisan route:clear || true
+php artisan event:clear || true
+# Limpiar también cachés de archivos compilados
+rm -rf bootstrap/cache/*.php 2>/dev/null || true
+rm -rf storage/framework/views/*.php 2>/dev/null || true
+echo "All caches cleared"
+echo "=============================="
 
 # Verificar que los assets compilados existan
 echo "=== Checking Build Assets ==="
@@ -214,9 +222,13 @@ grep "^DB_" .env | sed 's/DB_PASSWORD=.*/DB_PASSWORD=***HIDDEN***/' | sed 's/DB_
 echo "=============================="
 
 # Optimizar para producción (con manejo de errores mejorado)
+echo "=== Optimizing for production ==="
 php artisan config:cache || echo "Warning: Config cache failed"
 php artisan route:cache || echo "Warning: Route cache failed"
-php artisan view:cache || echo "Warning: View cache failed - this is usually OK if views are not pre-compiled"
+# NO cachear vistas - pueden tener referencias a assets que necesitan actualizarse
+# php artisan view:cache || echo "Warning: View cache failed"
+echo "Optimization complete"
+echo "=============================="
 
 # Verificar permisos finales
 chown -R www-data:www-data storage bootstrap/cache database 2>/dev/null || true
@@ -268,9 +280,11 @@ RUN if [ -f composer.json ]; then \
         exit 1; \
     fi
 
-# Instalar dependencias de Node
+# Instalar dependencias de Node (incluyendo devDependencies para poder compilar assets)
 RUN if [ -f package.json ] && [ -s package.json ] && [ "$(cat package.json)" != "{}" ]; then \
-        npm ci --only=production=false || npm install; \
+        echo "Installing Node dependencies (including devDependencies for build)..."; \
+        npm ci || npm install; \
+        echo "Node dependencies installed"; \
     else \
         echo "Skipping Node installation (no valid package.json found)"; \
     fi
