@@ -67,6 +67,15 @@
                             <a href="{{ route('admin.statistics.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.statistics.*') ? 'bg-zinc-900' : '' }}" @click="mobileMenuOpen = false">
                                 <span>{{ __('common.admin.statistics') }}</span>
                             </a>
+                            <a href="{{ route('admin.orders.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.orders.*') ? 'bg-zinc-900' : '' }}" @click="mobileMenuOpen = false">
+                                <span>{{ __('common.admin.orders') }}</span>
+                                @php
+                                    $pendingOrders = \App\Models\Order::where('status', 'paid')->where('shipped', false)->count();
+                                @endphp
+                                @if($pendingOrders > 0)
+                                    <span class="px-2 py-0.5 text-xs font-semibold text-zinc-950 bg-amber-400 rounded-full">{{ $pendingOrders }}</span>
+                                @endif
+                            </a>
                             <a href="{{ route('admin.home.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.home.*') ? 'bg-zinc-900' : '' }}" @click="mobileMenuOpen = false">
                                 <span>{{ __('common.admin.home') }}</span>
                             </a>
@@ -132,6 +141,15 @@
                     </a>
                     <a href="{{ route('admin.statistics.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.statistics.*') ? 'bg-zinc-900' : '' }}">
                         <span>{{ __('common.admin.statistics') }}</span>
+                    </a>
+                    <a href="{{ route('admin.orders.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.orders.*') ? 'bg-zinc-900' : '' }}">
+                        <span>{{ __('common.admin.orders') }}</span>
+                        @php
+                            $pendingOrders = \App\Models\Order::where('status', 'paid')->where('shipped', false)->count();
+                        @endphp
+                        @if($pendingOrders > 0)
+                            <span class="px-2 py-0.5 text-xs font-semibold text-zinc-950 bg-amber-400 rounded-full">{{ $pendingOrders }}</span>
+                        @endif
                     </a>
                     <a href="{{ route('admin.home.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.home.*') ? 'bg-zinc-900' : '' }}">
                         <span>{{ __('common.admin.home') }}</span>

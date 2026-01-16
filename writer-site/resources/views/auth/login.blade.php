@@ -26,8 +26,19 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('login') }}" class="space-y-4">
+            @if ($errors->has('_token') || (session()->has('errors') && session('errors')->has('_token')))
+                <div class="rounded-xl border border-red-600/40 bg-red-900/40 text-red-100 px-4 py-3 text-sm">
+                    <p class="font-semibold mb-1">Error de sesión</p>
+                    <p>El formulario ha expirado. Por favor, recarga la página e inténtalo de nuevo.</p>
+                    <a href="{{ route('login') }}" class="underline mt-2 inline-block">Recargar página</a>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('login') }}" class="space-y-4" id="login-form">
                 @csrf
+                
+                <!-- Token CSRF oculto adicional para mantener sincronizado -->
+                <input type="hidden" name="_token" value="{{ csrf_token() }}" id="csrf-token">
 
                 <!-- Email Address -->
                 <div>
@@ -92,6 +103,70 @@
                     </x-button>
                 </div>
             </form>
+
+            <script>
+                // Refrescar token CSRF cada 5 minutos si el formulario está visible
+                (function() {
+                    const form = document.getElementById('login-form');
+                    if (!form) return;
+                    
+                    const tokenInput = document.getElementById('csrf-token');
+                    const metaTag = document.querySelector('meta[name="csrf-token"]');
+                    
+                    // Función para actualizar el token
+                    function refreshCsrfToken() {
+                        fetch('{{ route("login") }}', {
+                            method: 'GET',
+                            credentials: 'same-origin',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.text())
+                        .then(html => {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const newToken = doc.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                            
+                            if (newToken) {
+                                if (tokenInput) tokenInput.value = newToken;
+                                if (metaTag) metaTag.setAttribute('content', newToken);
+                                
+                                // Actualizar también el input @csrf si existe
+                                const csrfInput = form.querySelector('input[name="_token"]');
+                                if (csrfInput) csrfInput.value = newToken;
+                            }
+                        })
+                        .catch(() => {
+                            // Si falla, recargar la página para obtener un token fresco
+                            console.warn('No se pudo refrescar el token CSRF. Recarga la página si tienes problemas.');
+                        });
+                    }
+                    
+                    // Refrescar token cada 5 minutos
+                    setInterval(refreshCsrfToken, 5 * 60 * 1000);
+                    
+                    // También refrescar antes de enviar el formulario si ha pasado mucho tiempo
+                    form.addEventListener('submit', function(e) {
+                        const lastRefresh = parseInt(sessionStorage.getItem('csrf_last_refresh') || '0');
+                        const now = Date.now();
+                        
+                        // Si han pasado más de 10 minutos desde la última carga, refrescar token
+                        if (now - lastRefresh > 10 * 60 * 1000) {
+                            e.preventDefault();
+                            refreshCsrfToken();
+                            
+                            // Esperar un momento y reenviar
+                            setTimeout(() => {
+                                form.submit();
+                            }, 500);
+                        }
+                    });
+                    
+                    // Guardar timestamp de carga de la página
+                    sessionStorage.setItem('csrf_last_refresh', Date.now().toString());
+                })();
+            </script>
 
             <div class="pt-4 border-t border-zinc-800">
                 <p class="text-sm text-zinc-400 text-center">

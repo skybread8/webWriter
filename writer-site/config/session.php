@@ -203,6 +203,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | CSRF Token Refresh Interval
+    |--------------------------------------------------------------------------
+    |
+    | This option determines how often the CSRF token should be refreshed
+    | in minutes. Lower values provide better security but may cause more
+    | frequent token expiration issues.
+    |
+    */
+
+    'csrf_token_refresh' => env('CSRF_TOKEN_REFRESH', 5),
+
+    /*
+    |--------------------------------------------------------------------------
     | Partitioned Cookies
     |--------------------------------------------------------------------------
     |

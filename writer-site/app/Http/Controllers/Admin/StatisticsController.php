@@ -79,8 +79,15 @@ class StatisticsController extends Controller
         $ordersToday = Order::whereDate('created_at', today())->count();
         $ordersThisWeek = Order::where('created_at', '>=', now()->startOfWeek())->count();
         $ordersThisMonth = Order::where('created_at', '>=', now()->startOfMonth())->count();
-        $totalRevenue = Order::where('status', 'paid')->sum('total');
-        $revenueThisMonth = Order::where('status', 'paid')
+        
+        // Ingresos totales - pedidos pagados (status 'paid') o enviados/entregados ('shipped', 'delivered')
+        // NO incluir 'pending' ni 'cancelled'
+        // Excluir pedidos devueltos
+        $totalRevenue = Order::whereIn('status', ['paid', 'shipped', 'delivered'])
+            ->where('refunded', false)
+            ->sum('total');
+        $revenueThisMonth = Order::whereIn('status', ['paid', 'shipped', 'delivered'])
+            ->where('refunded', false)
             ->where('created_at', '>=', now()->startOfMonth())
             ->sum('total');
         
@@ -179,10 +186,12 @@ class StatisticsController extends Controller
     {
         app()->setLocale('es');
         
+        // NO cambiar el status - mantener 'paid' para que siga contando en ingresos
+        // Solo actualizar el flag shipped y la fecha de envío
         $order->update([
             'shipped' => true,
             'shipped_at' => now(),
-            'status' => 'shipped',
+            // Mantener el status como 'paid' - el cálculo de ingresos incluirá ambos 'paid' y 'shipped'
         ]);
 
         return redirect()
@@ -197,10 +206,11 @@ class StatisticsController extends Controller
     {
         app()->setLocale('es');
         
+        // Mantener el status como estaba (probablemente 'paid')
         $order->update([
             'shipped' => false,
             'shipped_at' => null,
-            'status' => 'paid',
+            // No cambiar el status, mantenerlo como estaba
         ]);
 
         return redirect()

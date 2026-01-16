@@ -122,10 +122,16 @@ Route::middleware(['auth', 'admin', 'locale'])->prefix('admin')->name('admin.')-
     Route::resource('reader-photos', \App\Http\Controllers\Admin\ReaderPhotoController::class);
     Route::post('/reader-photos/update-order', [\App\Http\Controllers\Admin\ReaderPhotoController::class, 'updateOrder'])->name('reader-photos.update-order');
 
+    // Pedidos
+    Route::get('/orders', [\App\Http\Controllers\Admin\OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [\App\Http\Controllers\Admin\OrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/mark-shipped', [\App\Http\Controllers\Admin\OrderController::class, 'markAsShipped'])->name('orders.mark-shipped');
+    Route::post('/orders/{order}/mark-not-shipped', [\App\Http\Controllers\Admin\OrderController::class, 'markAsNotShipped'])->name('orders.mark-not-shipped');
+    Route::post('/orders/{order}/refund', [\App\Http\Controllers\Admin\OrderController::class, 'processRefund'])->name('orders.refund');
+    Route::post('/orders/{order}/cancel-refund', [\App\Http\Controllers\Admin\OrderController::class, 'cancelRefund'])->name('orders.cancel-refund');
+
     // Estadísticas
     Route::get('/statistics', [\App\Http\Controllers\Admin\StatisticsController::class, 'index'])->name('statistics.index');
-    Route::post('/orders/{order}/mark-shipped', [\App\Http\Controllers\Admin\StatisticsController::class, 'markAsShipped'])->name('orders.mark-shipped');
-    Route::post('/orders/{order}/mark-not-shipped', [\App\Http\Controllers\Admin\StatisticsController::class, 'markAsNotShipped'])->name('orders.mark-not-shipped');
 
     // Blog
     Route::resource('blog', \App\Http\Controllers\Admin\BlogPostController::class);

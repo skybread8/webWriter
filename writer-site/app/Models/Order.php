@@ -25,12 +25,19 @@ class Order extends Model
         'notes',
         'shipped',
         'shipped_at',
+        'refunded',
+        'refunded_at',
+        'refund_amount',
+        'refund_reason',
     ];
 
     protected $casts = [
         'total' => 'decimal:2',
         'shipped' => 'boolean',
         'shipped_at' => 'datetime',
+        'refunded' => 'boolean',
+        'refunded_at' => 'datetime',
+        'refund_amount' => 'decimal:2',
     ];
 
     /**

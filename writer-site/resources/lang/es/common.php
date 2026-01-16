@@ -134,6 +134,7 @@ return [
         'panel' => 'Panel',
         'dashboard' => 'Panel de control',
         'statistics' => 'Estadísticas',
+        'orders' => 'Pedidos',
         'books' => 'Libros',
         'testimonials' => 'Testimonios',
         'blog' => 'Blog',

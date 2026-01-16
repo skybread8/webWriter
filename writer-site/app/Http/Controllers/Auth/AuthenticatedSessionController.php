@@ -19,6 +19,10 @@ class AuthenticatedSessionController extends Controller
         // Establecer idioma a español para las páginas de autenticación
         app()->setLocale('es');
         
+        // Regenerar el token CSRF para evitar problemas de expiración
+        // Esto asegura que el token esté fresco cuando el usuario intente iniciar sesión
+        $request->session()->regenerateToken();
+        
         // Guardar la URL previa si el usuario viene de otra página y no hay una URL intended ya guardada
         // Laravel automáticamente guarda url.intended cuando se intenta acceder a una ruta protegida,
         // pero si el usuario hace clic en "Iniciar sesión" desde el menú, necesitamos guardarla manualmente
@@ -53,7 +57,20 @@ class AuthenticatedSessionController extends Controller
         // Establecer idioma a español para los mensajes de error
         app()->setLocale('es');
         
-        $request->authenticate();
+        try {
+            $request->authenticate();
+        } catch (\Exception $e) {
+            // Si hay un error de token CSRF (419), regenerar y mostrar mensaje claro
+            if ($e instanceof \Illuminate\Session\TokenMismatchException || 
+                $request->expectsJson() && $e->getCode() === 419) {
+                $request->session()->regenerateToken();
+                return redirect()->route('login')
+                    ->withInput($request->only('email'))
+                    ->withErrors(['_token' => 'El formulario ha expirado. Por favor, intenta iniciar sesión de nuevo.']);
+            }
+            // Re-lanzar la excepción si no es de token CSRF
+            throw $e;
+        }
 
         $request->session()->regenerate();
 
