@@ -39,6 +39,9 @@ RUN cat > /usr/local/bin/start.sh << 'EOF'
 #!/bin/bash
 set -e
 
+# Cambiar al directorio de trabajo
+cd /var/www/html
+
 # Crear directorios necesarios si no existen
 mkdir -p storage/framework/cache/data
 mkdir -p storage/framework/sessions
@@ -53,19 +56,19 @@ chmod -R 775 storage bootstrap/cache
 
 # Ejecutar migraciones solo si la variable de entorno está configurada
 if [ "$RUN_MIGRATIONS" = "true" ]; then
-    php artisan migrate --force
+    cd /var/www/html && php artisan migrate --force
 fi
 
 # Limpiar cachés
-php artisan config:clear
-php artisan cache:clear
-php artisan view:clear
-php artisan route:clear
+cd /var/www/html && php artisan config:clear
+cd /var/www/html && php artisan cache:clear
+cd /var/www/html && php artisan view:clear
+cd /var/www/html && php artisan route:clear
 
 # Optimizar para producción
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+cd /var/www/html && php artisan config:cache
+cd /var/www/html && php artisan route:cache
+cd /var/www/html && php artisan view:cache
 
 # Iniciar Apache
 exec apache2-foreground
@@ -123,17 +126,21 @@ RUN rm -rf node_modules \
 RUN echo "Listen 10000" >> /etc/apache2/ports.conf
 
 # Configurar VirtualHost para el puerto 10000
-RUN echo '<VirtualHost *:10000>\n\
-    ServerAdmin webmaster@localhost\n\
-    DocumentRoot /var/www/html/public\n\
-    <Directory /var/www/html/public>\n\
-        Options Indexes FollowSymLinks\n\
-        AllowOverride All\n\
-        Require all granted\n\
-    </Directory>\n\
-    ErrorLog ${APACHE_LOG_DIR}/error.log\n\
-    CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
-</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
+RUN cat > /etc/apache2/sites-available/000-default.conf << 'APACHE_EOF'
+<VirtualHost *:10000>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html/public
+    
+    <Directory /var/www/html/public>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+APACHE_EOF
 
 # Exponer puerto 10000
 EXPOSE 10000
