@@ -57,6 +57,11 @@ mkdir -p storage/logs
 mkdir -p storage/app/public
 mkdir -p bootstrap/cache
 
+# Establecer permisos ANTES de crear .env (importante para que Laravel pueda escribir)
+chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache
+chmod -R 777 storage/logs 2>/dev/null || true
+
 # Crear archivo .env si no existe (usando variables de entorno de Render.com)
 if [ ! -f .env ]; then
     echo "Creating .env file from environment variables..."
@@ -76,7 +81,7 @@ ENVEOF
     # Añadir más variables si existen
     [ -n "$DB_HOST" ] && echo "DB_HOST=${DB_HOST}" >> .env
     [ -n "$DB_PORT" ] && echo "DB_PORT=${DB_PORT}" >> .env
-    [ -n "$DB_DATABASE" ] && echo "DB_DATABASE=${DB_DATABASE}" >> .env
+    [ -n "$DB_DATABASE" ] && sed -i "s|DB_DATABASE=.*|DB_DATABASE=${DB_DATABASE}|" .env 2>/dev/null || echo "DB_DATABASE=${DB_DATABASE}" >> .env
     [ -n "$DB_USERNAME" ] && echo "DB_USERNAME=${DB_USERNAME}" >> .env
     [ -n "$DB_PASSWORD" ] && echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
     [ -n "$STRIPE_SECRET" ] && echo "STRIPE_SECRET=${STRIPE_SECRET}" >> .env
@@ -92,16 +97,32 @@ ENVEOF
     [ -n "$APP_FALLBACK_LOCALE" ] && echo "APP_FALLBACK_LOCALE=${APP_FALLBACK_LOCALE}" >> .env
 fi
 
-# Establecer permisos
-chown -R www-data:www-data storage bootstrap/cache .env 2>/dev/null || true
-chmod -R 775 storage bootstrap/cache
+# Establecer permisos en .env
+chown www-data:www-data .env 2>/dev/null || true
 chmod 644 .env 2>/dev/null || true
 
-# Verificar que APP_KEY esté configurada
-if ! grep -q "APP_KEY=base64:" .env 2>/dev/null || [ -z "$APP_KEY" ]; then
-    echo "WARNING: APP_KEY not set. Generating one..."
-    php artisan key:generate --force || echo "Warning: Failed to generate APP_KEY"
+# Verificar que APP_KEY esté configurada correctamente
+if ! grep -q "APP_KEY=base64:" .env 2>/dev/null || [ -z "$APP_KEY" ] || [ "$APP_KEY" = "" ]; then
+    echo "APP_KEY not set or invalid. Generating one..."
+    php artisan key:generate --force 2>&1 || {
+        echo "Failed to generate APP_KEY with artisan, trying alternative method..."
+        # Generar clave manualmente si artisan falla
+        KEY=$(php -r "echo 'base64:'.base64_encode(random_bytes(32));")
+        if grep -q "APP_KEY=" .env; then
+            sed -i "s|APP_KEY=.*|APP_KEY=${KEY}|" .env 2>/dev/null || \
+            sed -i "s|^APP_KEY=.*|APP_KEY=${KEY}|" .env
+        else
+            echo "APP_KEY=${KEY}" >> .env
+        fi
+        echo "APP_KEY generated successfully"
+    }
 fi
+
+# Asegurar permisos finales después de todas las operaciones
+chown -R www-data:www-data storage bootstrap/cache .env 2>/dev/null || true
+chmod -R 775 storage bootstrap/cache
+chmod -R 777 storage/logs 2>/dev/null || true
+chmod 644 .env 2>/dev/null || true
 
 # Ejecutar scripts de Composer que requieren Laravel configurado
 php artisan package:discover --ansi || echo "Warning: Package discovery failed"
