@@ -52,7 +52,7 @@
                 >
                     <div class="px-4 py-6 space-y-1 overflow-y-auto h-full">
                         <div class="mb-6 pb-4 border-b border-zinc-800">
-                            <div class="text-xs tracking-[0.3em] uppercase text-zinc-500 mb-2">Panel</div>
+                            <div class="text-xs tracking-[0.3em] uppercase text-zinc-500 mb-2">{{ __('common.admin.panel') }}</div>
                             <div class="font-['DM_Serif_Display'] text-xl">
                                 {{ optional(\App\Models\SiteSetting::first())->site_name ?? 'Autor' }}
                             </div>
@@ -112,7 +112,7 @@
             <!-- Sidebar desktop -->
             <aside class="hidden md:flex md:flex-col w-72 border-r border-zinc-800 bg-zinc-950/80 backdrop-blur">
                 <div class="px-6 py-6 border-b border-zinc-800">
-                    <div class="text-xs tracking-[0.3em] uppercase text-zinc-500 mb-2">Panel</div>
+                    <div class="text-xs tracking-[0.3em] uppercase text-zinc-500 mb-2">{{ __('common.admin.panel') }}</div>
                     <div class="font-['DM_Serif_Display'] text-xl">
                         {{ optional(\App\Models\SiteSetting::first())->site_name ?? 'Autor' }}
                     </div>

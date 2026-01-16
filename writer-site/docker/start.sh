@@ -24,6 +24,7 @@ echo "=== Creating image directories ==="
 mkdir -p storage/app/public/covers 2>/dev/null || true
 mkdir -p storage/app/public/blog_images 2>/dev/null || true
 mkdir -p storage/app/public/testimonials 2>/dev/null || true
+mkdir -p storage/app/public/author 2>/dev/null || true
 chown -R www-data:www-data storage/app/public 2>/dev/null || true
 chmod -R 775 storage/app/public 2>/dev/null || true
 echo "✓ Image directories created"

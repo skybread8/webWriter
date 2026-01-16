@@ -25,15 +25,20 @@ class PageController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'content' => ['nullable', 'string'],
+            'image' => ['nullable', 'image', 'max:4096'],
         ], [
-            'title.required' => 'Este título se muestra en la página “Sobre el autor”.',
+            'title.required' => 'Este título se muestra en la página "Sobre el autor".',
         ]);
+
+        if ($request->hasFile('image')) {
+            $data['image'] = store_image_safely($request->file('image'), 'author');
+        }
 
         $page->update($data);
 
         return redirect()
             ->route('admin.pages.about.edit')
-            ->with('status', 'La página “Sobre el autor” se ha guardado.');
+            ->with('status', 'La página "Sobre el autor" se ha guardado.');
     }
 
     public function editContact()

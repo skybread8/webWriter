@@ -23,10 +23,10 @@
                     <img
                         src="{{ asset('storage/'.$settings->hero_image) }}"
                         alt=""
-                        class="w-full h-full object-cover opacity-50"
+                        class="w-full h-full object-cover opacity-75"
                     >
-                    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-zinc-950/60"></div>
-                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,rgba(0,0,0,0.3)_100%)]"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-zinc-950/40"></div>
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,rgba(0,0,0,0.15)_100%)]"></div>
                 </div>
             @endif
 

@@ -36,10 +36,12 @@
                     Este texto aparece sobre el formulario (por ejemplo, horarios o tiempos de respuesta).
                 </p>
                 <input id="contact-content" type="hidden" name="content" value="{{ old('content', $page->content) }}">
-                <trix-editor
-                    input="contact-content"
-                    class="trix-content bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-zinc-100"
-                ></trix-editor>
+                <div class="trix-wrapper">
+                    <trix-editor
+                        input="contact-content"
+                        class="trix-content"
+                    ></trix-editor>
+                </div>
                 @error('content')
                     <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
                 @enderror

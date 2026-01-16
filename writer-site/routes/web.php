@@ -103,7 +103,7 @@ Route::group(['prefix' => '{locale}', 'middleware' => ['web', \App\Http\Middlewa
 |
 */
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin', 'locale'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Portada (texto principal e imagen).

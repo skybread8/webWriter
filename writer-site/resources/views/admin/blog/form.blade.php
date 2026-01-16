@@ -65,7 +65,9 @@
             {{ __('common.admin.article_content_description') }}
         </p>
         <input id="content" type="hidden" name="content" value="{{ old('content', $post?->content) }}">
-        <trix-editor input="content" class="bg-zinc-900 text-zinc-100 border-zinc-800 rounded-xl"></trix-editor>
+        <div class="trix-wrapper">
+            <trix-editor input="content" class="trix-content"></trix-editor>
+        </div>
         @error('content')
             <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
         @enderror

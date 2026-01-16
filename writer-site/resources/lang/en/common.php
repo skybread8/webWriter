@@ -131,6 +131,7 @@ return [
         'profile_description' => 'Update your personal information and shipping address',
     ],
     'admin' => [
+        'panel' => 'Panel',
         'dashboard' => 'Dashboard',
         'books' => 'Books',
         'testimonials' => 'Testimonials',

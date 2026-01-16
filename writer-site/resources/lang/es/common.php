@@ -131,6 +131,7 @@ return [
         'profile_description' => 'Actualiza tu información personal y dirección de envío',
     ],
     'admin' => [
+        'panel' => 'Panel',
         'dashboard' => 'Panel de control',
         'books' => 'Libros',
         'testimonials' => 'Testimonios',

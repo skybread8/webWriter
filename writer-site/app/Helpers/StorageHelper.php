@@ -12,6 +12,7 @@ if (!function_exists('ensure_storage_directories')) {
             storage_path('app/public/blog_images'),
             storage_path('app/public/testimonials'),
             storage_path('app/public/hero'),
+            storage_path('app/public/author'),
         ];
 
         foreach ($directories as $directory) {

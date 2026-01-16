@@ -10,5 +10,6 @@ class Page extends Model
         'slug',
         'title',
         'content',
+        'image',
     ];
 }

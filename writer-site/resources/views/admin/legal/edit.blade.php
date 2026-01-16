@@ -38,7 +38,9 @@
                         Información sobre cómo se recopilan, utilizan y protegen los datos personales.
                     </p>
                     <input id="privacy_policy" type="hidden" name="privacy_policy" value="{{ old('privacy_policy', $settings->privacy_policy) }}">
-                    <trix-editor input="privacy_policy" class="bg-zinc-900 text-zinc-100 border-zinc-800 rounded-xl min-h-[400px]"></trix-editor>
+                    <div class="trix-wrapper">
+                        <trix-editor input="privacy_policy" class="trix-content" style="min-height: 400px;"></trix-editor>
+                    </div>
                     @error('privacy_policy')
                         <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
                     @enderror
@@ -52,7 +54,9 @@
                         Condiciones de uso del sitio web y servicios ofrecidos.
                     </p>
                     <input id="terms_of_service" type="hidden" name="terms_of_service" value="{{ old('terms_of_service', $settings->terms_of_service) }}">
-                    <trix-editor input="terms_of_service" class="bg-zinc-900 text-zinc-100 border-zinc-800 rounded-xl min-h-[400px]"></trix-editor>
+                    <div class="trix-wrapper">
+                        <trix-editor input="terms_of_service" class="trix-content" style="min-height: 400px;"></trix-editor>
+                    </div>
                     @error('terms_of_service')
                         <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
                     @enderror
@@ -66,7 +70,9 @@
                         Información legal sobre el propietario del sitio, responsabilidades y derechos de propiedad intelectual.
                     </p>
                     <input id="legal_notice" type="hidden" name="legal_notice" value="{{ old('legal_notice', $settings->legal_notice) }}">
-                    <trix-editor input="legal_notice" class="bg-zinc-900 text-zinc-100 border-zinc-800 rounded-xl min-h-[400px]"></trix-editor>
+                    <div class="trix-wrapper">
+                        <trix-editor input="legal_notice" class="trix-content" style="min-height: 400px;"></trix-editor>
+                    </div>
                     @error('legal_notice')
                         <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
                     @enderror
@@ -80,7 +86,9 @@
                         Información sobre el uso de cookies en el sitio web.
                     </p>
                     <input id="cookie_policy" type="hidden" name="cookie_policy" value="{{ old('cookie_policy', $settings->cookie_policy) }}">
-                    <trix-editor input="cookie_policy" class="bg-zinc-900 text-zinc-100 border-zinc-800 rounded-xl min-h-[400px]"></trix-editor>
+                    <div class="trix-wrapper">
+                        <trix-editor input="cookie_policy" class="trix-content" style="min-height: 400px;"></trix-editor>
+                    </div>
                     @error('cookie_policy')
                         <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
                     @enderror

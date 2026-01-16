@@ -131,6 +131,7 @@ return [
         'profile_description' => 'Actualitza la teva informació personal i adreça d\'enviament',
     ],
     'admin' => [
+        'panel' => 'Panell',
         'dashboard' => 'Panell de control',
         'books' => 'Llibres',
         'testimonials' => 'Testimonis',

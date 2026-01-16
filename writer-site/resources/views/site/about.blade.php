@@ -13,18 +13,31 @@
             </h1>
         </header>
 
-        <article class="prose prose-invert prose-zinc max-w-none text-sm leading-relaxed">
-            @if($page && $page->content)
-                {!! $page->content !!}
-            @else
-                <p>
-                    Esta página está pensada para contar quién eres, cómo escribes y qué pueden esperar los lectores de tus libros.
-                </p>
-                <p>
-                    Puedes editar este texto desde el panel privado, en la sección “Sobre el autor”.
-                </p>
+        <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-6 sm:gap-8 md:gap-10 items-start">
+            @if($page && $page->image)
+                <figure class="w-full max-w-xs mx-auto md:max-w-none">
+                    <img 
+                        src="{{ asset('storage/'.$page->image) }}" 
+                        alt="Foto de {{ $page->title ?? 'Kevin Pérez Alarcón' }}" 
+                        class="w-full rounded-2xl sm:rounded-3xl border-2 border-zinc-800 object-cover shadow-2xl shadow-black/50"
+                        loading="lazy"
+                    >
+                </figure>
             @endif
-        </article>
+
+            <article class="prose prose-invert prose-zinc max-w-none text-sm leading-relaxed">
+                @if($page && $page->content)
+                    {!! $page->content !!}
+                @else
+                    <p>
+                        Esta página está pensada para contar quién eres, cómo escribes y qué pueden esperar los lectores de tus libros.
+                    </p>
+                    <p>
+                        Puedes editar este texto desde el panel privado, en la sección "Sobre el autor".
+                    </p>
+                @endif
+            </article>
+        </div>
     </section>
 @endsection
 

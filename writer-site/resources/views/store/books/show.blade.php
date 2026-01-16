@@ -89,7 +89,7 @@
                 </p>
                 @if($book->long_description)
                     <div class="prose prose-invert prose-zinc max-w-none text-sm sm:text-base leading-relaxed space-y-3 sm:space-y-4">
-                        {!! nl2br(e($book->long_description)) !!}
+                        {!! $book->long_description !!}
                     </div>
                 @endif
                 <a href="{{ localized_route('books.index.public') }}" class="inline-flex items-center gap-2 text-[10px] sm:text-[11px] tracking-[0.25em] uppercase text-zinc-400 hover:text-zinc-100 transition-colors group">
