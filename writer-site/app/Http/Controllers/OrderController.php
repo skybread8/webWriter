@@ -14,7 +14,11 @@ class OrderController extends Controller
     public function index(string $locale): View
     {
         $orders = auth()->user()->orders()
-            ->with('items.book')
+            ->with(['items.book' => function($query) {
+                $query->with(['images' => function($q) {
+                    $q->orderBy('order')->orderBy('created_at')->limit(1);
+                }]);
+            }])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -31,7 +35,11 @@ class OrderController extends Controller
             abort(403);
         }
 
-        $order->load('items.book');
+        $order->load(['items.book' => function($query) {
+            $query->with(['images' => function($q) {
+                $q->orderBy('order')->orderBy('created_at')->limit(1);
+            }]);
+        }]);
 
         return view('orders.show', compact('order'));
     }

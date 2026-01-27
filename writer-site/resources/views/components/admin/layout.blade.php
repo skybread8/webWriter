@@ -112,6 +112,9 @@
                             <a href="{{ route('admin.legal.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.legal.*') ? 'bg-zinc-900' : '' }}" @click="mobileMenuOpen = false">
                                 <span>{{ __('common.admin.legal') }}</span>
                             </a>
+                            <a href="{{ route('admin.email-templates.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.email-templates.*') ? 'bg-zinc-900' : '' }}" @click="mobileMenuOpen = false">
+                                <span>{{ __('common.admin.email_templates') }}</span>
+                            </a>
                         </nav>
                         <div class="pt-4 mt-4 border-t border-zinc-800 text-xs text-zinc-500 space-y-2">
                             <div>{{ __('common.admin.logged_in_as') }} <span class="text-zinc-200">{{ auth()->user()->name }}</span></div>
@@ -186,6 +189,9 @@
                     </a>
                     <a href="{{ route('admin.legal.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.legal.*') ? 'bg-zinc-900' : '' }}">
                         <span>{{ __('common.admin.legal') }}</span>
+                    </a>
+                    <a href="{{ route('admin.email-templates.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.email-templates.*') ? 'bg-zinc-900' : '' }}">
+                        <span>{{ __('common.admin.email_templates') }}</span>
                     </a>
                 </nav>
                 <div class="px-4 py-4 border-t border-zinc-800 text-xs text-zinc-500 space-y-2">

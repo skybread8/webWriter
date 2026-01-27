@@ -5,7 +5,7 @@
 @section('content')
     <section 
         x-data="scrollReveal(0)"
-        class="px-5 sm:px-8 py-14 sm:py-20 max-w-6xl mx-auto"
+        class="px-5 sm:px-8 py-8 sm:py-12 max-w-6xl mx-auto"
     >
         <div 
             :class="show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'"
@@ -20,7 +20,7 @@
                         Blog
                     </p>
                 </div>
-                <h1 class="font-['DM_Serif_Display'] text-4xl sm:text-5xl md:text-6xl tracking-tight">
+                <h1 class="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-4xl tracking-tight">
                     {{ __('common.blog.title') }}
                 </h1>
                 <p class="mt-3 text-sm text-zinc-400 max-w-md mx-auto">

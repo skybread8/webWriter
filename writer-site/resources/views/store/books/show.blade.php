@@ -5,32 +5,138 @@
 @section('content')
     <section 
         x-data="scrollReveal(0)"
-        class="px-4 sm:px-5 md:px-8 py-10 sm:py-14 md:py-20 max-w-6xl mx-auto"
+        class="px-4 sm:px-5 md:px-8 py-6 sm:py-8 md:py-12 max-w-6xl mx-auto"
     >
         <div 
-            class="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-6 sm:gap-8 md:gap-10 lg:gap-16 items-start"
+            class="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4 sm:gap-6 md:gap-8 items-start"
             :class="show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'"
             x-transition:enter="transition ease-out duration-700"
             x-transition:enter-start="opacity-0 translate-y-6"
             x-transition:enter-end="opacity-100 translate-y-0"
         >
             <div class="space-y-4 sm:space-y-6">
-                <figure class="aspect-[3/4] max-w-xs mx-auto md:max-w-none rounded-2xl sm:rounded-3xl border-2 border-zinc-800 overflow-hidden bg-zinc-900 shadow-2xl shadow-black/50">
-                    @if($book->cover_image)
-                        <img 
-                            src="{{ get_image_url($book->cover_image) }}" 
-                            alt="Portada del libro {{ $book->title }} de Kevin Pérez Alarcón" 
-                            class="w-full h-full object-cover"
-                            loading="lazy"
-                            width="400"
-                            height="600"
-                        >
-                    @else
+                @php
+                    // Obtener todas las imágenes usando el método helper
+                    $allImages = $book->getAllImages();
+                    // Convertir a array para Alpine.js
+                    $imagesArray = $allImages->toArray();
+                @endphp
+
+                @if($allImages->isNotEmpty())
+                    <div 
+                        x-data="{
+                            currentIndex: 0,
+                            images: @js($imagesArray),
+                            touchStartX: 0,
+                            touchEndX: 0,
+                            init() {
+                                // Debug: verificar que las imágenes se cargaron
+                                console.log('Imágenes cargadas:', this.images.length);
+                            },
+                            next() {
+                                if (this.images.length > 1) {
+                                    this.currentIndex = (this.currentIndex + 1) % this.images.length;
+                                }
+                            },
+                            prev() {
+                                if (this.images.length > 1) {
+                                    this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+                                }
+                            },
+                            goTo(index) {
+                                if (index >= 0 && index < this.images.length) {
+                                    this.currentIndex = index;
+                                }
+                            },
+                            handleTouchStart(e) {
+                                this.touchStartX = e.touches[0].clientX;
+                            },
+                            handleTouchEnd(e) {
+                                this.touchEndX = e.changedTouches[0].clientX;
+                                this.handleSwipe();
+                            },
+                            handleSwipe() {
+                                const diff = this.touchStartX - this.touchEndX;
+                                if (Math.abs(diff) > 50) {
+                                    if (diff > 0) {
+                                        this.next();
+                                    } else {
+                                        this.prev();
+                                    }
+                                }
+                            }
+                        }"
+                        class="relative aspect-[3/4] max-w-[200px] sm:max-w-[240px] md:max-w-none mx-auto rounded-2xl sm:rounded-3xl border-2 border-zinc-800 overflow-hidden bg-zinc-900 shadow-2xl shadow-black/50 group cursor-pointer"
+                        @touchstart="handleTouchStart"
+                        @touchend="handleTouchEnd"
+                    >
+                        <!-- Imagen actual -->
+                        <div class="relative w-full h-full">
+                            <template x-for="(image, index) in images" :key="index">
+                                <img 
+                                    :src="image.url"
+                                    :alt="image.alt"
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                                    :class="currentIndex === index ? 'opacity-100 z-10' : 'opacity-0 z-0'"
+                                    loading="lazy"
+                                    width="400"
+                                    height="600"
+                                    x-on:error="$el.style.display = 'none'"
+                                >
+                            </template>
+                        </div>
+
+                        <!-- Botones de navegación (solo si hay más de una imagen) -->
+                        <template x-if="images && images.length > 1">
+                            <div>
+                                <!-- Botón anterior -->
+                                <button 
+                                    @click.stop="prev()"
+                                    class="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-zinc-900/95 hover:bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center text-zinc-100 transition-all shadow-lg hover:scale-110"
+                                    aria-label="Imagen anterior"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                    </svg>
+                                </button>
+
+                                <!-- Botón siguiente -->
+                                <button 
+                                    @click.stop="next()"
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-zinc-900/95 hover:bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center text-zinc-100 transition-all shadow-lg hover:scale-110"
+                                    aria-label="Imagen siguiente"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </button>
+
+                                <!-- Indicadores de puntos -->
+                                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+                                    <template x-for="(image, index) in images" :key="index">
+                                        <button 
+                                            @click.stop="goTo(index)"
+                                            class="w-2 h-2 rounded-full transition-all"
+                                            :class="currentIndex === index ? 'bg-amber-400 w-6' : 'bg-zinc-600 hover:bg-zinc-500'"
+                                            :aria-label="`Ir a imagen ${index + 1}`"
+                                        ></button>
+                                    </template>
+                                </div>
+
+                                <!-- Contador de imágenes -->
+                                <div class="absolute top-3 right-3 z-20 px-2 py-1 rounded-full bg-zinc-900/90 border border-zinc-700 text-xs text-zinc-300 shadow-lg">
+                                    <span x-text="currentIndex + 1"></span> / <span x-text="images.length"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                @else
+                    <figure class="aspect-[3/4] max-w-xs mx-auto md:max-w-none rounded-2xl sm:rounded-3xl border-2 border-zinc-800 overflow-hidden bg-zinc-900 shadow-2xl shadow-black/50">
                         <div class="w-full h-full flex items-center justify-center text-xs text-zinc-500" role="img" aria-label="Portada no disponible">
                             <x-icons.book class="w-16 h-16 opacity-20" aria-hidden="true" />
                         </div>
-                    @endif
-                </figure>
+                    </figure>
+                @endif
                 <div class="space-y-3 sm:space-y-4">
                     <div class="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-zinc-900/60 border border-zinc-800">
                         <div class="mb-2 sm:mb-3">
@@ -80,7 +186,7 @@
                             Libro
                         </p>
                     </div>
-                    <h1 class="font-['DM_Serif_Display'] text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight">
+                    <h1 class="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-tight leading-tight">
                         {{ $book->title }}
                     </h1>
                 </div>
@@ -100,7 +206,7 @@
         </div>
 
         <!-- Reseñas -->
-        <div class="mt-12 sm:mt-16 space-y-6 sm:space-y-8">
+        <div class="mt-8 sm:mt-10 space-y-4 sm:space-y-6">
             <div>
                 <div class="inline-flex items-center gap-2 mb-2 sm:mb-3">
                     <svg class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
@@ -112,7 +218,7 @@
                 </div>
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                     <div>
-                        <h2 class="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-4xl tracking-tight">
+                        <h2 class="font-['DM_Serif_Display'] text-xl sm:text-2xl md:text-3xl tracking-tight">
                             Valoraciones de lectores
                         </h2>
                         @if(isset($book->reviews_count) && $book->reviews_count > 0)

@@ -18,7 +18,14 @@ class PageController extends Controller
     public function home()
     {
         $settings = SiteSetting::first();
-        $books = Book::where('active', true)->orderBy('order')->orderBy('created_at', 'desc')->get();
+        $books = Book::where('active', true)
+            ->withReviewStats()
+            ->with(['images' => function($query) {
+                $query->orderBy('order')->orderBy('created_at');
+            }])
+            ->orderBy('order')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('site.home', compact('settings', 'books'));
     }

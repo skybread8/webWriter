@@ -22,7 +22,7 @@
                 <div class="inline-flex items-center gap-2 mb-2 sm:mb-3">
                     <x-icons.shopping-cart class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
                     <p class="text-[10px] sm:text-[11px] tracking-[0.25em] sm:tracking-[0.3em] uppercase text-zinc-400">
-                        Pedido
+                        {{ __('common.orders.order') }}
                     </p>
                 </div>
                 <h1 class="font-['DM_Serif_Display'] text-3xl sm:text-4xl md:text-5xl tracking-tight mb-2">
@@ -39,9 +39,9 @@
                     <div class="border border-zinc-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-zinc-900/40">
                         <h2 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-zinc-100">{{ __('common.orders.customer_info') }}</h2>
                         <div class="space-y-2 text-xs sm:text-sm">
-                            <p><span class="text-zinc-400">Nombre:</span> <span class="text-zinc-100">{{ $order->customer_name }}</span></p>
-                            <p><span class="text-zinc-400">Email:</span> <span class="text-zinc-100 break-all">{{ $order->customer_email }}</span></p>
-                            <p><span class="text-zinc-400">Teléfono:</span> <span class="text-zinc-100">{{ $order->customer_phone }}</span></p>
+                            <p><span class="text-zinc-400">{{ __('common.orders.name') }}:</span> <span class="text-zinc-100">{{ $order->customer_name }}</span></p>
+                            <p><span class="text-zinc-400">{{ __('common.orders.email') }}:</span> <span class="text-zinc-100 break-all">{{ $order->customer_email }}</span></p>
+                            <p><span class="text-zinc-400">{{ __('common.orders.phone') }}:</span> <span class="text-zinc-100">{{ $order->customer_phone }}</span></p>
                         </div>
                     </div>
 
@@ -56,7 +56,7 @@
 
                     @if($order->notes)
                         <div class="border border-zinc-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-zinc-900/40">
-                            <h2 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-zinc-100">Notas</h2>
+                            <h2 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-zinc-100">{{ __('common.orders.notes') }}</h2>
                             <p class="text-xs sm:text-sm text-zinc-300 whitespace-pre-wrap">{{ $order->notes }}</p>
                         </div>
                     @endif
@@ -88,8 +88,8 @@
                         <div class="space-y-3 sm:space-y-4">
                             @foreach($order->items as $item)
                                 <div class="flex items-start gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-zinc-800 last:border-0">
-                                    @if($item->book && $item->book->cover_image)
-                                        <img src="{{ get_image_url($item->book->cover_image) }}" alt="{{ $item->book_title }}" class="w-12 h-16 sm:w-16 sm:h-20 rounded-lg object-cover border border-zinc-800 flex-shrink-0">
+                                    @if($item->book && $item->book->first_image_url)
+                                        <img src="{{ $item->book->first_image_url }}" alt="{{ $item->book_title }}" class="w-12 h-16 sm:w-16 sm:h-20 rounded-lg object-cover border border-zinc-800 flex-shrink-0">
                                     @else
                                         <div class="w-12 h-16 sm:w-16 sm:h-20 rounded-lg border border-dashed border-zinc-700 flex items-center justify-center bg-zinc-950 flex-shrink-0">
                                             <x-icons.book class="w-4 h-4 sm:w-6 sm:h-6 text-zinc-700" />
@@ -110,11 +110,11 @@
                     </div>
 
                     <div class="border border-zinc-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-zinc-900/40">
-                        <h2 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-zinc-100">Información del pedido</h2>
+                        <h2 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-zinc-100">{{ __('common.orders.order_info') }}</h2>
                         <div class="space-y-2 text-xs sm:text-sm">
                             <p><span class="text-zinc-400">{{ __('common.orders.date') }}:</span> <span class="text-zinc-100">{{ $order->created_at->format('d/m/Y H:i') }}</span></p>
                             @if($order->stripe_session_id)
-                                <p class="break-all"><span class="text-zinc-400">ID de pago:</span> <span class="text-zinc-100 font-mono text-[10px] sm:text-xs">{{ $order->stripe_session_id }}</span></p>
+                                <p class="break-all"><span class="text-zinc-400">{{ __('common.orders.payment_id') }}:</span> <span class="text-zinc-100 font-mono text-[10px] sm:text-xs">{{ $order->stripe_session_id }}</span></p>
                             @endif
                         </div>
                     </div>

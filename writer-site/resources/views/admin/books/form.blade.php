@@ -81,30 +81,6 @@
     <div class="grid md:grid-cols-2 gap-6">
         <div class="space-y-2">
             <label class="block text-xs font-medium text-zinc-300">
-                Imagen de portada
-            </label>
-            <p class="text-xs text-zinc-500 mb-1">
-                Archivo JPG o PNG, preferiblemente vertical. Se recortará automáticamente.
-            </p>
-            <input
-                type="file"
-                name="cover_image"
-                class="block w-full text-xs text-zinc-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-zinc-100 file:text-zinc-900 hover:file:bg-white"
-            >
-            @error('cover_image')
-                <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
-            @enderror
-
-            @if($book?->cover_image)
-                <div class="mt-3">
-                    <p class="text-xs text-zinc-500 mb-1">Portada actual:</p>
-                    <img src="{{ get_image_url($book->cover_image) }}" alt="Portada actual" class="max-h-40 rounded-lg border border-zinc-800 object-cover">
-                </div>
-            @endif
-        </div>
-
-        <div class="space-y-2">
-            <label class="block text-xs font-medium text-zinc-300">
                 Precio de Stripe (opcional)
             </label>
             <p class="text-xs text-zinc-500 mb-1">

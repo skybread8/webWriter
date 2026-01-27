@@ -17,7 +17,11 @@ class OrderController extends Controller
     {
         app()->setLocale('es');
         
-        $query = Order::with(['user', 'items.book'])->orderBy('created_at', 'desc');
+        $query = Order::with(['user', 'items.book' => function($query) {
+            $query->with(['images' => function($q) {
+                $q->orderBy('order')->orderBy('created_at')->limit(1);
+            }]);
+        }])->orderBy('created_at', 'desc');
 
         // Filtros
         if ($request->has('status') && $request->status !== '') {
@@ -59,7 +63,11 @@ class OrderController extends Controller
     {
         app()->setLocale('es');
         
-        $order->load(['user', 'items.book']);
+        $order->load(['user', 'items.book' => function($query) {
+            $query->with(['images' => function($q) {
+                $q->orderBy('order')->orderBy('created_at')->limit(1);
+            }]);
+        }]);
 
         return view('admin.orders.show', compact('order'));
     }
@@ -79,6 +87,13 @@ class OrderController extends Controller
             // Mantener el status como 'paid' o cambiarlo a 'shipped' solo para tracking,
             // pero el cálculo de ingresos incluirá ambos
         ]);
+
+        // Enviar correo de pedido enviado
+        try {
+            \Mail::to($order->customer_email)->send(new \App\Mail\OrderShippedMail($order));
+        } catch (\Exception $e) {
+            \Log::error('Error enviando correo de pedido enviado: ' . $e->getMessage());
+        }
 
         return redirect()
             ->route('admin.orders.show', $order)
@@ -130,6 +145,13 @@ class OrderController extends Controller
             'refund_reason' => $data['refund_reason'],
             'status' => 'cancelled',
         ]);
+
+        // Enviar correo de devolución
+        try {
+            \Mail::to($order->customer_email)->send(new \App\Mail\OrderRefundedMail($order));
+        } catch (\Exception $e) {
+            \Log::error('Error enviando correo de devolución: ' . $e->getMessage());
+        }
 
         return redirect()
             ->route('admin.orders.show', $order)

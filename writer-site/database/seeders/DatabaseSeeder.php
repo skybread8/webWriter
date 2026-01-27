@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             PageSeeder::class,
             BookSeeder::class,
             TestimonialSeeder::class,
+            EmailTemplateSeeder::class,
         ]);
     }
 }

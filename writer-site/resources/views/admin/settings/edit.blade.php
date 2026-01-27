@@ -67,6 +67,27 @@
                 @enderror
             </div>
 
+            <div class="space-y-2">
+                <label class="block text-xs font-medium text-zinc-300">
+                    Precio de envío (€)
+                </label>
+                <p class="text-xs text-zinc-500 mb-1">
+                    Precio que se cobrará por el envío de los pedidos. Este precio se añadirá al total del pedido en el checkout.
+                </p>
+                <input
+                    type="number"
+                    name="shipping_price"
+                    value="{{ old('shipping_price', $settings->shipping_price ?? 0) }}"
+                    step="0.01"
+                    min="0"
+                    max="9999.99"
+                    class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+                >
+                @error('shipping_price')
+                    <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
             <div class="pt-6 border-t border-zinc-800">
                 <h2 class="text-sm font-semibold text-zinc-300 mb-4">Redes sociales</h2>
                 

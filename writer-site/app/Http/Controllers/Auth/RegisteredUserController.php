@@ -57,6 +57,13 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        // Enviar correo de bienvenida
+        try {
+            \Mail::to($user->email)->send(new \App\Mail\UserRegisteredMail($user));
+        } catch (\Exception $e) {
+            \Log::error('Error enviando correo de registro: ' . $e->getMessage());
+        }
+
         Auth::login($user);
 
         return redirect(localized_route('home', [], false));

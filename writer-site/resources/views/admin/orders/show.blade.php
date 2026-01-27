@@ -130,20 +130,30 @@
             <h2 class="font-['DM_Serif_Display'] text-xl mb-4">Libros pedidos</h2>
             <div class="space-y-3">
                 @foreach($order->items as $item)
-                    <div class="flex items-center justify-between py-3 border-b border-zinc-800/50 last:border-0">
-                        <div class="flex items-center gap-4">
-                            @if($item->book && $item->book->cover_image)
-                                <img src="{{ get_image_url($item->book->cover_image) }}" alt="{{ $item->book_title }}" class="w-16 h-20 rounded-md object-cover border border-zinc-800">
-                            @endif
-                            <div>
-                                <div class="font-semibold text-zinc-200">{{ $item->book_title }}</div>
-                                <div class="text-xs text-zinc-500">Cantidad: {{ $item->quantity }}</div>
+                    <div class="py-3 border-b border-zinc-800/50 last:border-0">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-4">
+                                @if($item->book && $item->book->first_image_url)
+                                    <img src="{{ $item->book->first_image_url }}" alt="{{ $item->book_title }}" class="w-16 h-20 rounded-md object-cover border border-zinc-800">
+                                @endif
+                                <div>
+                                    <div class="font-semibold text-zinc-200">{{ $item->book_title }}</div>
+                                    <div class="text-xs text-zinc-500">Cantidad: {{ $item->quantity }}</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-zinc-200">{{ number_format($item->subtotal, 2) }} €</div>
+                                <div class="text-xs text-zinc-500">{{ number_format($item->book_price, 2) }} € c/u</div>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <div class="font-semibold text-zinc-200">{{ number_format($item->subtotal, 2) }} €</div>
-                            <div class="text-xs text-zinc-500">{{ number_format($item->book_price, 2) }} € c/u</div>
-                        </div>
+                        @if($item->dedication)
+                            <div class="mt-2 pl-20">
+                                <div class="text-xs text-zinc-500 mb-1">Dedicatoria:</div>
+                                <div class="text-sm text-zinc-300 italic bg-zinc-950/50 border border-zinc-800 rounded-lg p-3">
+                                    "{{ $item->dedication }}"
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 @endforeach
                 <div class="flex items-center justify-between pt-3 border-t border-zinc-800">

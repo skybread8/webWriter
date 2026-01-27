@@ -18,7 +18,7 @@
                 <div class="inline-flex items-center gap-2 mb-2 sm:mb-3">
                     <x-icons.user class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
                     <p class="text-[10px] sm:text-[11px] tracking-[0.25em] sm:tracking-[0.3em] uppercase text-zinc-400">
-                        Cuenta
+                        {{ __('common.orders.account') }}
                     </p>
                 </div>
                 <h1 class="font-['DM_Serif_Display'] text-3xl sm:text-4xl md:text-5xl tracking-tight mb-2">
@@ -79,7 +79,7 @@
                                         {{ __('common.orders.date') }}: {{ $order->created_at->format('d/m/Y H:i') }}
                                     </p>
                                     <p class="text-xs sm:text-sm text-zinc-400 mt-1">
-                                        {{ $order->items->count() }} {{ $order->items->count() === 1 ? 'artículo' : 'artículos' }}
+                                        {{ $order->items->count() }} {{ $order->items->count() === 1 ? __('common.orders.article') : __('common.orders.articles') }}
                                     </p>
                                 </div>
                                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">

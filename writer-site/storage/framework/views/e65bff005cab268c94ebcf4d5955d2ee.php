@@ -1,0 +1,4 @@
+<svg <?php echo e($attributes); ?> fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12M8.25 21H15.75M8.25 21v-6.75M15.75 21v-6.75M8.25 21H5.25a1.5 1.5 0 01-1.5-1.5v-8.25m13.5 0V9.75m0 0v-1.5m0 1.5H21m-13.5-3H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125H8.25m13.5-3H20.625c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125H15.75" />
+</svg>
+<?php /**PATH /Users/gerardrevo/Documents/GitHub/WebKevin/writer-site/resources/views/components/icons/gift.blade.php ENDPATH**/ ?>

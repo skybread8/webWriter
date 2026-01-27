@@ -43,8 +43,8 @@
                         <div class="space-y-3 sm:space-y-4">
                             @foreach($cartItems as $item)
                                 <div class="flex items-start gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-zinc-800 last:border-0">
-                                    @if($item['book']->cover_image)
-                                        <img src="{{ get_image_url($item['book']->cover_image) }}" alt="{{ $item['book']->title }}" class="w-12 h-16 sm:w-16 sm:h-20 rounded-lg object-cover border border-zinc-800 flex-shrink-0">
+                                    @if($item['book']->first_image_url)
+                                        <img src="{{ $item['book']->first_image_url }}" alt="{{ $item['book']->title }}" class="w-12 h-16 sm:w-16 sm:h-20 rounded-lg object-cover border border-zinc-800 flex-shrink-0">
                                     @else
                                         <div class="w-12 h-16 sm:w-16 sm:h-20 rounded-lg border border-dashed border-zinc-700 flex items-center justify-center bg-zinc-950 flex-shrink-0">
                                             <x-icons.book class="w-4 h-4 sm:w-6 sm:h-6 text-zinc-700" />
@@ -58,9 +58,21 @@
                                 </div>
                             @endforeach
                         </div>
-                        <div class="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-zinc-800 flex items-center justify-between">
-                            <span class="text-sm sm:text-base font-semibold text-zinc-300">{{ __('common.checkout.total') }}:</span>
-                            <span class="text-xl sm:text-2xl font-bold text-amber-400">{{ number_format($total, 2, ',', '.') }} €</span>
+                        <div class="mt-4 sm:mt-6 pt-4 sm:pt-6 space-y-3 border-t border-zinc-800">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-zinc-400">{{ __('common.checkout.subtotal') }}:</span>
+                                <span class="text-sm font-medium text-zinc-300">{{ number_format($subtotal, 2, ',', '.') }} €</span>
+                            </div>
+                            @if($shippingPrice > 0)
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-zinc-400">{{ __('common.checkout.shipping') }}:</span>
+                                    <span class="text-sm font-medium text-zinc-300">{{ number_format($shippingPrice, 2, ',', '.') }} €</span>
+                                </div>
+                            @endif
+                            <div class="flex items-center justify-between pt-2 border-t border-zinc-800">
+                                <span class="text-sm sm:text-base font-semibold text-zinc-300">{{ __('common.checkout.total') }}:</span>
+                                <span class="text-xl sm:text-2xl font-bold text-amber-400">{{ number_format($total, 2, ',', '.') }} €</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -221,14 +233,41 @@
                                     type="text" 
                                     id="customer_country" 
                                     name="customer_country" 
-                                    value="{{ old('customer_country', auth()->user()?->country ?? 'España') }}"
-                                    required
-                                    class="w-full rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 text-sm px-3 sm:px-4 py-2 focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50 transition-colors"
+                                    value="España"
+                                    readonly
+                                    class="w-full rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-400 text-sm px-3 sm:px-4 py-2 cursor-not-allowed"
                                 >
+                                <p class="text-[10px] sm:text-xs text-zinc-500 mt-1">{{ __('common.checkout.spain_only') }}</p>
                                 @error('customer_country')
                                     <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
+                        </div>
+
+                        <!-- Dedicatorias por libro -->
+                        <div class="space-y-3 sm:space-y-4">
+                            <h3 class="text-sm sm:text-base font-semibold text-zinc-300 mb-2">
+                                {{ __('common.checkout.dedications_title') }} ({{ __('common.checkout.optional') }})
+                            </h3>
+                            @foreach($cartItems as $index => $item)
+                                <div>
+                                    <label for="dedication_{{ $item['book']->id }}" class="block text-xs sm:text-sm font-medium text-zinc-300 mb-1">
+                                        {{ __('common.checkout.dedication_for') }} "{{ $item['book']->title }}"
+                                    </label>
+                                    <textarea 
+                                        id="dedication_{{ $item['book']->id }}" 
+                                        name="dedications[{{ $item['book']->id }}]" 
+                                        rows="2"
+                                        maxlength="500"
+                                        class="w-full rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 text-xs sm:text-sm px-3 sm:px-4 py-2 focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50 transition-colors"
+                                        placeholder="{{ __('common.checkout.dedication_placeholder') }}"
+                                    >{{ old('dedications.' . $item['book']->id) }}</textarea>
+                                    <p class="text-[10px] sm:text-xs text-zinc-500 mt-1">{{ __('common.checkout.dedication_max_chars') }}</p>
+                                    @error('dedications.' . $item['book']->id)
+                                        <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            @endforeach
                         </div>
 
                         <div>
@@ -245,6 +284,55 @@
                             @error('notes')
                                 <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
                             @enderror
+                        </div>
+
+                        <!-- Aceptación de políticas legales -->
+                        <div class="space-y-3 pt-4 border-t border-zinc-800">
+                            <p class="text-xs sm:text-sm font-medium text-zinc-300 mb-2">
+                                {{ __('common.checkout.legal_acceptance') }}
+                            </p>
+                            
+                            <div class="space-y-2">
+                                <label class="flex items-start gap-3 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        name="accept_privacy"
+                                        id="accept_privacy"
+                                        value="1"
+                                        required
+                                        class="mt-0.5 rounded bg-zinc-900 border-zinc-800 text-amber-400 focus:ring-amber-400/50 focus:ring-offset-zinc-950"
+                                    >
+                                    <span class="text-xs sm:text-sm text-zinc-300 flex-1">
+                                        {{ __('common.checkout.accept_privacy') }}
+                                        <a href="{{ localized_route('legal.privacy') }}" target="_blank" class="text-amber-400 hover:text-amber-300 underline underline-offset-2">
+                                            {{ __('common.legal.privacy_title') }}
+                                        </a>
+                                    </span>
+                                </label>
+                                @error('accept_privacy')
+                                    <p class="text-xs text-red-400 ml-6">{{ $message }}</p>
+                                @enderror
+
+                                <label class="flex items-start gap-3 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        name="accept_terms"
+                                        id="accept_terms"
+                                        value="1"
+                                        required
+                                        class="mt-0.5 rounded bg-zinc-900 border-zinc-800 text-amber-400 focus:ring-amber-400/50 focus:ring-offset-zinc-950"
+                                    >
+                                    <span class="text-xs sm:text-sm text-zinc-300 flex-1">
+                                        {{ __('common.checkout.accept_terms') }}
+                                        <a href="{{ localized_route('legal.terms') }}" target="_blank" class="text-amber-400 hover:text-amber-300 underline underline-offset-2">
+                                            {{ __('common.legal.terms_title') }}
+                                        </a>
+                                    </span>
+                                </label>
+                                @error('accept_terms')
+                                    <p class="text-xs text-red-400 ml-6">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
                         <div class="pt-4">

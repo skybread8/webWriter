@@ -35,6 +35,112 @@
             </div>
         </form>
 
+        <!-- Imágenes del libro -->
+        <div class="mt-12 pt-12 border-t border-zinc-800">
+            <div class="flex items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="font-['DM_Serif_Display'] text-2xl md:text-3xl tracking-tight mb-2">
+                        Imágenes del libro
+                    </h2>
+                    <p class="text-sm text-zinc-400">
+                        Añade múltiples imágenes para "{{ $book->title }}". Estas imágenes se mostrarán en una galería en la página del libro. Los usuarios podrán hacer click o deslizar para verlas todas.
+                    </p>
+                </div>
+                <div class="shrink-0">
+                    <button 
+                        type="button"
+                        onclick="document.getElementById('add-image-form').classList.toggle('hidden')"
+                        class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-zinc-950 text-xs font-semibold rounded-lg transition-colors"
+                    >
+                        + Añadir imagen
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formulario para añadir imagen (oculto por defecto) -->
+            <div id="add-image-form" class="hidden mb-6 p-6 bg-zinc-900/40 border border-zinc-800 rounded-xl">
+                <h3 class="text-lg font-semibold text-zinc-100 mb-4">Añadir nueva imagen</h3>
+                <form method="POST" action="{{ route('admin.books.images.store', $book) }}" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-medium text-zinc-300">
+                            Imagen <span class="text-red-400">*</span>
+                        </label>
+                        <input
+                            type="file"
+                            name="image"
+                            accept="image/*"
+                            required
+                            class="block w-full text-xs text-zinc-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-zinc-100 file:text-zinc-900 hover:file:bg-white"
+                        >
+                        @error('image')
+                            <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="image_order" class="block text-xs font-medium text-zinc-300">
+                            Orden (opcional)
+                        </label>
+                        <input
+                            type="number"
+                            id="image_order"
+                            name="order"
+                            value="{{ $book->images->max('order') + 1 ?? 0 }}"
+                            min="0"
+                            class="w-full rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 text-sm px-3 py-2 focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50 transition-colors"
+                        >
+                        <p class="text-xs text-zinc-500">Los números más bajos aparecen primero. Si no especificas, se añadirá al final.</p>
+                    </div>
+
+                    <div class="flex items-center gap-3 pt-2">
+                        <button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-zinc-950 text-xs font-semibold rounded-lg transition-colors">
+                            Guardar imagen
+                        </button>
+                        <button 
+                            type="button"
+                            onclick="document.getElementById('add-image-form').classList.add('hidden')"
+                            class="text-xs text-zinc-400 underline underline-offset-4"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            @if($book->images->isNotEmpty())
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    @foreach($book->images as $image)
+                        <div class="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-900/40">
+                            <div class="aspect-[3/4] overflow-hidden bg-zinc-950">
+                                <img 
+                                    src="{{ $image->image_url }}" 
+                                    alt="Imagen del libro {{ $book->title }}" 
+                                    class="w-full h-full object-cover"
+                                >
+                            </div>
+                            <div class="p-3 space-y-2">
+                                <p class="text-[10px] text-zinc-500">Orden: {{ $image->order }}</p>
+                                <form method="POST" action="{{ route('admin.books.images.destroy', [$book, $image]) }}" onsubmit="return confirm('¿Seguro que quieres eliminar esta imagen?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-[10px] text-red-400 underline underline-offset-2 w-full text-center">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-8 bg-zinc-900/40 border border-zinc-800 rounded-xl">
+                    <p class="text-sm text-zinc-500">Aún no hay imágenes adicionales para este libro.</p>
+                    <p class="text-xs text-zinc-600 mt-1">Pulsa "Añadir imagen" para crear la primera. Todas las imágenes se mostrarán en una galería deslizable en la página del libro.</p>
+                </div>
+            @endif
+        </div>
+
         <!-- Fotos de lectores de este libro -->
         <div class="mt-12 pt-12 border-t border-zinc-800">
             <div class="flex items-center justify-between gap-4 mb-6">

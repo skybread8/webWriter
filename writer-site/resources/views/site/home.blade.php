@@ -30,7 +30,7 @@
                 </div>
             @endif
 
-            <div class="relative z-10 px-4 sm:px-5 md:px-8 py-16 sm:py-20 md:py-32 max-w-6xl mx-auto w-full">
+            <div class="relative z-10 px-4 sm:px-5 md:px-8 py-10 sm:py-12 md:py-16 max-w-6xl mx-auto w-full">
                 <div class="space-y-6 sm:space-y-8 max-w-3xl" 
                      x-show="show" 
                      x-transition:enter="transition ease-out duration-1000"
@@ -42,7 +42,7 @@
                             {{ __('common.home.hero_subtitle') }}
                         </p>
                     </div>
-                    <h1 class="font-['DM_Serif_Display'] text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl tracking-tight leading-[0.95]">
+                    <h1 class="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl tracking-tight leading-[0.95]">
                         {!! nl2br(e($settings?->hero_text ?? 'Historias escritas en la sombra,<br>para leerse en silencio.')) !!}
                     </h1>
                     <p class="text-sm sm:text-base md:text-lg text-zinc-300 max-w-xl leading-relaxed">
@@ -67,7 +67,7 @@
     @if($books->isNotEmpty())
         <section 
             x-data="scrollReveal(100)"
-            class="px-4 sm:px-5 md:px-8 py-12 sm:py-16 md:py-20 lg:py-28 border-t border-zinc-800/50 bg-gradient-to-b from-zinc-950 to-zinc-900/50"
+            class="px-4 sm:px-5 md:px-8 py-8 sm:py-10 md:py-12 lg:py-16 border-t border-zinc-800/50 bg-gradient-to-b from-zinc-950 to-zinc-900/50"
         >
             <div class="max-w-7xl mx-auto">
                 <div 
@@ -84,7 +84,7 @@
                                 {{ __('common.home.catalog') }}
                             </p>
                         </div>
-                        <h2 class="font-['DM_Serif_Display'] text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight">
+                        <h2 class="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-tight">
                             {{ __('common.home.featured_books') }}
                         </h2>
                         <p class="mt-2 sm:mt-3 text-xs sm:text-sm text-zinc-400 max-w-md">
@@ -100,28 +100,80 @@
                         <x-icons.arrow-right class="w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </a>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
                     @foreach($books->take(6) as $index => $book)
                         <a 
                             href="{{ localized_route('books.show', $book) }}" 
-                            class="group border border-zinc-800 rounded-3xl overflow-hidden bg-zinc-900/40 hover:bg-zinc-900/80 hover:border-zinc-700 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/50"
+                            class="group border border-zinc-800 rounded-3xl overflow-hidden bg-zinc-900/40 hover:bg-zinc-900/80 hover:border-zinc-700 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-black/50 block"
                             :class="show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
                             x-data="scrollReveal({{ ($index + 1) * 100 }})"
                             x-transition:enter="transition ease-out duration-700"
                             x-transition:enter-start="opacity-0 translate-y-8"
                             x-transition:enter-end="opacity-100 translate-y-0"
                         >
+                            @php
+                                $allImages = $book->getAllImages();
+                                $imagesArray = $allImages->toArray();
+                            @endphp
                             <figure class="aspect-[3/4] overflow-hidden bg-zinc-900 relative">
-                                @if($book->cover_image)
-                                    <img 
-                                        src="{{ get_image_url($book->cover_image) }}" 
-                                        alt="Portada del libro {{ $book->title }} de Kevin Pérez Alarcón" 
-                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                        loading="lazy"
-                                        width="300"
-                                        height="400"
+                                @if($allImages->isNotEmpty())
+                                    <div 
+                                        x-data="{
+                                            currentIndex: 0,
+                                            images: @js($imagesArray),
+                                            touchStartX: 0,
+                                            touchEndX: 0,
+                                            next() {
+                                                if (this.images.length > 1) {
+                                                    this.currentIndex = (this.currentIndex + 1) % this.images.length;
+                                                }
+                                            },
+                                            prev() {
+                                                if (this.images.length > 1) {
+                                                    this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+                                                }
+                                            },
+                                            handleTouchStart(e) {
+                                                this.touchStartX = e.touches[0].clientX;
+                                            },
+                                            handleTouchEnd(e) {
+                                                this.touchEndX = e.changedTouches[0].clientX;
+                                                const diff = this.touchStartX - this.touchEndX;
+                                                if (Math.abs(diff) > 50) {
+                                                    if (diff > 0) {
+                                                        this.next();
+                                                    } else {
+                                                        this.prev();
+                                                    }
+                                                }
+                                            },
+                                            handleButtonClick(action, event) {
+                                                event.stopPropagation();
+                                                event.preventDefault();
+                                                action();
+                                                return false;
+                                            }
+                                        }"
+                                        class="relative w-full h-full"
+                                        @touchstart="handleTouchStart"
+                                        @touchend="handleTouchEnd"
                                     >
-                                    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" aria-hidden="true"></div>
+                                        <div class="relative w-full h-full pointer-events-none">
+                                            <template x-for="(image, index) in images" :key="index">
+                                                <img 
+                                                    :src="image.url"
+                                                    :alt="image.alt"
+                                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 group-hover:scale-110 transition-transform duration-700"
+                                                    :class="currentIndex === index ? 'opacity-100 z-10' : 'opacity-0 z-0'"
+                                                    loading="lazy"
+                                                    width="300"
+                                                    height="400"
+                                                    x-on:error="$el.style.display = 'none'"
+                                                >
+                                            </template>
+                                        </div>
+                                        <div class="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" aria-hidden="true"></div>
+                                    </div>
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-xs text-zinc-500" role="img" aria-label="Portada no disponible">
                                         <x-icons.book class="w-12 h-12 opacity-20" aria-hidden="true" />
@@ -147,6 +199,17 @@
                                 <p class="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
                                     {{ $book->description }}
                                 </p>
+                                @if($book->reviews_count > 0)
+                                    <div class="flex items-center gap-2 pt-1">
+                                        <x-star-rating :rating="$book->average_rating" :maxRating="10" size="sm" />
+                                        <span class="text-xs text-zinc-400">
+                                            {{ number_format($book->average_rating, 1) }}/10
+                                        </span>
+                                        <span class="text-[10px] text-zinc-500">
+                                            ({{ $book->reviews_count }} {{ $book->reviews_count === 1 ? 'reseña' : 'reseñas' }})
+                                        </span>
+                                    </div>
+                                @endif
                                 <div class="pt-2 flex items-center gap-2 text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
                                     <span>Ver detalles</span>
                                     <x-icons.arrow-right class="w-3 h-3 transition-transform group-hover:translate-x-1" />
@@ -173,7 +236,7 @@
     @if($testimonials->isNotEmpty())
         <section 
             x-data="scrollReveal(200)"
-            class="px-5 sm:px-8 py-20 sm:py-28 border-t border-zinc-800/50 bg-zinc-950"
+            class="px-5 sm:px-8 py-12 sm:py-16 border-t border-zinc-800/50 bg-zinc-950"
         >
             <div class="max-w-7xl mx-auto">
                 <div 
@@ -189,7 +252,7 @@
                             {{ __('common.home.testimonials') }}
                         </p>
                     </div>
-                    <h2 class="font-['DM_Serif_Display'] text-4xl sm:text-5xl md:text-6xl tracking-tight">
+                    <h2 class="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-4xl tracking-tight">
                         {{ __('common.home.what_readers_say') }}
                     </h2>
                     <p class="mt-3 text-sm text-zinc-400 max-w-md mx-auto">
@@ -234,7 +297,7 @@
     <!-- CTA Final -->
     <section 
         x-data="scrollReveal(300)"
-        class="px-5 sm:px-8 py-20 sm:py-28 border-t border-zinc-800/50 bg-gradient-to-b from-zinc-900/50 to-zinc-950"
+        class="px-5 sm:px-8 py-12 sm:py-16 border-t border-zinc-800/50 bg-gradient-to-b from-zinc-900/50 to-zinc-950"
     >
         <div class="max-w-4xl mx-auto text-center">
             <div 
@@ -244,7 +307,7 @@
                 x-transition:enter-end="opacity-100 translate-y-0"
                 class="space-y-6"
             >
-                <h2 class="font-['DM_Serif_Display'] text-4xl sm:text-5xl md:text-6xl tracking-tight">
+                <h2 class="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-4xl tracking-tight">
                     {{ __('common.home.cta_title') }}
                 </h2>
                 <p class="text-base text-zinc-400 max-w-xl mx-auto">

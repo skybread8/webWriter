@@ -55,7 +55,7 @@
                         </a>
                         <a href="{{ localized_route('orders.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200 transition-colors">
                             <x-icons.shopping-cart class="w-4 h-4" />
-                            <span class="text-sm font-medium">Mis pedidos</span>
+                            <span class="text-sm font-medium">{{ __('common.orders.title') }}</span>
                         </a>
                         <form method="POST" action="{{ route('logout') }}" class="pt-2 border-t border-zinc-800">
                             @csrf

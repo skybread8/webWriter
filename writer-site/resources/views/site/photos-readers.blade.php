@@ -3,12 +3,12 @@
 @section('title', __('common.nav.photos_readers'))
 
 @section('content')
-    <section class="px-5 sm:px-8 py-14 sm:py-20 max-w-6xl mx-auto">
+    <section class="px-5 sm:px-8 py-8 sm:py-12 max-w-6xl mx-auto">
         <header class="mb-8 sm:mb-12 text-center">
             <p class="text-[11px] tracking-[0.3em] uppercase text-zinc-500 mb-2">
                 {{ __('common.nav.photos_readers') }}
             </p>
-            <h1 class="font-['DM_Serif_Display'] text-3xl sm:text-4xl md:text-5xl tracking-tight mb-4">
+            <h1 class="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-4xl tracking-tight mb-4">
                 Fotos con mis lectores
             </h1>
             <p class="text-sm sm:text-base text-zinc-400 max-w-2xl mx-auto">

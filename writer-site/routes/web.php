@@ -113,6 +113,9 @@ Route::middleware(['auth', 'admin', 'locale'])->prefix('admin')->name('admin.')-
     // Libros (crear/editar/eliminar, precios e imágenes).
     Route::resource('books', AdminBookController::class)->except(['show']);
     Route::post('/books/update-order', [AdminBookController::class, 'updateOrder'])->name('books.update-order');
+    Route::post('/books/{book}/images', [\App\Http\Controllers\Admin\BookImageController::class, 'store'])->name('books.images.store');
+    Route::delete('/books/{book}/images/{bookImage}', [\App\Http\Controllers\Admin\BookImageController::class, 'destroy'])->name('books.images.destroy');
+    Route::post('/books/{book}/images/update-order', [\App\Http\Controllers\Admin\BookImageController::class, 'updateOrder'])->name('books.images.update-order');
 
     // Testimonios (reviews con fotos).
     Route::resource('testimonials', AdminTestimonialController::class);
@@ -156,6 +159,11 @@ Route::middleware(['auth', 'admin', 'locale'])->prefix('admin')->name('admin.')-
     // Políticas legales
     Route::get('/legal', [\App\Http\Controllers\Admin\LegalController::class, 'edit'])->name('legal.edit');
     Route::post('/legal', [\App\Http\Controllers\Admin\LegalController::class, 'update'])->name('legal.update');
+
+    // Templates de correo
+    Route::get('/email-templates', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'index'])->name('email-templates.index');
+    Route::get('/email-templates/{emailTemplate}/edit', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'edit'])->name('email-templates.edit');
+    Route::put('/email-templates/{emailTemplate}', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'update'])->name('email-templates.update');
 });
 
 /*

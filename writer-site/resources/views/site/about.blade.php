@@ -3,7 +3,7 @@
 @section('title', $page?->title ?? 'Sobre el autor')
 
 @section('content')
-    <section class="px-5 sm:px-8 py-14 sm:py-20 max-w-4xl mx-auto">
+    <section class="px-5 sm:px-8 py-8 sm:py-12 max-w-4xl mx-auto">
         <header class="mb-8 sm:mb-10">
             <p class="text-[11px] tracking-[0.3em] uppercase text-zinc-500 mb-2">
                 Sobre

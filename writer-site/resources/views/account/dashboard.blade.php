@@ -51,7 +51,7 @@
                         </a>
                         <a href="{{ localized_route('orders.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('orders.*') ? 'bg-zinc-800 text-zinc-100' : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200' }} transition-colors">
                             <x-icons.shopping-cart class="w-4 h-4" />
-                            <span class="text-sm font-medium">Mis pedidos</span>
+                            <span class="text-sm font-medium">{{ __('common.orders.title') }}</span>
                             @if($ordersCount > 0)
                                 <span class="ml-auto px-2 py-0.5 text-xs font-semibold text-zinc-950 bg-amber-400 rounded-full">{{ $ordersCount }}</span>
                             @endif
@@ -115,9 +115,9 @@
                     @if($recentOrders->isNotEmpty())
                         <div class="border border-zinc-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-zinc-900/40">
                             <div class="flex items-center justify-between mb-4">
-                                <h2 class="text-base sm:text-lg font-semibold text-zinc-100">Pedidos recientes</h2>
+                                <h2 class="text-base sm:text-lg font-semibold text-zinc-100">{{ __('common.orders.recent_orders') }}</h2>
                                 <a href="{{ localized_route('orders.index') }}" class="text-xs sm:text-sm text-amber-400 hover:text-amber-300 transition-colors">
-                                    Ver todos
+                                    {{ __('common.orders.view_all') }}
                                 </a>
                             </div>
                             <div class="space-y-3">
@@ -139,12 +139,12 @@
                                                     @else bg-amber-900/40 text-amber-300 border border-amber-800/50
                                                     @endif
                                                 ">
-                                                    @if($order->status === 'pending') Pendiente
-                                                    @elseif($order->status === 'paid') Pagado
-                                                    @elseif($order->status === 'processing') En proceso
-                                                    @elseif($order->status === 'shipped') Enviado
-                                                    @elseif($order->status === 'delivered') Entregado
-                                                    @elseif($order->status === 'cancelled') Cancelado
+                                                    @if($order->status === 'pending') {{ __('common.orders.status_pending') }}
+                                                    @elseif($order->status === 'paid') {{ __('common.orders.status_paid') }}
+                                                    @elseif($order->status === 'processing') {{ __('common.orders.status_processing') }}
+                                                    @elseif($order->status === 'shipped') {{ __('common.orders.status_shipped') }}
+                                                    @elseif($order->status === 'delivered') {{ __('common.orders.status_delivered') }}
+                                                    @elseif($order->status === 'cancelled') {{ __('common.orders.status_cancelled') }}
                                                     @endif
                                                 </span>
                                             </div>
@@ -155,9 +155,9 @@
                         </div>
                     @else
                         <div class="border border-zinc-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 bg-zinc-900/40 text-center">
-                            <p class="text-sm text-zinc-400 mb-4">Aún no has realizado ningún pedido</p>
+                            <p class="text-sm text-zinc-400 mb-4">{{ __('common.orders.no_orders') }}</p>
                             <a href="{{ localized_route('books.index.public') }}" class="inline-flex items-center gap-2 text-xs sm:text-sm text-amber-400 hover:text-amber-300 transition-colors">
-                                <span>Explorar libros</span>
+                                <span>{{ __('common.orders.explore_books') }}</span>
                                 <x-icons.arrow-right class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </a>
                         </div>

@@ -13,7 +13,12 @@ class BookController extends Controller
      */
     public function index()
     {
-        $books = Book::orderBy('order')->orderBy('created_at', 'desc')->get();
+        $books = Book::with(['images' => function($query) {
+            $query->orderBy('order')->orderBy('created_at')->limit(1);
+        }])
+        ->orderBy('order')
+        ->orderBy('created_at', 'desc')
+        ->get();
 
         return view('admin.books.index', compact('books'));
     }
@@ -52,7 +57,6 @@ class BookController extends Controller
             'description' => ['required', 'string', 'max:500'],
             'long_description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
-            'cover_image' => ['nullable', 'image', 'max:4096'],
             'stripe_price_id' => ['nullable', 'string', 'max:255'],
             'active' => ['nullable', 'boolean'],
             'order' => ['nullable', 'integer', 'min:0'],
@@ -64,19 +68,21 @@ class BookController extends Controller
             'price.required' => 'Indica un precio para poder vender el libro.',
             'price.numeric' => 'El precio debe ser un número.',
             'price.min' => 'El precio no puede ser negativo.',
-            'cover_image.image' => 'La imagen de portada debe ser un archivo de imagen (JPG, PNG, etc.).',
-            'cover_image.max' => 'La imagen de portada no puede pesar más de 4MB.',
         ]);
-
-        if ($request->hasFile('cover_image')) {
-            ensure_storage_directories();
-            $data['cover_image'] = store_image_safely($request->file('cover_image'), 'covers');
-        }
 
         $data['active'] = $request->boolean('active', true);
         $data['order'] = $request->input('order', 0);
 
-        Book::create($data);
+        $book = Book::create($data);
+
+        // Si hay una imagen de portada antigua, migrarla a BookImage
+        if ($book->cover_image) {
+            $book->images()->create([
+                'image_path' => $book->cover_image,
+                'order' => 0,
+            ]);
+            $book->update(['cover_image' => null]);
+        }
 
         return redirect()
             ->route('admin.books.index')
@@ -97,9 +103,13 @@ class BookController extends Controller
     public function edit(string $id)
     {
         $book = Book::findOrFail($id);
-        $readerPhotos = $book->readerPhotos()->orderBy('order')->orderBy('created_at', 'desc')->get();
+        $book->load(['readerPhotos' => function($query) {
+            $query->orderBy('order')->orderBy('created_at', 'desc');
+        }, 'images' => function($query) {
+            $query->orderBy('order')->orderBy('created_at');
+        }]);
 
-        return view('admin.books.edit', compact('book', 'readerPhotos'));
+        return view('admin.books.edit', compact('book'));
     }
 
     /**
@@ -115,18 +125,21 @@ class BookController extends Controller
             'description' => ['required', 'string', 'max:500'],
             'long_description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
-            'cover_image' => ['nullable', 'image', 'max:4096'],
             'stripe_price_id' => ['nullable', 'string', 'max:255'],
             'active' => ['nullable', 'boolean'],
             'order' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        if ($request->hasFile('cover_image')) {
-            ensure_storage_directories();
-            $data['cover_image'] = store_image_safely($request->file('cover_image'), 'covers');
-        }
-
         $data['active'] = $request->boolean('active', false);
+
+        // Si hay una imagen de portada antigua, migrarla a BookImage
+        if ($book->cover_image && $book->images()->where('order', 0)->doesntExist()) {
+            $book->images()->create([
+                'image_path' => $book->cover_image,
+                'order' => 0,
+            ]);
+            $book->update(['cover_image' => null]);
+        }
 
         $book->update($data);
 

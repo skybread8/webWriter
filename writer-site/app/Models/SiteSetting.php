@@ -12,6 +12,8 @@ class SiteSetting extends Model
         'hero_text',
         'hero_image',
         'contact_email',
+        'shipping_price',
+        'stripe_shipping_price_id',
         'instagram_url',
         'facebook_url',
         'tiktok_url',
@@ -28,5 +30,6 @@ class SiteSetting extends Model
 
     protected $casts = [
         'cookies_enabled' => 'boolean',
+        'shipping_price' => 'decimal:2',
     ];
 }

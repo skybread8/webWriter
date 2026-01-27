@@ -19,13 +19,15 @@ class CartController extends Controller
         $total = 0;
 
         foreach ($cart as $bookId => $quantity) {
-            $book = Book::find($bookId);
+            $book = Book::with(['images' => function($query) {
+                $query->orderBy('order')->orderBy('created_at')->limit(1);
+            }])->find($bookId);
             if ($book && $book->active) {
                 $books[] = [
                     'id' => $book->id,
                     'title' => $book->title,
                     'price' => $book->price,
-                    'cover_image' => $book->cover_image,
+                    'image_url' => $book->first_image_url,
                     'quantity' => $quantity,
                     'subtotal' => $book->price * $quantity,
                 ];
