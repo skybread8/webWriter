@@ -100,9 +100,12 @@ class PageController extends Controller
 
     public function faq()
     {
-        $page = Page::where('slug', 'faq')->first();
+        $faqs = \App\Models\Faq::where('active', true)
+            ->orderBy('order')
+            ->orderBy('created_at')
+            ->get();
 
-        return view('site.page', compact('page'));
+        return view('site.faq', compact('faqs'));
     }
 
     public function blog()

@@ -23,10 +23,10 @@
                     <img
                         src="{{ get_image_url($settings->hero_image) }}"
                         alt=""
-                        class="w-full h-full object-cover opacity-75"
+                        class="w-full h-full object-cover"
+                        style="opacity: 0.65;"
                     >
-                    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-zinc-950/40"></div>
-                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_0%,rgba(0,0,0,0.15)_100%)]"></div>
+                    <div class="absolute inset-0" style="background-color: rgba(9, 9, 11, 0.35);"></div>
                 </div>
             @endif
 
@@ -36,12 +36,6 @@
                      x-transition:enter="transition ease-out duration-1000"
                      x-transition:enter-start="opacity-0 translate-y-8"
                      x-transition:enter-end="opacity-100 translate-y-0">
-                    <div class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-zinc-900/60 border border-zinc-800/50 backdrop-blur-sm">
-                        <x-icons.book class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
-                        <p class="text-[10px] sm:text-[11px] tracking-[0.3em] sm:tracking-[0.35em] uppercase text-zinc-300">
-                            {{ __('common.home.hero_subtitle') }}
-                        </p>
-                    </div>
                     <h1 class="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl tracking-tight leading-[0.95]">
                         {!! nl2br(e($settings?->hero_text ?? 'Historias escritas en la sombra,<br>para leerse en silencio.')) !!}
                     </h1>

@@ -44,6 +44,9 @@
                     <a href="{{ route('admin.testimonials.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.testimonials.*') ? 'bg-zinc-900' : '' }}">
                         <span>Testimonios</span>
                     </a>
+                    <a href="{{ route('admin.faqs.index') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.faqs.*') ? 'bg-zinc-900' : '' }}">
+                        <span>Preguntas frecuentes</span>
+                    </a>
                     <a href="{{ route('admin.pages.about.edit') }}" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-zinc-900 {{ request()->routeIs('admin.pages.about.*') ? 'bg-zinc-900' : '' }}">
                         <span>Sobre el autor</span>
                     </a>

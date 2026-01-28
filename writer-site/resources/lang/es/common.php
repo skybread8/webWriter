@@ -170,6 +170,7 @@ return [
         'orders' => 'Pedidos',
         'books' => 'Libros',
         'testimonials' => 'Testimonios',
+        'faqs' => 'Preguntas frecuentes',
         'blog' => 'Blog',
         'blog_articles' => 'Artículos del blog',
         'blog_description' => 'Gestiona los artículos de tu blog. Puedes crear, editar y publicar contenido.',

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\HomeController as AdminHomeController;
 use App\Http\Controllers\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\TestimonialController as AdminTestimonialController;
+use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\BookStoreController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PageController;
@@ -120,6 +121,9 @@ Route::middleware(['auth', 'admin', 'locale'])->prefix('admin')->name('admin.')-
     // Testimonios (reviews con fotos).
     Route::resource('testimonials', AdminTestimonialController::class);
     Route::post('/testimonials/update-order', [AdminTestimonialController::class, 'updateOrder'])->name('testimonials.update-order');
+
+    // Preguntas frecuentes (FAQ).
+    Route::resource('faqs', AdminFaqController::class)->except(['show']);
 
     // Fotos con lectores
     Route::resource('reader-photos', \App\Http\Controllers\Admin\ReaderPhotoController::class);
