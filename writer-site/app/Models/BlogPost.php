@@ -13,6 +13,7 @@ class BlogPost extends Model
         'excerpt',
         'content',
         'featured_image',
+        'featured_image_alt',
         'published',
         'published_at',
         'order',

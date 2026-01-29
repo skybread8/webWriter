@@ -53,9 +53,15 @@
                 @if($readerPhoto->photo)
                     <div class="mt-3">
                         <p class="text-xs text-zinc-500 mb-1">Foto actual:</p>
-                        <img src="{{ $readerPhoto->photo_url }}" alt="Foto actual" class="max-h-48 rounded-lg border border-zinc-800 object-cover">
+                        <img src="{{ $readerPhoto->photo_url }}" alt="{{ $readerPhoto->photo_alt ?: 'Foto con lector' }}" class="max-h-48 rounded-lg border border-zinc-800 object-cover">
                     </div>
                 @endif
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-xs font-medium text-zinc-300">Texto alternativo SEO (palabras clave para la foto)</label>
+                <input type="text" name="photo_alt" value="{{ old('photo_alt', $readerPhoto->photo_alt) }}" placeholder="Ej: Lector con libro de Kevin Pérez" class="w-full rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 text-sm px-3 py-2 focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50">
+                @error('photo_alt')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
             </div>
 
             <div class="space-y-2">

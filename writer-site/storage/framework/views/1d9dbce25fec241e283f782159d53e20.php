@@ -5,6 +5,7 @@ $__propNames = \Illuminate\View\ComponentAttributeBag::extractPropNames(([
     'title' => null,
     'description' => null,
     'image' => null,
+    'image_alt' => null,
     'type' => 'website',
     'url' => null,
 ]));
@@ -26,6 +27,7 @@ foreach (array_filter(([
     'title' => null,
     'description' => null,
     'image' => null,
+    'image_alt' => null,
     'type' => 'website',
     'url' => null,
 ]), 'is_string', ARRAY_FILTER_USE_KEY) as $__key => $__value) {
@@ -66,6 +68,9 @@ unset($__defined_vars, $__key, $__value); ?>
 <meta property="og:title" content="<?php echo e($pageTitle); ?>">
 <meta property="og:description" content="<?php echo e($pageDescription); ?>">
 <meta property="og:image" content="<?php echo e($pageImage); ?>">
+<?php if($image_alt): ?>
+<meta property="og:image:alt" content="<?php echo e($image_alt); ?>">
+<?php endif; ?>
 <meta property="og:site_name" content="<?php echo e($siteName); ?>">
 <meta property="og:locale" content="<?php echo e(app()->getLocale() === 'es' ? 'es_ES' : (app()->getLocale() === 'ca' ? 'ca_ES' : 'en_US')); ?>">
 
@@ -75,6 +80,9 @@ unset($__defined_vars, $__key, $__value); ?>
 <meta name="twitter:title" content="<?php echo e($pageTitle); ?>">
 <meta name="twitter:description" content="<?php echo e($pageDescription); ?>">
 <meta name="twitter:image" content="<?php echo e($pageImage); ?>">
+<?php if($image_alt): ?>
+<meta name="twitter:image:alt" content="<?php echo e($image_alt); ?>">
+<?php endif; ?>
 
 <!-- Canonical URL -->
 <link rel="canonical" href="<?php echo e($pageUrl); ?>">

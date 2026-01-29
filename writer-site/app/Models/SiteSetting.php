@@ -11,6 +11,8 @@ class SiteSetting extends Model
         'tagline',
         'hero_text',
         'hero_image',
+        'hero_image_alt',
+        'hero_description',
         'contact_email',
         'shipping_price',
         'stripe_shipping_price_id',

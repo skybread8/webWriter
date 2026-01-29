@@ -93,6 +93,10 @@ class BookStoreController extends Controller
         
         abort_unless($book->active, 404);
 
+        if (! $book->isInStock()) {
+            return back()->with('status', 'Este libro no está disponible en este momento (sin stock).');
+        }
+
         if (! $book->stripe_price_id || ! config('services.stripe.secret')) {
             return back()->with('status', 'El pago aún no está configurado para este libro.');
         }
@@ -126,8 +130,21 @@ class BookStoreController extends Controller
 
         $total = 0;
         $cartItems = [];
+        $stockErrors = [];
         foreach ($books as $book) {
             $quantity = $cart[$book->id] ?? 1;
+            if ($book->hasStockControl()) {
+                $available = $book->stock ?? 0;
+                if ($available <= 0) {
+                    $stockErrors[] = "«{$book->title}» no tiene stock disponible. Elimínalo del carrito para continuar.";
+                    continue;
+                }
+                if ($quantity > $available) {
+                    $quantity = $available;
+                    $cart[$book->id] = $available;
+                    session()->put('cart', $cart);
+                }
+            }
             $subtotal = $book->price * $quantity;
             $total += $subtotal;
             $cartItems[] = [
@@ -135,6 +152,11 @@ class BookStoreController extends Controller
                 'quantity' => $quantity,
                 'subtotal' => $subtotal,
             ];
+        }
+
+        if (!empty($stockErrors)) {
+            return redirect()->to(localized_route('cart.index'))
+                ->with('status', implode(' ', $stockErrors));
         }
 
         // Obtener precio de envío
@@ -195,6 +217,10 @@ class BookStoreController extends Controller
 
         $subtotal = 0;
         foreach ($books as $book) {
+            if ($book->hasStockControl() && ($book->stock === null || $book->stock < ($cart[$book->id] ?? 0))) {
+                return redirect()->to(localized_route('cart.index'))
+                    ->with('status', 'No hay stock suficiente de «' . $book->title . '». Actualiza el carrito o elimínalo.');
+            }
             if (! $book->stripe_price_id) {
                 continue;
             }
@@ -326,6 +352,30 @@ class BookStoreController extends Controller
                 if ($order && $session->payment_status === 'paid') {
                     // Actualizar estado del pedido
                     $order->update(['status' => 'paid']);
+
+                    // Restar stock de cada libro del pedido (con bloqueo para evitar oversell)
+                    \Illuminate\Support\Facades\DB::transaction(function () use ($order) {
+                        foreach ($order->items as $item) {
+                            $book = \App\Models\Book::where('id', $item->book_id)->lockForUpdate()->first();
+                            if ($book && $book->stock !== null) {
+                                $qty = min($item->quantity, max(0, $book->stock));
+                                if ($qty > 0) {
+                                    $book->decrement('stock', $qty);
+                                    $book->refresh();
+                                    if ($book->stock <= 0) {
+                                        $adminEmail = \App\Models\SiteSetting::first()?->contact_email;
+                                        if ($adminEmail) {
+                                            try {
+                                                \Mail::to($adminEmail)->send(new \App\Mail\BookStockOutMail($book));
+                                            } catch (\Exception $e) {
+                                                \Log::error('Error enviando correo de stock agotado: ' . $e->getMessage());
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
                     
                     // Enviar correo de pago confirmado
                     try {

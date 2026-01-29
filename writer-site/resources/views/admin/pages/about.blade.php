@@ -67,9 +67,16 @@
                 @if($page->image)
                     <div class="mt-3">
                         <p class="text-xs text-zinc-500 mb-1">Foto actual:</p>
-                        <img src="{{ get_image_url($page->image) }}" alt="Foto del autor" class="max-h-48 rounded-lg border border-zinc-800 object-cover">
+                        <img src="{{ get_image_url($page->image) }}" alt="{{ $page->image_alt ?: 'Foto del autor' }}" class="max-h-48 rounded-lg border border-zinc-800 object-cover">
                     </div>
                 @endif
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-xs font-medium text-zinc-300">Texto alternativo SEO (foto del autor)</label>
+                <p class="text-xs text-zinc-500 mb-1">Palabras clave para buscadores (ej: &quot;Kevin Pérez Alarcón, escritor&quot;).</p>
+                <input type="text" name="image_alt" value="{{ old('image_alt', $page->image_alt) }}" placeholder="Ej: Kevin Pérez Alarcón, autor" class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500">
+                @error('image_alt')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
             </div>
 
             <div class="pt-2">

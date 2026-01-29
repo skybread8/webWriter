@@ -58,7 +58,9 @@ class BookController extends Controller
             'long_description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'stripe_price_id' => ['nullable', 'string', 'max:255'],
+            'cover_image_alt' => ['nullable', 'string', 'max:255'],
             'active' => ['nullable', 'boolean'],
+            'stock' => ['nullable', 'integer', 'min:0'],
             'order' => ['nullable', 'integer', 'min:0'],
         ], [
             'title.required' => 'Escribe un título para el libro.',
@@ -72,6 +74,9 @@ class BookController extends Controller
 
         $data['active'] = $request->boolean('active', true);
         $data['order'] = $request->input('order', 0);
+        $data['stock'] = $request->has('stock') && $request->input('stock') !== '' && $request->input('stock') !== null
+            ? (int) $request->input('stock')
+            : null;
 
         $book = Book::create($data);
 
@@ -126,11 +131,16 @@ class BookController extends Controller
             'long_description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'stripe_price_id' => ['nullable', 'string', 'max:255'],
+            'cover_image_alt' => ['nullable', 'string', 'max:255'],
             'active' => ['nullable', 'boolean'],
+            'stock' => ['nullable', 'integer', 'min:0'],
             'order' => ['nullable', 'integer', 'min:0'],
         ]);
 
         $data['active'] = $request->boolean('active', false);
+        $data['stock'] = $request->has('stock') && $request->input('stock') !== '' && $request->input('stock') !== null
+            ? (int) $request->input('stock')
+            : null;
 
         // Si hay una imagen de portada antigua, migrarla a BookImage
         if ($book->cover_image && $book->images()->where('order', 0)->doesntExist()) {

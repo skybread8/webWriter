@@ -18,6 +18,7 @@ class BookImageController extends Controller
         app()->setLocale('es');
         $data = $request->validate([
             'image' => ['required', 'image', 'max:4096'],
+            'alt' => ['nullable', 'string', 'max:255'],
             'order' => ['nullable', 'integer', 'min:0'],
         ], [
             'image.required' => 'Debes subir una imagen.',

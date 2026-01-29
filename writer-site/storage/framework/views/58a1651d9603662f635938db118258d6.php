@@ -20,7 +20,7 @@
                 >
                     <img
                         src="<?php echo e(get_image_url($settings->hero_image)); ?>"
-                        alt=""
+                        alt="<?php echo e($settings->hero_image_alt ?: ($settings->site_name ?? 'Portada')); ?>"
                         class="w-full h-full object-cover"
                         style="opacity: 0.65;"
                     >
@@ -39,7 +39,8 @@
 
                     </h1>
                     <p class="text-sm sm:text-base md:text-lg text-zinc-300 max-w-xl leading-relaxed">
-                        Libros pensados para una lectura íntima, nocturna, casi en voz baja. Cada página es una conversación con el silencio.
+                        <?php echo e(trim($settings?->hero_description ?? '') ?: 'Libros pensados para una lectura íntima, nocturna, casi en voz baja. Cada página es una conversación con el silencio.'); ?>
+
                     </p>
                     <div class="pt-2 sm:pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
                         <a href="<?php echo e(localized_route('books.index.public')); ?>" class="group inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-zinc-100 text-zinc-950 text-xs sm:text-sm font-semibold tracking-wide uppercase hover:bg-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-zinc-100/20">
@@ -464,7 +465,7 @@
                             <div class="flex items-center gap-4">
                                 <img 
                                     src="<?php echo e($testimonial->photo_url); ?>" 
-                                    alt="<?php echo e($testimonial->name); ?>" 
+                                    alt="<?php echo e($testimonial->photo_alt ?: $testimonial->name); ?>" 
                                     class="w-14 h-14 rounded-full object-cover border-2 border-zinc-800 ring-2 ring-zinc-700"
                                 >
                                 <div class="flex-1">

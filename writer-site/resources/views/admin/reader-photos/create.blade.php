@@ -34,6 +34,12 @@
             </div>
 
             <div class="space-y-2">
+                <label class="block text-xs font-medium text-zinc-300">Texto alternativo SEO (palabras clave para la foto)</label>
+                <input type="text" name="photo_alt" value="{{ old('photo_alt') }}" placeholder="Ej: Lector con libro de Kevin Pérez" class="w-full rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 text-sm px-3 py-2 focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50">
+                @error('photo_alt')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+            </div>
+
+            <div class="space-y-2">
                 <label for="reader_name" class="block text-xs font-medium text-zinc-300">
                     Nombre del lector (opcional)
                 </label>

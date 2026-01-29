@@ -9,6 +9,7 @@ class BookImage extends Model
     protected $fillable = [
         'book_id',
         'image_path',
+        'alt',
         'order',
     ];
 

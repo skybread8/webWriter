@@ -2,6 +2,7 @@
     'title' => null,
     'description' => null,
     'image' => null,
+    'image_alt' => null,
     'type' => 'website',
     'url' => null,
 ])
@@ -32,6 +33,9 @@
 <meta property="og:title" content="{{ $pageTitle }}">
 <meta property="og:description" content="{{ $pageDescription }}">
 <meta property="og:image" content="{{ $pageImage }}">
+@if($image_alt)
+<meta property="og:image:alt" content="{{ $image_alt }}">
+@endif
 <meta property="og:site_name" content="{{ $siteName }}">
 <meta property="og:locale" content="{{ app()->getLocale() === 'es' ? 'es_ES' : (app()->getLocale() === 'ca' ? 'ca_ES' : 'en_US') }}">
 
@@ -41,6 +45,9 @@
 <meta name="twitter:title" content="{{ $pageTitle }}">
 <meta name="twitter:description" content="{{ $pageDescription }}">
 <meta name="twitter:image" content="{{ $pageImage }}">
+@if($image_alt)
+<meta name="twitter:image:alt" content="{{ $image_alt }}">
+@endif
 
 <!-- Canonical URL -->
 <link rel="canonical" href="{{ $pageUrl }}">

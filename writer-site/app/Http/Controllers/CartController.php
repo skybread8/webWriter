@@ -23,15 +23,19 @@ class CartController extends Controller
                 $query->orderBy('order')->orderBy('created_at')->limit(1);
             }])->find($bookId);
             if ($book && $book->active) {
+                $maxQty = $book->hasStockControl() ? ($book->stock ?? 0) : null;
+                $effectiveQty = $maxQty !== null ? min($quantity, $maxQty) : $quantity;
                 $books[] = [
                     'id' => $book->id,
                     'title' => $book->title,
                     'price' => $book->price,
                     'image_url' => $book->first_image_url,
-                    'quantity' => $quantity,
-                    'subtotal' => $book->price * $quantity,
+                    'quantity' => $effectiveQty,
+                    'subtotal' => $book->price * $effectiveQty,
+                    'in_stock' => $book->isInStock(),
+                    'max_quantity' => $maxQty,
                 ];
-                $total += $book->price * $quantity;
+                $total += $book->price * $effectiveQty;
             }
         }
 
@@ -50,6 +54,10 @@ class CartController extends Controller
         
         abort_unless($book->active, 404);
 
+        if (! $book->isInStock()) {
+            return back()->with('status', 'Este libro no está disponible (sin stock).');
+        }
+
         $cart = session()->get('cart', []);
         $quantity = (int) $request->input('quantity', 1);
 
@@ -57,6 +65,10 @@ class CartController extends Controller
             $cart[$book->id] += $quantity;
         } else {
             $cart[$book->id] = $quantity;
+        }
+
+        if ($book->hasStockControl() && $book->stock !== null) {
+            $cart[$book->id] = min($cart[$book->id], $book->stock);
         }
 
         session()->put('cart', $cart);
@@ -82,6 +94,9 @@ class CartController extends Controller
         if ($quantity <= 0) {
             unset($cart[$book->id]);
         } else {
+            if ($book->hasStockControl() && $book->stock !== null) {
+                $quantity = min($quantity, $book->stock);
+            }
             $cart[$book->id] = $quantity;
         }
 

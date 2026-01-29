@@ -22,10 +22,13 @@ class HomeController extends Controller
 
         $data = $request->validate([
             'hero_text' => ['required', 'string', 'max:500'],
+            'hero_description' => ['nullable', 'string', 'max:1000'],
+            'hero_image_alt' => ['nullable', 'string', 'max:255'],
             'hero_image' => ['nullable', 'image', 'max:4096'],
         ], [
             'hero_text.required' => 'Este texto se muestra en la parte principal de la página de inicio.',
             'hero_text.max' => 'Por claridad visual, el texto principal no debe ser demasiado largo (máximo 500 caracteres).',
+            'hero_description.max' => 'El texto secundario no puede tener más de 1000 caracteres.',
             'hero_image.image' => 'La imagen principal debe ser un archivo de imagen (JPG, PNG, etc.).',
             'hero_image.max' => 'La imagen principal no puede pesar más de 4MB.',
         ]);

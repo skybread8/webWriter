@@ -27,6 +27,7 @@ class PageController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'content' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'max:4096'],
+            'image_alt' => ['nullable', 'string', 'max:255'],
         ], [
             'title.required' => 'Este título se muestra en la página "Sobre el autor".',
             'title.max' => 'El título no puede tener más de 255 caracteres.',

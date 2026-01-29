@@ -49,7 +49,7 @@
                                         <figure class="md:col-span-1">
                                             <img 
                                                 src="{{ get_image_url($post->featured_image) }}" 
-                                                alt="{{ $post->title }}" 
+                                                alt="{{ $post->featured_image_alt ?: $post->title }}" 
                                                 class="w-full h-48 md:h-full object-cover"
                                                 loading="lazy"
                                                 width="400"

@@ -81,6 +81,13 @@
             <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
         @enderror
 
+        <div class="mt-3 space-y-2">
+            <label class="block text-xs font-medium text-zinc-300">Texto alternativo SEO (foto)</label>
+            <p class="text-xs text-zinc-500 mb-1">Palabras clave para buscadores (ej: &quot;Foto de [nombre]&quot;).</p>
+            <input type="text" name="photo_alt" value="{{ old('photo_alt', $testimonial?->photo_alt) }}" placeholder="Ej: Foto de {{ $testimonial?->name ?? 'lector' }}" class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500">
+            @error('photo_alt')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+        </div>
+
         @if($testimonial?->photo)
             <div class="mt-3">
                 <p class="text-xs text-zinc-500 mb-1">Foto actual:</p>

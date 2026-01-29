@@ -66,6 +66,11 @@
                                 </p>
                                 <p class="text-xs text-zinc-500 mt-2">
                                     Precio: <span class="text-zinc-100 font-medium">{{ number_format($book->price, 2, ',', '.') }} €</span>
+                                    @if($book->stock !== null)
+                                        · Stock: <span class="{{ $book->stock <= 0 ? 'text-amber-400 font-medium' : 'text-zinc-300' }}">{{ $book->stock }} ud.</span>
+                                    @else
+                                        · Stock: <span class="text-zinc-500">ilimitado</span>
+                                    @endif
                                 </p>
                             </div>
                         </div>

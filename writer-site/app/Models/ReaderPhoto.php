@@ -9,6 +9,7 @@ class ReaderPhoto extends Model
     protected $fillable = [
         'book_id',
         'photo',
+        'photo_alt',
         'reader_name',
         'caption',
         'active',

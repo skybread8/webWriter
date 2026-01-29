@@ -31,7 +31,7 @@
                     <figure class="group relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-black/50">
                         <img 
                             src="{{ $photo->photo_url }}" 
-                            alt="{{ $photo->reader_name ?? 'Foto con lector' }}" 
+                            alt="{{ $photo->photo_alt ?: ($photo->reader_name ?: 'Foto con lector') }}" 
                             class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                             loading="lazy"
                         >

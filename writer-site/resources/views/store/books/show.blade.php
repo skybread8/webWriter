@@ -2,6 +2,32 @@
 
 @section('title', $book->title)
 
+@section('seo')
+    @php
+        $settings = \App\Models\SiteSetting::first();
+        $siteName = $settings?->site_name ?? 'Kevin Pérez Alarcón';
+        $seoTitle = $siteName . ' – ' . $book->title;
+        $seoDescription = \Illuminate\Support\Str::limit(strip_tags($book->description), 160);
+        $seoImage = $book->first_image_url ?: ($settings?->hero_image ? get_image_url($settings->hero_image) : null);
+        $seoImageAlt = $book->cover_image_alt ?: $book->title;
+    @endphp
+    <x-seo-meta :title="$seoTitle" :description="$seoDescription" :image="$seoImage" :image_alt="$seoImageAlt" type="website" />
+    @php
+        $bookSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Book',
+            'name' => $book->title,
+            'description' => $seoDescription,
+            'author' => ['@type' => 'Person', 'name' => $siteName],
+            'url' => url()->current(),
+        ];
+        if ($seoImage) {
+            $bookSchema['image'] = $seoImage;
+        }
+    @endphp
+    <script type="application/ld+json">{!! json_encode($bookSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+@endsection
+
 @section('content')
     <section 
         x-data="scrollReveal(0)"
@@ -152,23 +178,30 @@
                         </p>
                     </div>
                     <div class="space-y-2 sm:space-y-3">
-                        <form method="POST" action="{{ localized_route('cart.add', $book) }}">
-                            @csrf
-                            <input type="hidden" name="quantity" value="1">
-                            <x-button type="submit" variant="secondary" class="w-full flex items-center justify-center gap-2 text-xs sm:text-sm">
-                                <x-icons.shopping-cart class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                <span>{{ __('common.books.add_to_cart') }}</span>
-                            </x-button>
-                        </form>
-                        <form method="POST" action="{{ localized_route('books.checkout', $book) }}">
-                            @csrf
-                            <x-button class="w-full flex items-center justify-center gap-2 text-xs sm:text-sm">
-                                <span>{{ __('common.books.buy') }}</span>
-                                <x-icons.arrow-right class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            </x-button>
-                        </form>
+                        @if ($book->isInStock())
+                            <form method="POST" action="{{ localized_route('cart.add', $book) }}">
+                                @csrf
+                                <input type="hidden" name="quantity" value="1">
+                                <x-button type="submit" variant="secondary" class="w-full flex items-center justify-center gap-2 text-xs sm:text-sm">
+                                    <x-icons.shopping-cart class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                    <span>{{ __('common.books.add_to_cart') }}</span>
+                                </x-button>
+                            </form>
+                            <form method="POST" action="{{ localized_route('books.checkout', $book) }}">
+                                @csrf
+                                <x-button class="w-full flex items-center justify-center gap-2 text-xs sm:text-sm">
+                                    <span>{{ __('common.books.buy') }}</span>
+                                    <x-icons.arrow-right class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                </x-button>
+                            </form>
+                        @else
+                            <div class="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-zinc-800/80 border border-zinc-700 text-center">
+                                <p class="text-sm font-medium text-zinc-300">No disponible</p>
+                                <p class="text-xs text-zinc-500 mt-1">Este libro está agotado. No se pueden realizar compras por el momento.</p>
+                            </div>
+                        @endif
                     </div>
-                    @if (! $book->stripe_price_id)
+                    @if ($book->isInStock() && ! $book->stripe_price_id)
                         <div class="p-3 rounded-xl bg-amber-900/20 border border-amber-800/50">
                             <p class="text-xs text-amber-300">
                                 Este libro aún no tiene un precio de Stripe configurado. El botón de compra no estará activo hasta añadirlo desde el panel.
@@ -387,7 +420,7 @@
                         <figure class="group relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 transition-all duration-300 hover:shadow-xl hover:shadow-black/50">
                             <img 
                                 src="{{ $photo->photo_url }}" 
-                                alt="{{ $photo->reader_name ?? 'Foto con lector' }}" 
+                                alt="{{ $photo->photo_alt ?: ($photo->reader_name ?: 'Foto con lector') }}" 
                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                 loading="lazy"
                             >

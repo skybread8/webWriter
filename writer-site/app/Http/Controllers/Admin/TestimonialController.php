@@ -55,6 +55,7 @@ class TestimonialController extends Controller
             'review' => ['required', 'string', 'max:2000'],
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'photo' => ['nullable', 'image', 'max:2048'],
+            'photo_alt' => ['nullable', 'string', 'max:255'],
             'active' => ['boolean'],
             'order' => ['nullable', 'integer', 'min:0'],
         ], [
@@ -103,6 +104,7 @@ class TestimonialController extends Controller
             'review' => ['required', 'string', 'max:2000'],
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'photo' => ['nullable', 'image', 'max:2048'],
+            'photo_alt' => ['nullable', 'string', 'max:255'],
             'active' => ['boolean'],
             'order' => ['nullable', 'integer', 'min:0'],
         ], [

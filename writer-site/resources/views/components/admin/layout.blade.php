@@ -24,9 +24,9 @@
             <!-- Menú móvil (hamburguesa) -->
             <div x-data="{ mobileMenuOpen: false }" class="md:hidden">
                 <header class="border-b border-zinc-800 px-4 py-3 flex items-center justify-between bg-zinc-950/90 backdrop-blur sticky top-0 z-50">
-                    <div class="font-['DM_Serif_Display'] text-lg">
+                    <a href="{{ route('home', ['locale' => app()->getLocale()]) }}" class="font-['DM_Serif_Display'] text-lg hover:text-zinc-200 transition-colors">
                         {{ optional(\App\Models\SiteSetting::first())->site_name ?? 'Autor' }}
-                    </div>
+                    </a>
                     <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 rounded-lg hover:bg-zinc-900 transition-colors" aria-label="Menú">
                         <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -53,9 +53,9 @@
                     <div class="px-4 py-6 space-y-1 overflow-y-auto h-full">
                         <div class="mb-6 pb-4 border-b border-zinc-800">
                             <div class="text-xs tracking-[0.3em] uppercase text-zinc-500 mb-2">{{ __('common.admin.panel') }}</div>
-                            <div class="font-['DM_Serif_Display'] text-xl">
+                            <a href="{{ route('home', ['locale' => app()->getLocale()]) }}" class="font-['DM_Serif_Display'] text-xl hover:text-zinc-200 transition-colors block" @click="mobileMenuOpen = false">
                                 {{ optional(\App\Models\SiteSetting::first())->site_name ?? 'Autor' }}
-                            </div>
+                            </a>
                             <p class="text-xs text-zinc-500 mt-1">
                                 {{ __('common.admin.private_space') }}
                             </p>
@@ -134,9 +134,9 @@
             <aside class="hidden md:flex md:flex-col w-72 border-r border-zinc-800 bg-zinc-950/80 backdrop-blur">
                 <div class="px-6 py-6 border-b border-zinc-800">
                     <div class="text-xs tracking-[0.3em] uppercase text-zinc-500 mb-2">{{ __('common.admin.panel') }}</div>
-                    <div class="font-['DM_Serif_Display'] text-xl">
+                    <a href="{{ route('home', ['locale' => app()->getLocale()]) }}" class="font-['DM_Serif_Display'] text-xl hover:text-zinc-200 transition-colors block">
                         {{ optional(\App\Models\SiteSetting::first())->site_name ?? 'Autor' }}
-                    </div>
+                    </a>
                     <p class="text-xs text-zinc-500 mt-1">
                         {{ __('common.admin.private_space') }}
                     </p>

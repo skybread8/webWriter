@@ -98,6 +98,12 @@
         @error('featured_image')
             <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
         @enderror
+        <div class="mt-3 space-y-2">
+            <label class="block text-xs font-medium text-zinc-300">Texto alternativo SEO (imagen destacada)</label>
+            <p class="text-xs text-zinc-500 mb-1">Palabras clave para buscadores (ej: &quot;Portada del artículo: [título]&quot;).</p>
+            <input type="text" name="featured_image_alt" value="{{ old('featured_image_alt', $post?->featured_image_alt) }}" placeholder="Ej: Imagen del artículo {{ $post?->title ?? '' }}" class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500">
+            @error('featured_image_alt')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
+        </div>
     </div>
 
     <div class="grid md:grid-cols-3 gap-6">

@@ -94,7 +94,7 @@ class Book extends Model
             if ($coverUrl) {
                 $allImages->push([
                     'url' => $coverUrl,
-                    'alt' => "Portada del libro {$this->title}",
+                    'alt' => $this->cover_image_alt ?: "Portada del libro {$this->title}",
                     'is_cover' => true,
                 ]);
             }
@@ -106,7 +106,7 @@ class Book extends Model
                 if ($image->image_url) {
                     $allImages->push([
                         'url' => $image->image_url,
-                        'alt' => "Imagen del libro {$this->title}",
+                        'alt' => $image->alt ?: "Imagen del libro {$this->title}",
                         'is_cover' => false,
                     ]);
                 }
@@ -117,7 +117,7 @@ class Book extends Model
                 if ($image->image_url) {
                     $allImages->push([
                         'url' => $image->image_url,
-                        'alt' => "Imagen del libro {$this->title}",
+                        'alt' => $image->alt ?: "Imagen del libro {$this->title}",
                         'is_cover' => false,
                     ]);
                 }
@@ -151,13 +151,43 @@ class Book extends Model
         'long_description',
         'price',
         'cover_image',
+        'cover_image_alt',
         'stripe_price_id',
         'active',
+        'stock',
         'order',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'active' => 'boolean',
+        'stock' => 'integer',
     ];
+
+    /**
+     * Indica si el libro tiene control de stock (stock no es null)
+     */
+    public function hasStockControl(): bool
+    {
+        return $this->stock !== null;
+    }
+
+    /**
+     * Indica si hay unidades disponibles para comprar
+     */
+    public function isInStock(): bool
+    {
+        if ($this->stock === null) {
+            return true; // Sin control = siempre disponible
+        }
+        return $this->stock > 0;
+    }
+
+    /**
+     * Unidades disponibles (null = ilimitado)
+     */
+    public function availableStock(): ?int
+    {
+        return $this->stock;
+    }
 }

@@ -56,6 +56,7 @@ class ReaderPhotoController extends Controller
         $data = $request->validate([
             'book_id' => ['nullable', 'exists:books,id'],
             'photo' => ['required', 'image', 'max:4096'],
+            'photo_alt' => ['nullable', 'string', 'max:255'],
             'reader_name' => ['nullable', 'string', 'max:255'],
             'caption' => ['nullable', 'string', 'max:500'],
             'active' => ['boolean'],
@@ -120,6 +121,7 @@ class ReaderPhotoController extends Controller
         $data = $request->validate([
             'book_id' => ['nullable', 'exists:books,id'],
             'photo' => ['nullable', 'image', 'max:4096'],
+            'photo_alt' => ['nullable', 'string', 'max:255'],
             'reader_name' => ['nullable', 'string', 'max:255'],
             'caption' => ['nullable', 'string', 'max:500'],
             'active' => ['boolean'],

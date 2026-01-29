@@ -71,6 +71,9 @@
                                     <p class="text-xs sm:text-sm text-amber-400 font-medium">{{ number_format($item['price'], 2, ',', '.') }} €</p>
                                 </div>
 
+                                @if(isset($item['in_stock']) && !$item['in_stock'])
+                                    <p class="text-xs text-amber-400 font-medium">Sin stock — elimina este producto para poder continuar con el pedido.</p>
+                                @endif
                                 <div class="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-4">
                                     <form method="POST" action="{{ localized_route('cart.update', $item['id']) }}" class="flex items-center gap-2">
                                         @csrf
@@ -81,8 +84,10 @@
                                             name="quantity"
                                             value="{{ $item['quantity'] }}"
                                             min="1"
+                                            @if(isset($item['max_quantity']) && $item['max_quantity'] !== null) max="{{ $item['max_quantity'] }}" @endif
                                             class="w-16 sm:w-20 rounded-lg bg-zinc-950 border border-zinc-800 text-xs sm:text-sm text-zinc-100 text-center focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50 transition-colors"
                                             onchange="this.form.submit()"
+                                            @if(isset($item['in_stock']) && !$item['in_stock']) disabled @endif
                                         >
                                     </form>
 

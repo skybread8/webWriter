@@ -30,6 +30,7 @@
                 :title="$pageTitle"
                 :description="$pageDescription"
                 :image="$settings?->hero_image ? get_image_url($settings->hero_image) : null"
+                :image_alt="$settings?->hero_image_alt"
             />
         @endif
 

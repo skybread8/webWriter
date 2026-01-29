@@ -11,5 +11,6 @@ class Page extends Model
         'title',
         'content',
         'image',
+        'image_alt',
     ];
 }

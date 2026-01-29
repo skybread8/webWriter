@@ -18,7 +18,7 @@
                 <figure class="w-full max-w-xs mx-auto md:max-w-none">
                     <img 
                         src="{{ get_image_url($page->image) }}" 
-                        alt="Foto de {{ $page->title ?? 'Kevin Pérez Alarcón' }}" 
+                        alt="{{ $page->image_alt ?: ('Foto de ' . ($page->title ?? 'Kevin Pérez Alarcón')) }}" 
                         class="w-full rounded-2xl sm:rounded-3xl border-2 border-zinc-800 object-cover shadow-2xl shadow-black/50"
                         loading="lazy"
                     >
@@ -66,7 +66,7 @@
                         <figure class="group relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700 transition-colors">
                             <img 
                                 src="{{ $photo->photo_url }}" 
-                                alt="{{ $photo->reader_name ?? 'Foto con lector' }}" 
+                                alt="{{ $photo->photo_alt ?: ($photo->reader_name ?: 'Foto con lector') }}" 
                                 class="w-full h-full object-cover"
                                 loading="lazy"
                             >

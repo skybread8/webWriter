@@ -113,6 +113,45 @@
 
         <div class="space-y-2">
             <label class="block text-xs font-medium text-zinc-300">
+                Texto alternativo SEO (portada / primera imagen)
+            </label>
+            <p class="text-xs text-zinc-500 mb-1">
+                Palabras clave para buscadores (ej: &quot;Portada del libro [título]&quot;). Mejora el posicionamiento de las imágenes.
+            </p>
+            <input
+                type="text"
+                name="cover_image_alt"
+                value="{{ old('cover_image_alt', $book?->cover_image_alt) }}"
+                placeholder="Ej: Portada de [nombre del libro]"
+                class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+            >
+            @error('cover_image_alt')
+                <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="space-y-2">
+            <label class="block text-xs font-medium text-zinc-300">
+                Stock (unidades disponibles)
+            </label>
+            <p class="text-xs text-zinc-500 mb-1">
+                Deja vacío para no controlar stock (ilimitado). Si pones un número, se irá restando con cada venta. A 0 se bloqueará la compra y se avisará al admin.
+            </p>
+            <input
+                type="number"
+                name="stock"
+                value="{{ old('stock', $book?->stock !== null ? $book->stock : '') }}"
+                min="0"
+                placeholder="Ilimitado"
+                class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+            >
+            @error('stock')
+                <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="space-y-2">
+            <label class="block text-xs font-medium text-zinc-300">
                 Orden de aparición
             </label>
             <p class="text-xs text-zinc-500 mb-1">

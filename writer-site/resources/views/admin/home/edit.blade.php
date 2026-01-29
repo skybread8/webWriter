@@ -32,6 +32,42 @@
 
             <div class="space-y-2">
                 <label class="block text-xs font-medium text-zinc-300">
+                    Texto debajo del título
+                </label>
+                <p class="text-xs text-zinc-500 mb-1">
+                    El párrafo que aparece bajo el texto principal, por ejemplo: &quot;Libros pensados para una lectura íntima...&quot;
+                </p>
+                <textarea
+                    name="hero_description"
+                    rows="3"
+                    class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+                >{{ old('hero_description', $settings->hero_description) }}</textarea>
+                @error('hero_description')
+                    <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-xs font-medium text-zinc-300">
+                    Texto alternativo / palabras clave SEO (imagen de fondo)
+                </label>
+                <p class="text-xs text-zinc-500 mb-1">
+                    Describe la imagen para buscadores y accesibilidad (ej: &quot;Kevin Pérez Alarcón con sus libros&quot;). Mejora el posicionamiento.
+                </p>
+                <input
+                    type="text"
+                    name="hero_image_alt"
+                    value="{{ old('hero_image_alt', $settings->hero_image_alt) }}"
+                    placeholder="Ej: Autor Kevin Pérez Alarcón con sus libros"
+                    class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+                >
+                @error('hero_image_alt')
+                    <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-xs font-medium text-zinc-300">
                     Imagen de fondo (opcional)
                 </label>
                 <p class="text-xs text-zinc-500 mb-1">

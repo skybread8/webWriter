@@ -80,6 +80,22 @@
                     </div>
 
                     <div class="space-y-2">
+                        <label class="block text-xs font-medium text-zinc-300">
+                            Texto alternativo SEO (palabras clave para la imagen)
+                        </label>
+                        <input
+                            type="text"
+                            name="alt"
+                            value="{{ old('alt') }}"
+                            placeholder="Ej: Detalle de la portada de {{ $book->title }}"
+                            class="w-full rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 text-sm px-3 py-2 focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50"
+                        >
+                        @error('alt')
+                            <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="space-y-2">
                         <label for="image_order" class="block text-xs font-medium text-zinc-300">
                             Orden (opcional)
                         </label>
@@ -116,7 +132,7 @@
                             <div class="aspect-[3/4] overflow-hidden bg-zinc-950">
                                 <img 
                                     src="{{ $image->image_url }}" 
-                                    alt="Imagen del libro {{ $book->title }}" 
+                                    alt="{{ $image->alt ?: 'Imagen del libro ' . $book->title }}" 
                                     class="w-full h-full object-cover"
                                 >
                             </div>

@@ -28,14 +28,14 @@
         <?php else: ?>
             <?php if (isset($component)) { $__componentOriginal84f9df3f620371229981225e7ba608d7 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal84f9df3f620371229981225e7ba608d7 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.seo-meta','data' => ['title' => $pageTitle,'description' => $pageDescription,'image' => $settings?->hero_image ? get_image_url($settings->hero_image) : null]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.seo-meta','data' => ['title' => $pageTitle,'description' => $pageDescription,'image' => $settings?->hero_image ? get_image_url($settings->hero_image) : null,'imageAlt' => $settings?->hero_image_alt]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('seo-meta'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($pageTitle),'description' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($pageDescription),'image' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($settings?->hero_image ? get_image_url($settings->hero_image) : null)]); ?>
+<?php $component->withAttributes(['title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($pageTitle),'description' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($pageDescription),'image' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($settings?->hero_image ? get_image_url($settings->hero_image) : null),'image_alt' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($settings?->hero_image_alt)]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal84f9df3f620371229981225e7ba608d7)): ?>
