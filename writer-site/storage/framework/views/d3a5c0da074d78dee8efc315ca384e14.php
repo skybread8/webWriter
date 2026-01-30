@@ -94,6 +94,7 @@
                         <label class="block text-xs font-medium text-zinc-300">
                             Imagen <span class="text-red-400">*</span>
                         </label>
+                        <p class="text-xs text-zinc-500">Máx. 4 MB. Formatos: JPG, PNG, GIF, WebP. Se redimensionará automáticamente si es muy grande.</p>
                         <input
                             type="file"
                             name="image"

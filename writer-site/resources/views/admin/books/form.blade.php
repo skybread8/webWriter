@@ -66,13 +66,12 @@
             Texto largo (opcional)
         </label>
         <p class="text-xs text-zinc-500 mb-1">
-            Se muestra en la ficha completa del libro. Puedes escribir con calma.
+            Se muestra en la ficha completa del libro. Usa el editor para poner negritas, cursivas, listas, etc.
         </p>
-        <textarea
-            name="long_description"
-            rows="5"
-            class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
-        >{{ old('long_description', $book?->long_description) }}</textarea>
+        <input id="long_description" type="hidden" name="long_description" value="{{ old('long_description', $book?->long_description) }}">
+        <div class="trix-wrapper">
+            <trix-editor input="long_description" class="trix-content" style="min-height: 220px;"></trix-editor>
+        </div>
         @error('long_description')
             <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
         @enderror
@@ -80,17 +79,17 @@
 
     <div class="grid md:grid-cols-2 gap-6">
         <div class="space-y-2">
-            <label class="block text-xs font-medium text-zinc-300">
+            <label class="block text-xs font-medium text-zinc-300 hidden">
                 Precio de Stripe (opcional)
             </label>
-            <p class="text-xs text-zinc-500 mb-1">
+            <p class="text-xs text-zinc-500 mb-1 hidden">
                 Código “Price ID” de Stripe para este libro. Si lo dejas vacío, podrás rellenarlo más adelante.
             </p>
             <input
                 type="text"
                 name="stripe_price_id"
                 value="{{ old('stripe_price_id', $book?->stripe_price_id) }}"
-                class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+                class="hidden"
             >
             @error('stripe_price_id')
                 <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
