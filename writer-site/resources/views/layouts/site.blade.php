@@ -424,6 +424,7 @@
         </div>
 
         <x-cookie-banner />
+        @stack('scripts')
     </body>
 </html>
 

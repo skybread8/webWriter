@@ -24,6 +24,7 @@ class BookImageController extends Controller
             'image.required' => 'Debes subir una imagen.',
             'image.image' => 'El archivo debe ser una imagen (JPG, PNG, etc.).',
             'image.max' => 'La imagen no puede pesar más de 4MB.',
+            'image.uploaded' => 'La imagen no llegó al servidor. Prueba con una imagen más pequeña (menos de 2 MB) o comprueba la conexión. El servidor puede tener un límite de subida menor.',
         ]);
 
         if ($request->hasFile('image')) {

@@ -94,6 +94,11 @@
                                 </p>
                                 <p class="text-xs text-zinc-500 mt-2">
                                     Precio: <span class="text-zinc-100 font-medium"><?php echo e(number_format($book->price, 2, ',', '.')); ?> €</span>
+                                    <?php if($book->stock !== null): ?>
+                                        · Stock: <span class="<?php echo e($book->stock <= 0 ? 'text-amber-400 font-medium' : 'text-zinc-300'); ?>"><?php echo e($book->stock); ?> ud.</span>
+                                    <?php else: ?>
+                                        · Stock: <span class="text-zinc-500">ilimitado</span>
+                                    <?php endif; ?>
                                 </p>
                             </div>
                         </div>

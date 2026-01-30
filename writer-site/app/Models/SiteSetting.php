@@ -16,6 +16,7 @@ class SiteSetting extends Model
         'contact_email',
         'shipping_price',
         'stripe_shipping_price_id',
+        'stripe_shipping_product_id',
         'instagram_url',
         'facebook_url',
         'tiktok_url',

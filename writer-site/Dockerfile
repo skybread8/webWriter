@@ -26,6 +26,10 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo_mysql pdo_sqlite pdo_pgsql mbstring exif pcntl bcmath gd zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Límites de subida de archivos (para imágenes de libros: máx 4 MB en Laravel)
+RUN echo "upload_max_filesize = 8M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "post_max_size = 10M" >> /usr/local/etc/php/conf.d/uploads.ini
+
 # Habilitar mod_rewrite de Apache
 RUN a2enmod rewrite
 

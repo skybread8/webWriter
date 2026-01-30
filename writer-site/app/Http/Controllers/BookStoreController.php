@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\ShippingCostService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -159,13 +161,30 @@ class BookStoreController extends Controller
                 ->with('status', implode(' ', $stockErrors));
         }
 
-        // Obtener precio de envío
-        $settings = \App\Models\SiteSetting::first();
-        $shippingPrice = $settings->shipping_price ?? 0;
         $subtotal = $total;
-        $total += $shippingPrice;
+        $shippingPrice = null;
+        $totalWithShipping = $total;
+        $shippingRange = ShippingCostService::getPriceRange();
+        $shippingZones = ShippingCostService::getAllZones();
 
-        return view('store.checkout.form', compact('cartItems', 'subtotal', 'shippingPrice', 'total'));
+        return view('store.checkout.form', compact('cartItems', 'subtotal', 'shippingPrice', 'totalWithShipping', 'shippingRange', 'shippingZones'));
+    }
+
+    /**
+     * Devuelve el precio de envío para una provincia (JSON, para actualizar el resumen al elegir provincia).
+     * La etiqueta de zona se devuelve en el idioma de la ruta (locale).
+     */
+    public function shippingCost(Request $request): JsonResponse
+    {
+        $locale = $request->route('locale', 'es');
+        if (in_array($locale, ['es', 'ca', 'en'])) {
+            app()->setLocale($locale);
+        }
+        $province = $request->query('province', '');
+        $info = ShippingCostService::getShippingInfoForProvince($province);
+        $info['zone_label'] = __('common.checkout.shipping_zone_' . $info['zone']);
+
+        return response()->json($info);
     }
 
     /**
@@ -239,42 +258,36 @@ class BookStoreController extends Controller
                 ->with('status', 'Algunos libros no tienen precio de Stripe configurado.');
         }
 
-        // Obtener precio de envío
-        $settings = \App\Models\SiteSetting::first();
-        $shippingPrice = $settings->shipping_price ?? 0;
+        // Calcular precio de envío según provincia (zonas desde Monistrol de Montserrat)
+        $shippingPrice = ShippingCostService::getShippingPriceForProvince($validated['customer_province']);
         $total = $subtotal + $shippingPrice;
 
-        // Si hay precio de envío, añadirlo como un line item adicional
+        // Añadir gastos de envío como line item en Stripe (precio dinámico por zona)
         if ($shippingPrice > 0) {
-            // Crear o obtener precio de envío en Stripe
             try {
-                $shippingPriceId = $settings->stripe_shipping_price_id;
-                if (!$shippingPriceId) {
-                    // Crear producto de envío en Stripe
+                $settings = \App\Models\SiteSetting::first();
+                $productId = $settings->stripe_shipping_product_id ?? null;
+                if (! $productId) {
                     $shippingProduct = \Stripe\Product::create([
                         'name' => 'Gastos de envío',
                         'type' => 'service',
                     ]);
-
-                    // Crear precio de envío en Stripe
-                    $shippingPriceStripe = \Stripe\Price::create([
-                        'product' => $shippingProduct->id,
-                        'unit_amount' => (int)($shippingPrice * 100), // Convertir a céntimos
-                        'currency' => 'eur',
-                    ]);
-
-                    // Guardar el ID del precio en la configuración
-                    $settings->update(['stripe_shipping_price_id' => $shippingPriceStripe->id]);
-                    $shippingPriceId = $shippingPriceStripe->id;
+                    $productId = $shippingProduct->id;
+                    if ($settings) {
+                        $settings->update(['stripe_shipping_product_id' => $productId]);
+                    }
                 }
-
+                $shippingPriceStripe = \Stripe\Price::create([
+                    'product' => $productId,
+                    'unit_amount' => (int) round($shippingPrice * 100),
+                    'currency' => 'eur',
+                ]);
                 $lineItems[] = [
-                    'price' => $shippingPriceId,
+                    'price' => $shippingPriceStripe->id,
                     'quantity' => 1,
                 ];
             } catch (\Exception $e) {
                 \Log::error('Error creando precio de envío en Stripe: ' . $e->getMessage());
-                // Continuar sin precio de envío en Stripe si hay error
             }
         }
 
@@ -284,6 +297,7 @@ class BookStoreController extends Controller
             'order_number' => Order::generateOrderNumber(),
             'status' => 'pending',
             'total' => $total,
+            'shipping_amount' => $shippingPrice,
             'customer_name' => $validated['customer_name'],
             'customer_email' => $validated['customer_email'],
             'customer_phone' => $validated['customer_phone'],

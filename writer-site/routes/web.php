@@ -62,6 +62,7 @@ Route::group(['prefix' => '{locale}', 'middleware' => ['web', \App\Http\Middlewa
 
     // Checkout
     Route::get('/checkout', [BookStoreController::class, 'checkoutForm'])->name('checkout.index');
+    Route::get('/checkout/shipping-cost', [BookStoreController::class, 'shippingCost'])->name('checkout.shipping-cost');
     Route::post('/checkout', [BookStoreController::class, 'checkoutCart'])->name('checkout.process');
     Route::get('/checkout/success', [BookStoreController::class, 'success'])->name('checkout.success');
     Route::get('/checkout/cancel', [BookStoreController::class, 'cancel'])->name('checkout.cancel');

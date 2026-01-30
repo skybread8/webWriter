@@ -1126,6 +1126,7 @@
 <?php $component = $__componentOriginalceaf3fe1766c78c4907eaa2dfb569a19; ?>
 <?php unset($__componentOriginalceaf3fe1766c78c4907eaa2dfb569a19); ?>
 <?php endif; ?>
+        <?php echo $__env->yieldPushContent('scripts'); ?>
     </body>
 </html>
 

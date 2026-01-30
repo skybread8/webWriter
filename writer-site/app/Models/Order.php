@@ -14,6 +14,7 @@ class Order extends Model
         'order_number',
         'status',
         'total',
+        'shipping_amount',
         'customer_name',
         'customer_email',
         'customer_phone',
@@ -33,6 +34,7 @@ class Order extends Model
 
     protected $casts = [
         'total' => 'decimal:2',
+        'shipping_amount' => 'decimal:2',
         'shipped' => 'boolean',
         'shipped_at' => 'datetime',
         'refunded' => 'boolean',

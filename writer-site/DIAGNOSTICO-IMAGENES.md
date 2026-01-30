@@ -175,6 +175,47 @@ En PostgreSQL, el campo `cover_image` debe contener **solo** la ruta relativa:
 
 Laravel añade automáticamente `storage/` cuando usa `asset('storage/'.$book->cover_image)`.
 
+## Error "La imagen no se pudo subir" (validation.uploaded)
+
+Si al subir una imagen en **Imágenes del libro** (o en otras secciones del admin) aparece el error de validación `validation.uploaded` o "La imagen no llegó al servidor", suele deberse a que **PHP rechazó la subida antes de que Laravel la procese**.
+
+### Causas habituales
+
+1. **Límite de PHP menor que el archivo**  
+   Por defecto PHP suele tener `upload_max_filesize = 2M`. Si la imagen pesa más, el archivo no llega a Laravel.
+
+2. **Límite de POST**  
+   `post_max_size` debe ser mayor que el tamaño del formulario (incluido el archivo). Si es menor, la petición se corta.
+
+3. **Conexión lenta o timeout**  
+   En móvil o redes lentas, subidas grandes pueden cortarse.
+
+### Límites en esta aplicación
+
+| Dónde | Límite |
+|-------|--------|
+| **Laravel (imágenes de libro)** | Máx. **4 MB**, tipo imagen (JPG, PNG, GIF, WebP, etc.) |
+| **PHP en Docker** | `upload_max_filesize = 8M`, `post_max_size = 10M` (si usas el Dockerfile del proyecto) |
+| **Render / otro hosting** | Depende del servidor; si no usas Docker, puede seguir en 2 MB |
+
+### Optimización automática al guardar
+
+Al guardar una imagen (libros, portada, hero, etc.) se usa el helper `store_image_safely`:
+
+- **Redimensionado:** si el ancho supera **1920 px**, se escala manteniendo la proporción.
+- **Calidad:** se guarda como JPEG al **85%** de calidad.
+- **Motor:** Imagick si está instalado, si no GD.
+
+No se hace optimización *antes* de la subida: el archivo debe llegar al servidor dentro de los límites de PHP y Laravel. Si quieres subir fotos muy grandes, reduce el peso o el tamaño en el dispositivo antes de subir, o aumenta los límites de PHP en el servidor.
+
+### Qué hacer si sigue fallando
+
+1. **Probar con una imagen más pequeña** (por ejemplo &lt; 2 MB) para descartar límite de PHP.
+2. **En Render (Docker):** el Dockerfile del proyecto ya sube los límites a 8M/10M; vuelve a desplegar si lo has cambiado.
+3. **En otro hosting:** revisar `upload_max_filesize` y `post_max_size` en `php.ini` o panel de control y subirlos (por ejemplo a 8M y 10M).
+
+---
+
 ## Si Nada Funciona
 
 Si después de todos estos pasos las imágenes siguen sin funcionar, puede ser que Render.com tenga restricciones con enlaces simbólicos. En ese caso, considera:

@@ -40,4 +40,9 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    'google' => [
+        // API Key de Google Maps/Places para autocompletar direcciones en el checkout.
+        'maps_api_key' => env('GOOGLE_MAPS_API_KEY'),
+    ],
+
 ];

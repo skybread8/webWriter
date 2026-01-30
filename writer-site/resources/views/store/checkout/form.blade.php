@@ -3,22 +3,56 @@
 @section('title', 'Finalizar compra')
 
 @section('content')
-    <section 
-        x-data="scrollReveal(0)"
-        class="px-4 sm:px-5 md:px-8 py-10 sm:py-14 md:py-20 max-w-4xl mx-auto"
-    >
+    <section class="px-4 sm:px-5 md:px-8 py-10 sm:py-14 md:py-20 max-w-4xl mx-auto">
         <div 
+            x-data="scrollReveal(0)"
             class="space-y-6 sm:space-y-8"
             :class="show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'"
             x-transition:enter="transition ease-out duration-700"
             x-transition:enter-start="opacity-0 translate-y-6"
             x-transition:enter-end="opacity-100 translate-y-0"
         >
+            <div 
+                x-data="{
+                    subtotal: {{ (float) $subtotal }},
+                    shippingPrice: null,
+                    shippingZoneLabel: null,
+                    loading: false,
+                    shippingCostUrl: '{{ localized_route('checkout.shipping-cost') }}',
+                    shippingMin: {{ (float) ($shippingRange['min'] ?? 6.65) }},
+                    shippingMax: {{ (float) ($shippingRange['max'] ?? 17.61) }},
+                    get totalWithShipping() {
+                        if (this.shippingPrice !== null) return this.subtotal + this.shippingPrice;
+                        return this.subtotal;
+                    },
+                    async fetchShipping() {
+                        const province = document.getElementById('customer_province')?.value?.trim();
+                        if (!province) {
+                            this.shippingPrice = null;
+                            this.shippingZoneLabel = null;
+                            return;
+                        }
+                        this.loading = true;
+                        try {
+                            const url = this.shippingCostUrl + (this.shippingCostUrl.includes('?') ? '&' : '?') + 'province=' + encodeURIComponent(province);
+                            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                            const data = await res.json();
+                            this.shippingPrice = data.price ?? null;
+                            this.shippingZoneLabel = data.zone_label ?? null;
+                        } catch (e) {
+                            this.shippingPrice = null;
+                            this.shippingZoneLabel = null;
+                        }
+                        this.loading = false;
+                    }
+                }"
+                x-init="$nextTick(() => { if (document.getElementById('customer_province')?.value?.trim()) fetchShipping(); })"
+            >
             <div>
                 <div class="inline-flex items-center gap-2 mb-2 sm:mb-3">
                     <x-icons.shopping-cart class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
                     <p class="text-[10px] sm:text-[11px] tracking-[0.25em] sm:tracking-[0.3em] uppercase text-zinc-400">
-                        Checkout
+                        {{ __('common.checkout.title') }}
                     </p>
                 </div>
                 <h1 class="font-['DM_Serif_Display'] text-3xl sm:text-4xl md:text-5xl tracking-tight mb-2">
@@ -61,17 +95,22 @@
                         <div class="mt-4 sm:mt-6 pt-4 sm:pt-6 space-y-3 border-t border-zinc-800">
                             <div class="flex items-center justify-between">
                                 <span class="text-sm text-zinc-400">{{ __('common.checkout.subtotal') }}:</span>
-                                <span class="text-sm font-medium text-zinc-300">{{ number_format($subtotal, 2, ',', '.') }} €</span>
+                                <span class="text-sm font-medium text-zinc-300" x-text="subtotal.toFixed(2).replace('.', ',') + ' €'">{{ number_format($subtotal, 2, ',', '.') }} €</span>
                             </div>
-                            @if($shippingPrice > 0)
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm text-zinc-400">{{ __('common.checkout.shipping') }}:</span>
-                                    <span class="text-sm font-medium text-zinc-300">{{ number_format($shippingPrice, 2, ',', '.') }} €</span>
-                                </div>
-                            @endif
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-zinc-400">{{ __('common.checkout.shipping') }}:</span>
+                                <span class="text-sm font-medium text-zinc-300" x-show="shippingPrice !== null && !loading">
+                                    <span x-text="shippingPrice !== null ? shippingPrice.toFixed(2).replace('.', ',') + ' €' : ''"></span>
+                                    <span x-show="shippingZoneLabel" class="text-zinc-500 text-xs ml-1" x-text="shippingZoneLabel ? '(' + shippingZoneLabel + ')' : ''"></span>
+                                </span>
+                                <span class="text-sm text-zinc-500" x-show="shippingPrice === null && !loading" x-transition>
+                                    {{ __('common.checkout.shipping_by_province') }} (<span x-text="shippingMin.toFixed(2).replace('.', ',')"></span> – <span x-text="shippingMax.toFixed(2).replace('.', ',')"></span> €)
+                                </span>
+                                <span class="text-sm text-zinc-400" x-show="loading">...</span>
+                            </div>
                             <div class="flex items-center justify-between pt-2 border-t border-zinc-800">
                                 <span class="text-sm sm:text-base font-semibold text-zinc-300">{{ __('common.checkout.total') }}:</span>
-                                <span class="text-xl sm:text-2xl font-bold text-amber-400">{{ number_format($total, 2, ',', '.') }} €</span>
+                                <span class="text-xl sm:text-2xl font-bold text-amber-400" x-text="totalWithShipping.toFixed(2).replace('.', ',') + ' €'">{{ number_format($subtotal, 2, ',', '.') }} €</span>
                             </div>
                         </div>
                     </div>
@@ -164,8 +203,12 @@
                                 name="customer_address" 
                                 value="{{ old('customer_address', auth()->user()?->address) }}"
                                 required
+                                autocomplete="address-line1"
                                 class="w-full rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 px-4 py-2 focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50 transition-colors"
                             >
+                            @if(config('services.google.maps_api_key'))
+                                <p class="text-[10px] sm:text-xs text-zinc-500 mt-1">{{ __('common.checkout.address_with_google') }}</p>
+                            @endif
                             @error('customer_address')
                                 <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
                             @enderror
@@ -218,6 +261,8 @@
                                     name="customer_province" 
                                     value="{{ old('customer_province', auth()->user()?->province) }}"
                                     required
+                                    @input.debounce.400ms="fetchShipping()"
+                                    @change="fetchShipping()"
                                     class="w-full rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-100 text-sm px-3 sm:px-4 py-2 focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50 transition-colors"
                                 >
                                 @error('customer_province')
@@ -348,6 +393,65 @@
                     </form>
                 </div>
             </div>
+            </div>
         </div>
     </section>
+
+    @if(config('services.google.maps_api_key'))
+    @push('scripts')
+    <script>
+(function() {
+    var apiKey = @json(config('services.google.maps_api_key'));
+    if (!apiKey) return;
+    function initCheckoutPlaces() {
+        var addressInput = document.getElementById('customer_address');
+        if (!addressInput || typeof google === 'undefined' || !google.maps || !google.maps.places) return;
+        var autocomplete = new google.maps.places.Autocomplete(addressInput, {
+            componentRestrictions: { country: 'es' },
+            fields: ['address_components'],
+            types: ['address']
+        });
+        autocomplete.addListener('place_changed', function() {
+            var place = autocomplete.getPlace();
+            if (!place.address_components) return;
+            var street = '', city = '', postalCode = '', province = '';
+            for (var i = 0; i < place.address_components.length; i++) {
+                var c = place.address_components[i];
+                if (c.types.indexOf('street_number') !== -1) street = (street + ' ' + c.long_name).trim();
+                if (c.types.indexOf('route') !== -1) street = (street + ' ' + c.long_name).trim();
+                if (c.types.indexOf('locality') !== -1) city = c.long_name;
+                if (c.types.indexOf('postal_code') !== -1) postalCode = c.long_name;
+                if (c.types.indexOf('administrative_area_level_1') !== -1) province = c.long_name;
+            }
+            if (!city && place.address_components.length) {
+                for (var j = 0; j < place.address_components.length; j++) {
+                    if (place.address_components[j].types.indexOf('administrative_area_level_2') !== -1) {
+                        city = place.address_components[j].long_name;
+                        break;
+                    }
+                }
+            }
+            if (street) addressInput.value = street;
+            var cityEl = document.getElementById('customer_city');
+            if (cityEl && city) cityEl.value = city;
+            var postalEl = document.getElementById('customer_postal_code');
+            if (postalEl && postalCode) postalEl.value = postalCode;
+            var provinceEl = document.getElementById('customer_province');
+            if (provinceEl && province) {
+                provinceEl.value = province;
+                provinceEl.dispatchEvent(new Event('input', { bubbles: true }));
+                provinceEl.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+    }
+    window.initCheckoutPlaces = initCheckoutPlaces;
+    var s = document.createElement('script');
+    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + apiKey + '&libraries=places&callback=initCheckoutPlaces';
+    s.async = true;
+    s.defer = true;
+    document.head.appendChild(s);
+})();
+    </script>
+    @endpush
+    @endif
 @endsection
