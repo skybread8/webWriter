@@ -343,7 +343,6 @@
                                 <li><a href="{{ localized_route('faq') }}" class="hover:text-zinc-300 transition-colors">{{ __('common.nav.faq') }}</a></li>
                                 <li><a href="{{ localized_route('contact') }}" class="hover:text-zinc-300 transition-colors">{{ __('common.nav.contact') }}</a></li>
                                 <li><a href="{{ localized_route('photos.readers') }}" class="hover:text-zinc-300 transition-colors">{{ __('common.nav.photos_readers') }}</a></li>
-                                <li><a href="{{ localized_route('photos.books') }}" class="hover:text-zinc-300 transition-colors">{{ __('common.nav.photos_books') }}</a></li>
                             </ul>
                         </div>
                         <div>

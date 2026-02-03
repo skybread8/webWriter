@@ -7,6 +7,7 @@ use App\Models\Book;
 use App\Models\Page;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 if (!function_exists('localized_route')) {
@@ -119,12 +120,17 @@ class PageController extends Controller
         return view('site.blog.index', compact('posts'));
     }
     
-    public function blogPost($slug)
+    public function blogPost(string|int $id = null)
     {
-        $post = \App\Models\BlogPost::where('slug', $slug)
-            ->where('published', true)
-            ->where('published_at', '<=', now())
-            ->firstOrFail();
+        $id = (int) ($id ?? request()->route('id'));
+        if ($id < 1) {
+            abort(404);
+        }
+
+        $post = \App\Models\BlogPost::where('id', $id)->first();
+        if (! $post) {
+            abort(404);
+        }
 
         return view('site.blog.show', compact('post'));
     }

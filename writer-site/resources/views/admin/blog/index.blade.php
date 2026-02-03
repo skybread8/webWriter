@@ -73,16 +73,19 @@
                                 @endif
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 justify-end shrink-0">
-                            <a href="{{ route('admin.blog.edit', $post) }}" class="text-xs text-zinc-200 underline underline-offset-4">
+                        <div class="flex items-center gap-3 justify-end shrink-0 flex-wrap">
+                            <a href="{{ url('admin/blog/'.$post->id) }}" class="text-xs text-zinc-300 hover:text-zinc-100 underline underline-offset-4">
+                                Vista previa
+                            </a>
+                            <a href="{{ url('admin/blog/'.$post->id.'/edit') }}" class="text-xs text-zinc-200 underline underline-offset-4">
                                 {{ __('common.admin.edit') }}
                             </a>
-                            <form method="POST" action="{{ route('admin.blog.destroy', $post) }}" onsubmit="return confirm('{{ __('common.admin.confirm_delete_article') }}');">
+                            <form method="POST" action="{{ url('admin/blog/'.$post->id) }}" class="inline" onsubmit="return confirm({{ json_encode(__('common.admin.confirm_delete_article')) }});">
                                 @csrf
                                 @method('DELETE')
-                                <x-button variant="danger">
+                                <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold tracking-wide uppercase transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-950 bg-red-600 text-white hover:bg-red-500 focus:ring-red-500">
                                     {{ __('common.admin.delete') }}
-                                </x-button>
+                                </button>
                             </form>
                         </div>
                     </div>

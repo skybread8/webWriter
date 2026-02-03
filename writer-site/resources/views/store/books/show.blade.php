@@ -53,11 +53,25 @@
                         x-data="{
                             currentIndex: 0,
                             images: @js($imagesArray),
+                            lightboxOpen: false,
                             touchStartX: 0,
                             touchEndX: 0,
                             init() {
-                                // Debug: verificar que las imágenes se cargaron
-                                console.log('Imágenes cargadas:', this.images.length);
+                                window.addEventListener('keydown', (e) => {
+                                    if (e.key === 'Escape') this.closeLightbox();
+                                    if (this.lightboxOpen && this.images.length > 1) {
+                                        if (e.key === 'ArrowLeft') this.prev();
+                                        if (e.key === 'ArrowRight') this.next();
+                                    }
+                                });
+                            },
+                            openLightbox() {
+                                this.lightboxOpen = true;
+                                document.body.style.overflow = 'hidden';
+                            },
+                            closeLightbox() {
+                                this.lightboxOpen = false;
+                                document.body.style.overflow = '';
                             },
                             next() {
                                 if (this.images.length > 1) {
@@ -96,13 +110,21 @@
                         @touchstart="handleTouchStart"
                         @touchend="handleTouchEnd"
                     >
-                        <!-- Imagen actual -->
-                        <div class="relative w-full h-full">
+                        <!-- Imagen actual (clic para ver en grande) -->
+                        <div 
+                            class="relative w-full h-full cursor-zoom-in"
+                            @click="openLightbox()"
+                            role="button"
+                            tabindex="0"
+                            aria-label="Ver imagen en grande"
+                            @keydown.enter="openLightbox()"
+                            @keydown.space.prevent="openLightbox()"
+                        >
                             <template x-for="(image, index) in images" :key="index">
                                 <img 
                                     :src="image.url"
                                     :alt="image.alt"
-                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 pointer-events-none"
                                     :class="currentIndex === index ? 'opacity-100 z-10' : 'opacity-0 z-0'"
                                     loading="lazy"
                                     width="400"
@@ -118,10 +140,10 @@
                                 <!-- Botón anterior -->
                                 <button 
                                     @click.stop="prev()"
-                                    class="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-zinc-900/95 hover:bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center text-zinc-100 transition-all shadow-lg hover:scale-110"
+                                    class="absolute left-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-100 transition-all shadow-md hover:scale-105"
                                     aria-label="Imagen anterior"
                                 >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                     </svg>
                                 </button>
@@ -129,10 +151,10 @@
                                 <!-- Botón siguiente -->
                                 <button 
                                     @click.stop="next()"
-                                    class="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-zinc-900/95 hover:bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center text-zinc-100 transition-all shadow-lg hover:scale-110"
+                                    class="absolute right-1 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-100 transition-all shadow-md hover:scale-105"
                                     aria-label="Imagen siguiente"
                                 >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                     </svg>
                                 </button>
@@ -153,6 +175,68 @@
                                 <div class="absolute top-3 right-3 z-20 px-2 py-1 rounded-full bg-zinc-900/90 border border-zinc-700 text-xs text-zinc-300 shadow-lg">
                                     <span x-text="currentIndex + 1"></span> / <span x-text="images.length"></span>
                                 </div>
+                            </div>
+                        </template>
+
+                        <!-- Lightbox: imagen en grande -->
+                        <template x-teleport="body">
+                            <div 
+                                x-show="lightboxOpen"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0"
+                                x-transition:enter-end="opacity-100"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100"
+                                x-transition:leave-end="opacity-0"
+                                class="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4"
+                                @click.self="closeLightbox()"
+                                x-cloak
+                                style="display: none;"
+                            >
+                                <button 
+                                    type="button"
+                                    @click="closeLightbox()"
+                                    class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-zinc-100 transition-colors"
+                                    aria-label="Cerrar"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                                <div class="relative max-w-4xl max-h-[90vh] w-full flex items-center justify-center">
+                                    <template x-for="(image, index) in images" :key="'lb-' + index">
+                                        <img 
+                                            :src="image.url"
+                                            :alt="image.alt"
+                                            class="max-w-full max-h-[90vh] w-auto object-contain rounded-lg shadow-2xl transition-opacity duration-300"
+                                            :class="currentIndex === index ? 'opacity-100' : 'opacity-0 absolute pointer-events-none'"
+                                            @click.stop
+                                        >
+                                    </template>
+                                </div>
+                                <template x-if="images && images.length > 1">
+                                    <div class="absolute inset-x-0 bottom-4 flex justify-center gap-2 z-10">
+                                        <button 
+                                            @click.stop="prev()"
+                                            class="w-10 h-10 rounded-full bg-zinc-800/90 hover:bg-zinc-700 flex items-center justify-center text-zinc-100"
+                                            aria-label="Imagen anterior"
+                                        >
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                            </svg>
+                                        </button>
+                                        <span class="flex items-center px-3 text-sm text-zinc-400" x-text="(currentIndex + 1) + ' / ' + images.length"></span>
+                                        <button 
+                                            @click.stop="next()"
+                                            class="w-10 h-10 rounded-full bg-zinc-800/90 hover:bg-zinc-700 flex items-center justify-center text-zinc-100"
+                                            aria-label="Imagen siguiente"
+                                        >
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
                             </div>
                         </template>
                     </div>

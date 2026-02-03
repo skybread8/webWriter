@@ -40,6 +40,28 @@ Route::get('/', function () {
     return redirect('/es');
 });
 
+// Artículo del blog: ruta FUERA del grupo para que /es/blog/22 coincida siempre
+Route::get('{locale}/blog/{id}', function ($locale, $id) {
+    if (!in_array($locale, ['es', 'ca', 'en'])) {
+        abort(404);
+    }
+    app()->setLocale($locale);
+    session(['locale' => $locale]);
+    $id = (int) $id;
+    if ($id < 1) {
+        abort(404);
+    }
+    $post = \App\Models\BlogPost::where('id', $id)->first();
+    if (!$post) {
+        abort(404);
+    }
+    return view('site.blog.show', compact('post'));
+})
+    ->where('locale', 'es|ca|en')
+    ->where('id', '[0-9]+')
+    ->name('blog.post')
+    ->middleware(['web', \App\Http\Middleware\SetLocale::class]);
+
 // Rutas públicas con prefijo de idioma obligatorio
 Route::group(['prefix' => '{locale}', 'middleware' => ['web', \App\Http\Middleware\SetLocale::class], 'where' => ['locale' => 'es|ca|en']], function () {
     Route::get('/', [PageController::class, 'home'])->name('home');
@@ -82,8 +104,7 @@ Route::group(['prefix' => '{locale}', 'middleware' => ['web', \App\Http\Middlewa
     Route::get('/contact', [PageController::class, 'contact'])->name('contact');
     Route::post('/contact', [PageController::class, 'sendContact'])->name('contact.send');
     Route::get('/faq', [PageController::class, 'faq'])->name('faq');
-    Route::get('/blog', [PageController::class, 'blog'])->name('blog');
-    Route::get('/blog/{slug}', [PageController::class, 'blogPost'])->name('blog.post');
+    Route::get('blog', [PageController::class, 'blog'])->name('blog');
     Route::get('/photos-readers', [PageController::class, 'photosReaders'])->name('photos.readers');
     Route::get('/photos-books', [PageController::class, 'photosBooks'])->name('photos.books');
     Route::get('/offers', [PageController::class, 'offers'])->name('offers');
@@ -141,8 +162,14 @@ Route::middleware(['auth', 'admin', 'locale'])->prefix('admin')->name('admin.')-
     // Estadísticas
     Route::get('/statistics', [\App\Http\Controllers\Admin\StatisticsController::class, 'index'])->name('statistics.index');
 
-    // Blog
-    Route::resource('blog', \App\Http\Controllers\Admin\BlogPostController::class);
+    // Blog (rutas explícitas con id para que editar/actualizar/eliminar encuentren el artículo)
+    Route::get('/blog', [\App\Http\Controllers\Admin\BlogPostController::class, 'index'])->name('blog.index');
+    Route::get('/blog/create', [\App\Http\Controllers\Admin\BlogPostController::class, 'create'])->name('blog.create');
+    Route::post('/blog', [\App\Http\Controllers\Admin\BlogPostController::class, 'store'])->name('blog.store');
+    Route::get('/blog/{id}', [\App\Http\Controllers\Admin\BlogPostController::class, 'show'])->name('blog.show')->whereNumber('id');
+    Route::get('/blog/{id}/edit', [\App\Http\Controllers\Admin\BlogPostController::class, 'edit'])->name('blog.edit')->whereNumber('id');
+    Route::match(['put', 'patch'], '/blog/{id}', [\App\Http\Controllers\Admin\BlogPostController::class, 'update'])->name('blog.update')->whereNumber('id');
+    Route::delete('/blog/{id}', [\App\Http\Controllers\Admin\BlogPostController::class, 'destroy'])->name('blog.destroy')->whereNumber('id');
     Route::post('/blog/update-order', [\App\Http\Controllers\Admin\BlogPostController::class, 'updateOrder'])->name('blog.update-order');
 
     // Reseñas

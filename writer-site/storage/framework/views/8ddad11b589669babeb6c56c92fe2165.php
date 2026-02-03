@@ -892,7 +892,6 @@
                                 <li><a href="<?php echo e(localized_route('faq')); ?>" class="hover:text-zinc-300 transition-colors"><?php echo e(__('common.nav.faq')); ?></a></li>
                                 <li><a href="<?php echo e(localized_route('contact')); ?>" class="hover:text-zinc-300 transition-colors"><?php echo e(__('common.nav.contact')); ?></a></li>
                                 <li><a href="<?php echo e(localized_route('photos.readers')); ?>" class="hover:text-zinc-300 transition-colors"><?php echo e(__('common.nav.photos_readers')); ?></a></li>
-                                <li><a href="<?php echo e(localized_route('photos.books')); ?>" class="hover:text-zinc-300 transition-colors"><?php echo e(__('common.nav.photos_books')); ?></a></li>
                             </ul>
                         </div>
                         <div>

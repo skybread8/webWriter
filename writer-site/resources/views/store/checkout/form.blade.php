@@ -291,9 +291,10 @@
 
                         <!-- Dedicatorias por libro -->
                         <div class="space-y-3 sm:space-y-4">
-                            <h3 class="text-sm sm:text-base font-semibold text-zinc-300 mb-2">
+                            <h3 class="text-sm sm:text-base font-semibold text-zinc-300 mb-1">
                                 {{ __('common.checkout.dedications_title') }} ({{ __('common.checkout.optional') }})
                             </h3>
+                            <p class="text-xs sm:text-sm text-zinc-400 mb-2">{{ __('common.checkout.dedication_question') }}</p>
                             @foreach($cartItems as $index => $item)
                                 <div>
                                     <label for="dedication_{{ $item['book']->id }}" class="block text-xs sm:text-sm font-medium text-zinc-300 mb-1">

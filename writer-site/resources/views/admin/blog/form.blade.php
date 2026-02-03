@@ -1,43 +1,24 @@
-@props(['post' => null])
-
+@php
+    $post = $post ?? $blogPost ?? null;
+@endphp
 <div class="space-y-6">
-    <div class="grid md:grid-cols-2 gap-6">
-        <div class="space-y-2">
-            <label class="block text-xs font-medium text-zinc-300">
-                {{ __('common.admin.article_title') }}
-            </label>
-            <p class="text-xs text-zinc-500 mb-1">
-                {{ __('common.admin.article_title_description') }}
-            </p>
-            <input
-                type="text"
-                name="title"
-                value="{{ old('title', $post?->title) }}"
-                class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
-                required
-            >
-            @error('title')
-                <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-
-        <div class="space-y-2">
-            <label class="block text-xs font-medium text-zinc-300">
-                {{ __('common.admin.article_slug') }}
-            </label>
-            <p class="text-xs text-zinc-500 mb-1">
-                {{ __('common.admin.article_slug_description') }}
-            </p>
-            <input
-                type="text"
-                name="slug"
-                value="{{ old('slug', $post?->slug) }}"
-                class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
-            >
-            @error('slug')
-                <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+    <div class="space-y-2">
+        <label class="block text-xs font-medium text-zinc-300">
+            {{ __('common.admin.article_title') }}
+        </label>
+        <p class="text-xs text-zinc-500 mb-1">
+            {{ __('common.admin.article_title_description') }}
+        </p>
+        <input
+            type="text"
+            name="title"
+            value="{{ old('title', $post?->title) }}"
+            class="w-full rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:border-zinc-500"
+            required
+        >
+        @error('title')
+            <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
+        @enderror
     </div>
 
     <div class="space-y-2">
@@ -64,10 +45,24 @@
         <p class="text-xs text-zinc-500 mb-1">
             {{ __('common.admin.article_content_description') }}
         </p>
-        <input id="content" type="hidden" name="content" value="{{ old('content', $post?->content) }}">
+        @php
+            $contentValue = old('content', $post?->content ?? '');
+            $contentForAttr = str_replace(['&', '"'], ['&amp;', '&quot;'], $contentValue);
+        @endphp
+        <input id="content" type="hidden" name="content" value="{!! $contentForAttr !!}">
+        <script type="text/template" id="content-initial">{!! str_replace('</script>', '<\/script>', $contentValue) !!}</script>
         <div class="trix-wrapper">
             <trix-editor input="content" class="trix-content"></trix-editor>
         </div>
+        <script>
+            document.addEventListener('trix-initialize', function(e) {
+                if (e.target.getAttribute('input') !== 'content') return;
+                var template = document.getElementById('content-initial');
+                if (template && template.textContent && (!document.getElementById('content').value || document.getElementById('content').value.length < 5)) {
+                    e.target.editor.loadHTML(template.textContent);
+                }
+            });
+        </script>
         @error('content')
             <p class="text-xs text-red-400 mt-1">{{ $message }}</p>
         @enderror

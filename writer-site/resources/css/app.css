@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Alpine.js: ocultar hasta que esté listo (evita parpadeo en lightbox, etc.) */
+[x-cloak] {
+    display: none !important;
+}
+
 /* Estilos personalizados para Trix editor en tema oscuro */
 trix-toolbar {
     background-color: rgb(24 24 27) !important;

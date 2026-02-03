@@ -10,10 +10,10 @@
             </p>
         </div>
 
-        <form method="POST" action="{{ route('admin.blog.update', $blogPost) }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ $updateUrl }}" enctype="multipart/form-data">
             @csrf
             @method('PATCH')
-            @include('admin.blog.form', ['post' => $blogPost])
+            @include('admin.blog.form')
             
             <div class="flex items-center gap-4 pt-6">
                 <x-button>{{ __('common.admin.save_changes') }}</x-button>

@@ -62,7 +62,7 @@
                             x-transition:enter-start="opacity-0 translate-y-8"
                             x-transition:enter-end="opacity-100 translate-y-0"
                         >
-                            <a href="<?php echo e(localized_route('blog.post', ['slug' => $post->slug])); ?>" class="block">
+                            <a href="<?php echo e(localized_route('blog.post', ['id' => $post->id])); ?>" class="block">
                                 <div class="grid md:grid-cols-3 gap-6">
                                     <?php if($post->featured_image): ?>
                                         <figure class="md:col-span-1">

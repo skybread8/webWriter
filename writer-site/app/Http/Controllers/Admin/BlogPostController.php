@@ -28,7 +28,6 @@ class BlogPostController extends Controller
         app()->setLocale('es');
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255', 'unique:blog_posts,slug'],
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['nullable', 'string'],
             'featured_image' => ['nullable', 'image', 'max:2048'],
@@ -39,8 +38,6 @@ class BlogPostController extends Controller
         ], [
             'title.required' => 'El título del artículo es obligatorio.',
             'title.max' => 'El título no puede tener más de 255 caracteres.',
-            'slug.max' => 'El slug no puede tener más de 255 caracteres.',
-            'slug.unique' => 'Este slug ya está en uso. Elige otro.',
             'excerpt.max' => 'El extracto no puede tener más de 500 caracteres.',
             'featured_image.image' => 'La imagen destacada debe ser un archivo de imagen (JPG, PNG, etc.).',
             'featured_image.max' => 'La imagen destacada no puede pesar más de 2MB.',
@@ -55,6 +52,12 @@ class BlogPostController extends Controller
             $data['published_at'] = now();
         }
 
+        $data['published'] = $request->boolean('published');
+        $data['order'] = (int) ($data['order'] ?? 0);
+        if (!isset($data['featured_image_alt'])) {
+            $data['featured_image_alt'] = null;
+        }
+
         BlogPost::create($data);
 
         return redirect()
@@ -62,17 +65,31 @@ class BlogPostController extends Controller
             ->with('status', 'Artículo creado correctamente.');
     }
 
-    public function edit(BlogPost $blogPost): View
+    public function show(int $id): View
     {
-        return view('admin.blog.edit', compact('blogPost'));
+        $blogPost = BlogPost::findOrFail($id);
+
+        return view('admin.blog.show', compact('blogPost'));
     }
 
-    public function update(Request $request, BlogPost $blogPost): RedirectResponse
+    public function edit(int $id): View
     {
+        $blogPost = BlogPost::findOrFail($id);
+        $updateUrl = url('admin/blog/'.(int) $blogPost->id);
+
+        return view('admin.blog.edit', [
+            'blogPost' => $blogPost,
+            'updateUrl' => $updateUrl,
+            'post' => $blogPost,
+        ]);
+    }
+
+    public function update(Request $request, int $id): RedirectResponse
+    {
+        $blogPost = BlogPost::findOrFail($id);
         app()->setLocale('es');
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255', 'unique:blog_posts,slug,' . $blogPost->id],
             'excerpt' => ['nullable', 'string', 'max:500'],
             'content' => ['nullable', 'string'],
             'featured_image' => ['nullable', 'image', 'max:2048'],
@@ -82,19 +99,20 @@ class BlogPostController extends Controller
             'order' => ['nullable', 'integer'],
         ], [
             'title.required' => 'El título del artículo es obligatorio.',
-            'slug.unique' => 'Este slug ya está en uso.',
             'featured_image.image' => 'El archivo debe ser una imagen.',
             'featured_image.max' => 'La imagen no puede pesar más de 2MB.',
         ]);
 
+        $disk = (config('filesystems.default') === 's3' || (env('AWS_ACCESS_KEY_ID') && env('AWS_SECRET_ACCESS_KEY') && env('AWS_BUCKET'))) ? 's3' : 'public';
+
         if ($request->hasFile('featured_image')) {
             if ($blogPost->featured_image) {
-                Storage::disk('public')->delete($blogPost->featured_image);
+                Storage::disk($disk)->delete($blogPost->featured_image);
             }
-            $data['featured_image'] = $request->file('featured_image')->store('blog_images', 'public');
+            $data['featured_image'] = store_image_safely($request->file('featured_image'), 'blog_images');
         } elseif ($request->boolean('remove_featured_image')) {
             if ($blogPost->featured_image) {
-                Storage::disk('public')->delete($blogPost->featured_image);
+                Storage::disk($disk)->delete($blogPost->featured_image);
             }
             $data['featured_image'] = null;
         }
@@ -103,6 +121,9 @@ class BlogPostController extends Controller
             $data['published_at'] = now();
         }
 
+        $data['published'] = $request->boolean('published');
+        $data['order'] = (int) ($data['order'] ?? $blogPost->order ?? 0);
+
         $blogPost->update($data);
 
         return redirect()
@@ -110,10 +131,12 @@ class BlogPostController extends Controller
             ->with('status', 'Artículo actualizado correctamente.');
     }
 
-    public function destroy(BlogPost $blogPost): RedirectResponse
+    public function destroy(int $id): RedirectResponse
     {
+        $blogPost = BlogPost::findOrFail($id);
+        $disk = (config('filesystems.default') === 's3' || (env('AWS_ACCESS_KEY_ID') && env('AWS_SECRET_ACCESS_KEY') && env('AWS_BUCKET'))) ? 's3' : 'public';
         if ($blogPost->featured_image) {
-            Storage::disk('public')->delete($blogPost->featured_image);
+            Storage::disk($disk)->delete($blogPost->featured_image);
         }
         $blogPost->delete();
 
